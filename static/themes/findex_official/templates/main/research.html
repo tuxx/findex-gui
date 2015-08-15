@@ -1,0 +1,56 @@
+{% extends "helpers/base_home.html" %}
+{% block content %}
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<link rel="stylesheet" href="">
+<div class="wrapper">
+    <div style="height:80px;"></div>
+
+</div>
+<style>
+    td{
+        line-height:1;
+    }
+    .progress {
+        margin-bottom: 0px;
+    }
+    thead>tr>th:first-child{
+        width:16px;
+    }
+    thead>tr>th:nth-child(2){
+        width:200px;
+    }
+    thead>tr>th:nth-child(3){
+        width:160px;
+    }
+    thead>tr>th:nth-child(3){
+        width:260px;
+    }
+    pre{
+        font-size:12px;
+    }
+    #content>p>img{
+        width: 80%;
+        margin: 0 auto;
+        display: block;
+    }
+</style>
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-left">
+        <div class="col-md-4">
+            <h4>Mass FTP Crawling</h4>
+            <p>
+                The combination of interesting files one can find on public FTP servers plus the technical expertise required to make a
+                decent search engine motivat...
+            </p>
+            <p>
+                <a style="text-decoration:underline;" href="/research/mass-ftp-crawling/">Read More</a>
+            </p>
+        </div>
+
+   </div>
+    <!--/.row-->
+</div><!--/.container-->
+</div><!--/.page-container-->
+
+
+{% endblock %}

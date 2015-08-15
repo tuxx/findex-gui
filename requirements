@@ -1,0 +1,8 @@
+python-dateutil
+psycopg2
+jinja2
+sqlalchemy
+gevent
+bottle
+bottle-sqlalchemy
+psycogreen

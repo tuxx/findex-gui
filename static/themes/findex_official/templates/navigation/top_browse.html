@@ -1,0 +1,253 @@
+<div class="menu_dropdown"></div>
+
+<div class="nav-top-browse">
+    <div class="nav">
+        <div class="menu_item menu_btn">
+            <span class="fa fa-bars" aria-hidden="true"></span>
+        </div>
+
+        <div id="btn_search" class="menu_item menu_btn">
+            <span class="fa fa-search" aria-hidden="true"></span>
+        </div>
+
+        <div id="search_box" class="menu_item menu_inp" style="display:none;">
+            <input id="nav-top-inp" type="text" placeholder="Quick Search">
+        </div>
+
+        <div class="menu_item divider">
+
+        </div>
+        {% include 'helpers/breadcrumbs_navbar.html' %}
+    </div>
+
+    <div class="search">
+        <div class="row">
+            <div class="col-md-2" style="min-width:220px;max-width:220px;border-right:1px solid rgba(255, 255, 255, 0.5);padding-right:0;">
+                <ul>
+                    <li id="1" data-text="Documents">Documents</li>
+                    <li id="2" data-text="Movies">Movies</li>
+                    <li id="3" data-text="Music">Music</li>
+                    <li id="4" data-text="Pictures">Pictures</li>
+                </ul>
+            </div>
+
+            <div class="col-md-7">
+                <div id="table_container">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    table#quick_search-table{
+        color:white;
+        margin-top: 6px;
+    }
+    table#quick_search-table>tbody>tr>td{
+        border-bottom: 0px;
+        height: auto;
+        min-height: auto;
+        cursor: pointer;
+    }
+    table#quick_search-table>tbody>tr:hover{
+        background:rgb(54, 135, 207);
+    }
+    .nav-top-browse>.search>.row>.col-md-2>ul{
+        list-style-type: none;
+        margin-left: 0;
+        padding-left: 0;
+        margin-bottom: 0px;
+    }
+    .nav-top-browse>.search>.row>.col-md-2>ul>li{
+        background:transparent;
+        color:white;
+        padding: 8px;
+        padding-left:20px;
+        padding-top:12px;
+        padding-bottom:12px;
+        cursor:pointer;
+        -webkit-transition: all 300ms ease;
+        -moz-transition: all 300ms ease;
+        -ms-transition: all 300ms ease;
+        -o-transition: all 300ms ease;
+        transition: all 300ms ease;
+        border-bottom:1px solid rgba(255, 255, 255, 0.5);
+    }
+    .nav-top-browse>.search>.row>.col-md-2>ul>li:last-child{
+        border-bottom:0px;
+    }
+    .nav{
+        height:38px;
+        overflow:hidden;
+    }
+    .nav-top-browse>.search{
+        overflow:hidden;
+        border-top:1px solid rgba(255, 255, 255, 0.5);
+        margin-top:2px;
+    }
+    .nav-top-browse>.searchr>.srow{
+        width:100%;
+        height:120px;
+        padding-top:10px;
+    }
+    .nav-top-browse>.search>.srow>.item{
+        width:25%;
+        height:46px;
+        float:left;
+        color:white;
+    }
+    .nav-top-browse>.search>.srow>.item>img{
+        width:46px;
+        height:46px;
+        background-size:contain;
+        float:left;
+    }
+    .nav-top-browse>.search>.srow>.item>div.content{
+        float:left;
+        width:auto;
+        margin-left:8px;
+        height:100%;
+    }
+</style>
+
+<script>
+    $(document).ready(function(){
+        $('#btn_search').click(function(){
+            window.document.location = '/search';
+        });
+    });
+    <!--$(document).ready(function(){-->
+        <!--var nav_top_browse_search = false;-->
+        <!--var nav_top_search_open = false;-->
+
+        <!--$('#btn_search').click(function(){-->
+            <!--if(!nav_top_browse_search){-->
+                <!--nav_top_browse_search = true;-->
+
+                <!--$('#search_box').show();-->
+                <!--$('#search_box>input').focus();-->
+            <!--} else {-->
+                <!--nav_top_browse_search = false;-->
+                <!--$('#search_box').removeAttr('value');-->
+                <!--$('#search_box').hide();-->
+
+                <!--if(nav_top_search_open){-->
+                    <!--nav_top_search_toggle();-->
+                <!--}-->
+            <!--}-->
+        <!--});-->
+
+        <!--$(document).on('click', '.clickable-row',function() {-->
+            <!--window.document.location = '/browse' + $(this).data("url");-->
+        <!--});-->
+
+        <!--$('.nav-top-browse>.search>.row>.col-md-2>ul>li').mouseover(function(){-->
+            <!--$('.nav-top-browse>.search>.row>.col-md-2>ul>li').css('background-color', 'transparent');-->
+            <!--$(this).css('background-color', 'rgb(54, 135, 207)');-->
+
+            <!--search_item_changed($(this).attr('id'));-->
+        <!--});-->
+
+        <!--function search_item_changed(id){-->
+            <!--searchCat = id;-->
+
+            <!--var table = makeTable();-->
+            <!--$('#table_container').html(table);-->
+        <!--}-->
+
+        <!--function nav_top_search_toggle(){-->
+            <!--if(!nav_top_search_open){-->
+                <!--nav_top_search_open = true;-->
+                <!--$('.nav-top-browse').css('height', '220px');-->
+            <!--} else {-->
+                <!--nav_top_search_open = false;-->
+                <!--$('.nav-top-browse').css('height', '38px');-->
+            <!--}-->
+        <!--}-->
+
+        <!--$('#search_box>input').keyup(function (e) {-->
+            <!--var val = $(this).val();-->
+            <!--if (e.keyCode == 13){-->
+                <!--if(val != ''){-->
+                    <!--var uri = '/search?key='+val+'&server=[*]&protocol=[*]';-->
+                    <!--goto_uri(uri);-->
+                <!--}-->
+            <!--}-->
+
+            <!--if(val.length >= 4){-->
+                <!--post(val, searchCat);-->
+                <!--if(!nav_top_search_open){-->
+                    <!--nav_top_search_toggle();-->
+                <!--}-->
+            <!--}-->
+            <!--else if(val.length < 4){-->
+                <!--if(nav_top_search_open){-->
+                    <!--nav_top_search_toggle();-->
+                <!--}-->
+            <!--}-->
+        <!--});-->
+
+        <!--function post(search_query, format){-->
+            <!--$.ajax({-->
+                <!--type: 'POST',-->
+                <!--url: '/post',-->
+                <!--data: 'cmd=menu_search_dropdown&val=' + search_query + '&format=' + format,-->
+                <!--dataType: 'json',-->
+                <!--success: function(result){-->
+                    <!--searchCallback(result)-->
+                <!--},-->
+                <!--error:function(zemmel){-->
+
+                <!--}-->
+            <!--});-->
+        <!--}-->
+
+        <!--var searchData = {'1':[],'2':[],'3':[],'4':[]};-->
+        <!--var searchCat = 1;-->
+
+        <!--function searchCallback(result){-->
+            <!--$('.menu_dropdown').empty();-->
+
+            <!--if (result.hasOwnProperty('menu_search_dropdown')) {-->
+                <!--if (result['menu_search_dropdown'] == 'OK') {-->
+                    <!--searchData = result['data'];-->
+
+                    <!--$(".nav-top-browse>.search>.row>.col-md-2>ul>li").each(function(){-->
+                        <!--var id = $(this).attr('id');-->
+                        <!--$(this).text($(this).attr('data-text') + ' (' + searchData[id].length + ')');-->
+                    <!--});-->
+
+                    <!--search_item_changed(searchCat);-->
+                <!--}-->
+                <!--else{-->
+                    <!--console.log('An error occured sending the data through post');-->
+                <!--}-->
+            <!--}-->
+        <!--}-->
+
+        <!--function makeTable(){-->
+            <!--var data = searchData[searchCat];-->
+            <!--console.log('setting table for data: ' + searchCat);-->
+            <!--if(data){-->
+                <!--var table = "<table id=\"quick_search-table\" class=\"table\"><tbody>";-->
+
+                <!--for (var i = 0; i != data.length; i++) {-->
+                    <!--var href = data[i]["href"];-->
+                    <!--var name = data[i]["file_name"];-->
+                    <!--var size = data[i]["file_size"];-->
+                    <!--var host = data[i]["host"];-->
+
+                    <!--table += "<tr class=\'clickable-row\' data-url=\'" + href + "\'><td>" + name + "</td><td>" + size + "</td><td>" + host + "</td></tr>";-->
+                <!--}-->
+
+                <!--table += "</tbody></table>";-->
+                <!--return table;-->
+            <!--}-->
+            <!--else{-->
+                <!--$('#table_container').html('');-->
+            <!--}-->
+        <!--}-->
+    <!--});-->
+</script>

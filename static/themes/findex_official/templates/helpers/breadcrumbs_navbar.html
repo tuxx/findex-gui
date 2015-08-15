@@ -1,0 +1,23 @@
+{% for i in range(0, data['breadcrumbs'] | length) %}
+    {% set crumb = data['breadcrumbs'][i] %}
+    {% set href = ('../'*(data['breadcrumbs'] | length - i-1))[:-1] %}
+
+    {% if i+1 == data['breadcrumbs'] | length %}
+        {% set active = True %}
+    {% else %}
+        {% set active = False %}
+    {% endif %}
+
+    {% if i == 0 %}
+        <div class="menu_item menu_crumb">
+            <a class="{{"active" if active else "unactive"}}" href="{{href if not active else "."}}/">{{crumb}}</a>
+            <div id="fa">
+                <i class="fa fa-desktop fa-fw"></i>
+            </div>
+        </div>
+    {% else %}
+        <div class="menu_item menu_crumb_div">/</div>
+        <a class="menu_item menu_crumb" href="{{href if not active else "."}}/"><span class="{{"active" if active else "unactive"}}">{{crumb}}</span></a>
+    {% endif %}
+
+{% endfor %}

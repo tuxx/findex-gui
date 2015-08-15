@@ -1,0 +1,29 @@
+{% extends "helpers/base_home.html" %}
+{% block content %}
+<body>
+<style>
+    .bg_container{
+        background: transparent !important;
+    }
+    .hero_container{
+        height: 100%;
+    }
+    #home_cta_row>div>div.well{
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.10);
+        border: 1px solid rgba(0, 0, 0, 0.22);
+    }
+</style>
+<div class="hero_container">
+    <div class="max_width">
+        <div id="hero_tagline_row" class="row" style="padding-top:140px;">
+            <div class="col-md-12 text-center">
+                <span id="hero_tagline" class="hero_tagline">
+                    {{data['error']}}
+                </span>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+{% endblock %}

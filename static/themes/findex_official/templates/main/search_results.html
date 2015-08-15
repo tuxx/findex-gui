@@ -1,0 +1,591 @@
+{% extends "helpers/base_home.html" %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    a:hover{
+        text-decoration: none;
+    }
+
+    hr {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border: 0;
+        border-top: 1px solid #C7C7C7;
+    }
+
+    .container{
+        width: 95%;
+    }
+
+    .dropdown.dropdown-lg .dropdown-menu {
+        margin-top: -1px;
+        padding: 20px 20px;
+    }
+
+    .input-group-btn .btn-group {
+        display: flex !important;
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+        margin-left: -1px;
+    }
+
+    .btn-group .btn:last-child {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+
+    .btn-group .form-horizontal .btn[type="submit"] {
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+
+    .form-horizontal .form-group {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .form-group .form-control:last-child {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }
+
+    @media screen and (min-width: 768px) {
+        .dropdown.dropdown-lg {
+            position: static !important;
+        }
+        .dropdown.dropdown-lg .dropdown-menu {
+            min-width: 420px;
+        }
+    }
+
+    .menu_top {
+        background-image: linear-gradient(to right, rgba(32, 90, 144, 0.79), rgba(78, 133, 165, 0.79));
+    }
+
+    .important{
+        text-decoration: underline;
+    }
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+    color: #868686;
+    cursor: default;
+    background-color: rgb(228, 228, 228);
+    border: 1px solid #ddd;
+    border-bottom-color: transparent;
+}
+.nav>li>a {
+    position: relative;
+    display: block;
+    padding: 4px 10px;
+}
+</style>
+
+<div id="search_container" class="container" style="margin-top:80px;">
+    <div class="row" style="padding-bottom:20px;">
+        <div class="col-md-5">
+            <h3>Search</h3>
+            <div class="input-group" id="adv-search">
+                <input id="inp_search" type="text" class="form-control" placeholder="Search for files" value="{{data['key']}}"/>
+                <div class="input-group-btn">
+                    <div class="btn-group" role="group">
+                        <div class="dropdown dropdown-lg">
+                            <button id="btn_filters" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span style="padding-right:8px;">Filters</span></button>
+                            <!--<div class="dropdown-menu dropdown-menu-right" role="menu">-->
+                                <!--:)-->
+                            <!--</div>-->
+                        </div>
+                        <button id="btn_search" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10" style="max-width:750px;">
+            <form id="form_filter" class="form-horizontal">
+                <fieldset>
+                    <div class="row">
+                        <div id="filter_box" style="display:none;">
+                            <div class="col-md-3" style="max-width:126px;">
+                                <b>Files</b>
+                                <div class="form-group">
+
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="cats" value="0" {% if 0 in data['sdata']['cats'] %}checked{% endif %}>Undefined</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="cats" value="1" {% if 1 in data['sdata']['cats'] %}checked{% endif %}>Documents</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="cats" value="2" {% if 2 in data['sdata']['cats'] %}checked{% endif %}>Movies</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="cats" value="3" {% if 3 in data['sdata']['cats'] %}checked{% endif %}>Music</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="cats" value="4" {% if 4 in data['sdata']['cats'] %}checked{% endif %}>Pictures</label>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-3" style="max-width: 100px;">
+                                <b>Protocols</b>
+                                <div class="form-group">
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="protocols" value="0" {% if 0 in data['sdata']['protocols'] %}checked{% endif %}>FTP</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="protocols" value="1" {% if 1 in data['sdata']['protocols'] %}checked{% endif %}>HTTP</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="protocols" value="2" {% if 2 in data['sdata']['protocols'] %}checked{% endif %}>SMB</label>
+                                    </div>
+                                </div>
+
+                                <b>Types</b>
+                                <div class="form-group">
+                                    <div class="radio">
+                                      <label><input type="radio" value="1" name="type" {% if data['sdata']['ftype'] == 0 %}checked{% endif %}>Files</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="2" name="type" {% if data['sdata']['ftype'] == 1 %}checked{% endif %}>Folders</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="0" name="type" {% if data['sdata']['ftype'] == 2 %}checked{% endif %}>Both</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3" style="max-width: 150px;">
+                                <b>Size</b>
+                                <div class="form-group">
+                                    <div class="radio">
+                                      <label><input type="radio" value="0" name="size" {% if data['sdata']['fsize'] == 0 %}checked{% endif %}>Any size</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="1" name="size" {% if data['sdata']['fsize'] == 1 %}checked{% endif %}>0MB - 8MB</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="2" name="size" {% if data['sdata']['fsize'] == 2 %}checked{% endif %}>8MB - 128MB</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="3" name="size" {% if data['sdata']['fsize'] == 3 %}checked{% endif %}>128MB - 512MB</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="4" name="size" {% if data['sdata']['fsize'] == 4 %}checked{% endif %}>512MB - 2GB</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="5" name="size" {% if data['sdata']['fsize'] == 5 %}checked{% endif %}>2GB - 8GB</label>
+                                    </div>
+                                    <div class="radio">
+                                      <label><input type="radio" value="6" name="size" {% if data['sdata']['fsize'] == 6 %}checked{% endif %}>More than 8GB</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" style="max-width:160px;">
+                                <b>Extensions</b>
+                                <div class="form-group">
+                                    <input id="tag1" name="exts" value="{{','.join(data['sdata']['exts'])}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+    <div id="search_results" class="row">
+        <div class="col-md-10" id="search_well">
+            {% if 'results' in data %}
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#all">All ({{data['results']['data'][-1]|length}})</a></li>
+                <li><a href="#documents">Documents ({{data['results']['data'][1]|length}})</a></li>
+                <li><a href="#movies">Movies ({{data['results']['data'][2]|length}})</a></li>
+                <li><a href="#music">Music ({{data['results']['data'][3]|length}})</a></li>
+                <li><a href="#pictures">Pictures ({{data['results']['data'][4]|length}})</a></li>
+                <li><a href="#unidentified">Unidentified files ({{data['results']['data'][0]|length}})</a></li>
+                <li><a href="#folders">Folders ({{data['results']['data'][-2]|length}})</a></li>
+            </ul>
+
+            {% macro search_result(results) %}
+                {% if results %}
+                    {% for f in results %}
+                        <div id="{{f.id}}" class="sitem_container">
+                            <a id="link" href="/browse/{{f.host.address}}/{{f.file_path_human[1:]}}#{{f.id}}" target="_self">
+                                <div class="sitem_info">
+                                    <div class="thumb" style="background: url('{{f.img_icon}}');"></div>
+
+                                    <div class="info">
+                                        <span><b>{{f.file_name_human}}</b></span>
+                                        <br>
+                                        <span class="info_path"><b>{{f.host.address}}</b> - {{f.file_path_human[:115]}}...</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="options">
+                                <span class="size">{{f.file_size_human}}</span>
+                                <div id="div"></div>
+
+                                <a id="icon" href="#" style="background:url('/static/img/icons/blue/128/Very_Basic/download-128.png');"></a>
+                                <a id="icon" href="#" style="background:url('/static/img/icons/blue/128/Very_Basic/search-128.png');"></a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <br>
+                    <h4>No results found for '{{data['key']}}' \:D/</h4>
+                {% endif %}
+            {% endmacro %}
+
+            <div class="tab-content">
+                <div id="all" class="tab-pane fade in active">
+                    {{ search_result(data['results']['data'][-1]) }}
+                </div>
+                <div id="documents" class="tab-pane fade">
+                    {{ search_result(data['results']['data'][1]) }}
+                </div>
+                <div id="movies" class="tab-pane fade">
+                    {{ search_result(data['results']['data'][2]) }}
+                </div>
+                <div id="music" class="tab-pane fade">
+                    {{ search_result(data['results']['data'][3]) }}
+                </div>
+                <div id="pictures" class="tab-pane fade">
+                    {{ search_result(data['results']['data'][4]) }}
+                </div>
+                <div id="unidentified" class="tab-pane fade">
+                    {{ search_result(data['results']['data'][0]) }}
+                </div>
+                <div id="folders" class="tab-pane fade">
+                    {{ search_result(data['results']['data'][-2]) }}
+                </div>
+            </div>
+            {% else %}
+                {% if 'key' in data %}
+                    <h3 style="padding-bottom:10px;">No results for “{{data['key']}}”</h3>
+                {% elif exception %}
+                    <h3>Error: "{{exception}}"</h3>
+                {% else %}
+                    <script>
+                        $(document).ready(function() {
+                            $('#inp_search').focus();
+                        });
+                    </script>
+
+                {% endif %}
+
+            {% endif %}
+        </div>
+
+        <div id="description" class="col-md-2" style="padding-left: 30px;">
+            <div id="container">
+                <div id="thumb">
+                    <img src=""/>
+                </div>
+                <div id="description"></div>
+                <div id="table">
+                    <table class="table">
+                        <tbody id="description_table">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="options">
+                    <a id="browse_host" href=""></a>
+                    <a id="browse_path" href=""></a>
+
+                    <br>
+                    <span id="filters" style="opacity:0;">Set Filters</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-5">
+            <div class="alert">Database load: 0.086561 sec </div>
+        </div>
+    </div>
+
+    <script>
+        // tabs
+        $(".nav-tabs a").click(function(){
+            $(this).tab('show');
+        });
+
+        // highlight search results
+        $('#search_well>div').highlight('{{data['key']}}', { className: 'important' });
+
+        // selectors
+        var sel_desc = $('#search_results>#description');
+        var sel_desc_filters = $('#search_results>#description>#container>#options>span#filters');
+
+        var description_box_offset = sel_desc.offset()['top'];
+        var description_box_shown = false;
+        var window_scrollTop = 0;
+        var filters_shown = false;
+        var search_data = {};
+
+        function show_option_apply_filters(){
+            if(description_box_shown){
+                if(window_scrollTop > 172) {
+                    sel_desc_filters.show();
+                    sel_desc_filters.stop().animate({'opacity': 1}, 400);
+                }
+            } else {
+                sel_desc_filters.hide();
+            }
+        }
+
+        $(window).scroll(function() {
+            var current_window_scrollTop = $(this).scrollTop();
+
+            // sticky description div
+            if (current_window_scrollTop > description_box_offset){
+                sel_desc.css('margin-top', current_window_scrollTop - description_box_offset);
+
+                // sticky description div - show filter btn
+                show_option_apply_filters();
+            } else if(current_window_scrollTop < 172){
+                sel_desc.css('margin-top', 0);
+                sel_desc_filters.stop().animate({
+                    'opacity': 0
+                }, 200);
+            }
+
+            // show or hide nav bar
+            if (current_window_scrollTop > window_scrollTop){
+                $('.menu_top').stop().animate({'top': '-50'}, 150);
+            } else {
+                if(current_window_scrollTop < 40) {
+                    $('.menu_top').stop().animate({'top': '0'}, 150);
+                }
+            }
+
+            window_scrollTop = current_window_scrollTop;
+        });
+
+        {% if data['results']['data'][-1] %}
+            search_data = {
+                {% for f in data['results']['data'][-1] %}
+                    '{{f.id}}': {
+                        'size': "{{f.file_size_human}}",
+                        'name': "{{f.file_name_human}}",
+                        'icon': '{{f.img_icon}}',
+                        'host': '{{f.host.address}}',
+                        'protocol': '{{f.host.protocol}}',
+                        'date_modified': '{{f.file_modified_human}}',
+                        'isdir': '{{f.file_isdir}}',
+                        'ext': '{{f.file_ext}}',
+                        'path': "{{f.file_path_human}}"
+                    },
+                {% endfor %}
+            };
+        {% endif %}
+
+        $(document).ready(function(){
+            // tr hover description effect
+            var sitem_lasthover = 0;
+
+            function rowSelect(id){
+                // set new background row color
+                if(sitem_lasthover > 0){
+                    $('div#' + sitem_lasthover).css('background', 'transparent');
+                }
+                sitem_lasthover = id;
+                $('div#' + id).css('background', '#E4E4E4');
+
+                if(id in search_data) {
+                    var data = search_data[id];
+                    $('#search_results>#description>div>#thumb>img').attr('src', data['icon']);
+                    $('#search_results>#description>div>#description').html(data['name']);
+                    $('#options>a#browse_host').attr('href', '/browse/' + data['host']).text('Browse Host');
+                    $('#options>a#browse_path').attr('href', '/browse/' + data['host'] + data['path']).text('Browse Path');
+
+                    var table_rows = '';
+                    var columns = [
+                        {'key': 'host', 'title': 'Host'},
+                        {'key': 'isdir', 'title': 'Dir.'},
+                        {'key': 'ext', 'title': 'Ext.'},
+                        {'key': 'size', 'title': 'Size'},
+                        {'key': 'date_modified', 'title': 'Date'}];
+
+                    for(var i = 0; i != columns.length; i++) {
+                        var dict = columns[i];
+                        table_rows += "<tr><td><b>" + dict['title'] + "</b></td><td>" + data[dict['key']] + "</td></tr>";
+                    }
+
+                    $('table>#description_table').html(table_rows);
+                    description_box_shown = true;
+
+                    show_option_apply_filters();
+                }
+            }
+
+            $('.sitem_container').mouseenter(function(){
+                var id = $(this).attr('id');
+
+                rowSelect(id);
+            });
+
+            function toggle_filters(animate) {
+                var sel = $('#filter_box');
+
+                if (!filters_shown){
+                    filters_shown = true;
+
+                    if(animate) {
+                        sel.css('margin-left', '-20px').css('opacity', '0');
+                    }
+                    sel.show();
+
+                    $('#btn_filters').addClass('btn-info');
+
+                    if(animate) {
+                        sel.stop().animate({'margin-left': '+=20', 'opacity': '1'}, 200);
+                    }
+
+                    // reset base offset position for description box
+                    description_box_offset += 232;
+                } else {
+                    filters_shown = false;
+
+                    if(animate) {
+                        sel.stop().animate({'margin-left': '-=20', 'opacity': '0'}, 200);
+                    }
+
+                    $('#btn_filters').removeClass('btn-info');
+
+                    setTimeout(function(){
+                        sel.hide();
+                    }, 200);
+
+                    // reset base offset position for description box
+                    description_box_offset -= 232;
+                }
+            }
+
+            /* buttons */
+
+            $('#btn_filters').click(function () {
+                toggle_filters(true);
+            });
+
+            $('#btn_search').click(function(){
+               reloadPage();
+            });
+
+            $('#search_results>#description>#container>#options>span#filters').click(function(){
+                $("html, body").animate({ scrollTop: 0 }, 200);
+
+                if(!filters_shown) {
+                    setTimeout(function () {
+                        toggle_filters(true);
+                    }, 150);
+                }
+            });
+
+            $('#tag1').tagsInput({width:'auto', 'defaultText': 'Add an ext'});
+
+            $("#inp_search").keyup(function(e) {
+                if (e.keyCode == 13) {
+                    reloadPage();
+                }
+            });
+
+            function reloadPage(){
+                var data = $('#form_filter').serialize();
+
+                var query = form_parse(data);
+                goto_uri('/search?' + query);
+            }
+
+            $('#form_filter').submit(function(e){
+                e.preventDefault();
+                reloadPage();
+            });
+
+            // to-do: move search specific stuff to search.js?
+            argl = {
+                'protocols': ['ftp', 'http', 'smb'],
+                'cats': ['unknown', 'documents', 'movies', 'music', 'pictures']
+            };
+
+            function form_parse(inp){
+                // meh
+                var parsed = inp.split("&");
+                var data = {};
+
+                parsed.forEach(function(entry){
+                    var spl = entry.split("=");
+
+                    var key = spl[0];
+                    var val = '';
+
+                    if(key != "exts"){
+                        val = spl[1];
+
+                        if(key in argl){
+                            val = argl[key][val];
+                        }
+                    } else {
+                        val = spl[1].split("%2C");
+                    }
+
+                    if (!(key in data)) {
+                        if(val instanceof Array){
+                            data[key] = val;
+                        }
+                        else{
+                            data[key] = [val];
+                        }
+                    }
+                    else{
+                        data[key].push(val);
+                    }
+
+                });
+
+                var query = '';
+
+                for(key in data){
+                    query += key + '=[';
+
+                    for(var i = 0; i != data[key].length ; i++){
+                        query += data[key][i];
+                        if(i != data[key].length-1){
+                            query += ','
+                        }
+                    }
+
+                    query += ']&';
+
+                }
+                query = query.substring(0, query.length - 1);
+                query = 'key=' + encodeURIComponent($('#inp_search').val()) + '&' + query;
+                return query;
+            }
+
+                {% if data['sdata']['filtered'] %}
+                    toggle_filters(false);
+                {% endif %}
+
+                {% if data['results']['data'][-1] %}
+                    rowSelect({{data['results']['data'][-1][0].id}});
+                {% endif %}
+
+        });
+
+    </script>
+</div>
+
+{% endblock %}

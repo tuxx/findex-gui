@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "helpers/resources.html" %}
+</head>
+<body>
+
+    <div class="menu_dropdown">
+        <!--<div class=\"menu_dropdown_item\"><div class=\"menu_dropdown_item_thumbnail\"><img src=\"/static/images/source_default_thumbnail.png\" width=\"40px\"/></div><div class=\"menu_dropdown_item_description\"><b>ekwgnwe</b><br>1lineinformationhere</div></div>-->
+    </div>
+    <div class="menu_top" style="border-bottom: 1px solid rgb(18, 66, 87);background-image: linear-gradient(to right, #2D71AD, rgba(0, 113, 179, 1));">
+            <a href="/" class="menu_item menu_btn" style="width: 104px;">
+                <img src="/static/img/findex_logo.png"/>
+            </a>
+
+            <div class="menu_item" style="padding-top:6px;">
+                <div class="db_counter">
+                    {{ ('{:,}').format(env['db_file_count']) }}
+                </div>
+            </div>
+
+            <div class="menu_item divider">
+
+            </div>
+
+            <div class="menu_item" style="">
+                <div class="input-group" style="padding-top:8px;">
+                    <input id="menu_searchbar" class="form-control_menu" type="text" style="width:100px;" placeholder="Search...">
+                    <!--<span class="input-group-btn">
+                            <button class="btn btn-default" type="button" style="height:32px">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>-->
+                </div>
+            </div>
+
+            <div class="menu_item divider">
+
+            </div>
+
+            <div class="menu_item menu_btn" style="padding-top:6px;">
+                <a class="menu_knopje disabled" href="/">Home</a>
+            </div>
+
+            <div class="menu_item menu_btn" style="padding-top:6px;">
+                <a class="menu_knopje disabled" href="/">About</a>
+            </div>
+
+            <!--<div class="menu_item menu_btn" style="float:right;margin-right:-6px;">-->
+                <!--<img src="/static/img/findex_logo.png"/>-->
+            <!--</div>-->
+    </div>
+    <div class="bg_container"></div>
+    <div class="wrapper">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+</html>

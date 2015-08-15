@@ -1,0 +1,11 @@
+config
+config.py
+old/*
+.idea/*
+*.pyc
+geo/*.mmdb
+static/themes/ccc/*
+static/css/ccc*
+static/js/ccc*
+static/img/pirate*
+nohup.out

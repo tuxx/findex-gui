@@ -84,7 +84,7 @@ def server_static(filename):
 
 @route('/terms')
 def terms():
-    f = open('static/terms')
+    f = open(os.path.join(os.path.dirname(__file__), 'static', 'terms'))
     response.set_header('content-type', 'text/plain')
     return f.read()
 

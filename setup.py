@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 import os
 
@@ -30,7 +30,7 @@ def read_file(filename):
 
 setup(
     name='findex-gui',
-    packages=['findex_gui'],
+    packages=find_packages(),
     version=__version__,
     description='findex-gui.',
     long_description=read_file('README.md'),
@@ -39,6 +39,8 @@ setup(
     url='https://github.com/skftn/findex-gui/',
     download_url='https://github.com/skftn/findex-gui/tarball/v%s' % __version__,
     install_requires=requires,
+    include_package_data=True,
+    zip_safe=False,
     entry_points={
         'console_scripts': [
             'findex-gui=findex_gui.daemon:cli',

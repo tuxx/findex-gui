@@ -8,15 +8,7 @@ import atexit
 import signal
 
 
-@click.group()
-def cli():
-    pass
-
-
-@click.command()
-def start():
-    """Start the findex-gui service."""
-
+def start_as_daemon():
     # Double-fork to daemonize the process.
     if os.fork() > 0:
         return
@@ -49,6 +41,17 @@ def start():
     main()
 
 
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+def start():
+    """Start the findex-gui service."""
+    start_as_daemon()
+
+
 @click.command()
 def stop():
     """Stop the findex-gui service."""
@@ -64,8 +67,23 @@ def stop():
     os.kill(pid, signal.SIGHUP)
 
 
+@click.command()
+def restart():
+    """Restart the findex-gui service."""
+    
+    try:
+        with open('/tmp/findex-gui.pid', 'r') as f:
+            pid = int(f.readline().strip())
+            os.kill(pid, signal.SIGHUP)
+    except IOError as e:
+        print('findex-gui not running, starting it.', file=sys.stderr)
+
+    start_as_daemon()
+
+        
 cli.add_command(start)
 cli.add_command(stop)
+cli.add_command(restart)
 
 
 if __name__ == '__main__':

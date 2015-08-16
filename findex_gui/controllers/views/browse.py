@@ -2,10 +2,10 @@
 from datetime import datetime
 from bottle import jinja2_template
 
-from db.orm import Hosts
-from controllers.views.browser import Browser
-from controllers.findex.findex import Findex
-from controllers.helpers import data_strap
+from findex_gui.db.orm import Hosts
+from findex_gui.controllers.views.browser import Browser
+from findex_gui.controllers.findex.findex import Findex
+from findex_gui.controllers.helpers import data_strap
 
 
 class Browse():

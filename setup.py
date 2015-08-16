@@ -16,6 +16,7 @@ requires = [
     'bottle',
     'psycogreen',
     'findex-common',
+    'click'
 ]
 
 
@@ -38,6 +39,11 @@ setup(
     url='https://github.com/skftn/findex-gui/',
     download_url='https://github.com/skftn/findex-gui/tarball/v%s' % __version__,
     install_requires=requires,
+    entry_points={
+        'console_scripts': [
+            'findex-gui=findex_gui.daemon:cli',
+        ],
+    },
     classifiers=[
         'Environment :: Console',
         'License :: OSI Approved :: MIT License',

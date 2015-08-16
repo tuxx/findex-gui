@@ -131,7 +131,8 @@ def beepbeep():
     response.content_type = 'text/plain'
     return "User-agent: *\nDisallow: /browse/\nDisallow: /search\nDisallow: /goto/"
 
-if __name__ == "__main__":
+
+def main():
     run(app=app,
         host=cfg['general']['bind_host'],
         port=cfg['general']['bind_port'],
@@ -140,3 +141,7 @@ if __name__ == "__main__":
         reloader=False,
         server='gevent'
     )
+
+
+if __name__ == "__main__":
+    main()

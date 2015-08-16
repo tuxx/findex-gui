@@ -5,9 +5,9 @@ sys.setdefaultencoding('utf-8')
 
 from bottle import jinja2_template, request, redirect
 
-from controllers.helpers import data_strap
-from controllers.request import var_parse
-from controllers.views.searcher import Searcher
+from findex_gui.controllers.helpers import data_strap
+from findex_gui.controllers.request import var_parse
+from findex_gui.controllers.views.searcher import Searcher
 
 from findex_common.exceptions import SearchException
 

@@ -1,7 +1,7 @@
-from db.orm import Files, Hosts
+from findex_gui.db.orm import Files, Hosts
 from sqlalchemy import and_, asc, desc
 from sqlalchemy.dialects import mysql
-from bin.icons import Icons
+from findex_gui.bin.icons import Icons
 from datetime import datetime
 from findex_common.utils import DataObjectManipulation
 

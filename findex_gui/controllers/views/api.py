@@ -3,8 +3,8 @@ import urllib
 from sqlalchemy import and_
 from bottle import response, jinja2_template
 
-from db.orm import Files, Hosts
-from controllers.helpers import data_strap
+from findex_gui.db.orm import Files, Hosts
+from findex_gui.controllers.helpers import data_strap
 
 from findex_common.utils import ArgValidate
 from findex_common.bytes2human import bytes2human

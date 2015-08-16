@@ -2,9 +2,9 @@ import jinja2
 from datetime import datetime
 from urllib import quote_plus
 
-from db.orm import Files, Hosts
+from findex_gui.db.orm import Files, Hosts
 from findex_common.exceptions import SearchException
-from controllers.findex.findex import Findex
+from findex_gui.controllers.findex.findex import Findex
 
 
 class Searcher():

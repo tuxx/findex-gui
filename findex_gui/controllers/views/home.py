@@ -1,7 +1,7 @@
 from bottle import jinja2_template
 
-from controllers.findex.findex import Findex
-from controllers.helpers import data_strap
+from findex_gui.controllers.findex.findex import Findex
+from findex_gui.controllers.helpers import data_strap
 
 
 class Home():

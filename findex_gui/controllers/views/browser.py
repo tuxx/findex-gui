@@ -1,8 +1,8 @@
 from urllib import quote_plus, unquote_plus
 from datetime import datetime
 
-from db.orm import Files, Hosts
-from controllers.findex.findex import Findex
+from findex_gui.db.orm import Files, Hosts
+from findex_gui.controllers.findex.findex import Findex
 
 from findex_common.bytes2human import bytes2human
 from findex_common.exceptions import BrowseException

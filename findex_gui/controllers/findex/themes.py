@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import sessionmaker
 
-from db.orm import Options
+from findex_gui.db.orm import Options
 from findex_common import utils
 
 class Theme():
@@ -35,7 +35,7 @@ class Theme():
 class Themes():
     def __init__(self, db):
         self.db = sessionmaker(bind=db.engine)()
-        self.theme_dir = 'static/themes/'
+        self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'themes')
         self.themes = {}
 
         self.active_theme = {}
@@ -58,7 +58,7 @@ class Themes():
             if dir in self.themes:
                 raise Exception('Duplicate theme. Is it already added?')
 
-            path = '%s%s/theme.json' % (self.theme_dir, dir)
+            path = '%s/%s/theme.json' % (self.theme_dir, dir)
 
             options = ''.join(utils.file_read(path))
             blob = utils.is_json(options)
@@ -92,8 +92,9 @@ class Themes():
             theme.val = name
             self.db.commit()
 
-        bottle.TEMPLATE_PATH = ['static/themes/%s/templates/' % name, './', './views/']
-        loader = jinja2.FileSystemLoader('static/themes/%s/templates/' % name)
+        template_path = os.path.join(self.theme_dir, name, 'templates')
+        bottle.TEMPLATE_PATH = [template_path]
+        loader = jinja2.FileSystemLoader(template_path)
         env = jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
         env.globals.update({'test': '222222'})
 

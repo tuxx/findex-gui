@@ -12,16 +12,16 @@ import urllib, os, json, random, jinja2
 from datetime import datetime
 
 from findex_common.cfg import Config
-from db.orm import Postgres
-import bin.utils
+from findex_gui.db.orm import Postgres
+import findex_gui.bin.utils
 
-from controllers.views.home import Home
-from controllers.views.browse import Browse
-from controllers.views.documentation import Documentation
-from controllers.views.api import Api
-from controllers.views.search import Search
-from controllers.views.research import Research
-from controllers.findex.themes import Themes
+from findex_gui.controllers.views.home import Home
+from findex_gui.controllers.views.browse import Browse
+from findex_gui.controllers.views.documentation import Documentation
+from findex_gui.controllers.views.api import Api
+from findex_gui.controllers.views.search import Search
+from findex_gui.controllers.views.research import Research
+from findex_gui.controllers.findex.themes import Themes
 
 from gevent import monkey
 monkey.patch_all()
@@ -34,19 +34,6 @@ app = app()
 database = Postgres(cfg, app)
 
 themes = Themes(db=database)
-
-
-jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader('static/themes/ccc/templates/'),
-    autoescape=True,
-)
-jinja_env.globals.update({
-    'site_name': 'Findex',
-    'test': '22222'
-})
-
-# loader = jinja2.FileSystemLoader('static/themes/findex_official/templates/')
-# environment = jinja2.Environment(loader=loader)
 
 @route('/post', method='POST')
 def post(db):
@@ -93,11 +80,11 @@ def search_(db):
 
 @route('/static/<filename:path>')
 def server_static(filename):
-    return static_file(filename, root='static/')
+    return static_file(filename, root=os.path.join(os.path.dirname(__file__), 'static'))
 
 @route('/terms')
 def terms():
-    f = open('static/terms')
+    f = open(os.path.join(os.path.dirname(__file__), 'static', 'terms'))
     response.set_header('content-type', 'text/plain')
     return f.read()
 
@@ -144,7 +131,8 @@ def beepbeep():
     response.content_type = 'text/plain'
     return "User-agent: *\nDisallow: /browse/\nDisallow: /search\nDisallow: /goto/"
 
-if __name__ == "__main__":
+
+def main():
     run(app=app,
         host=cfg['general']['bind_host'],
         port=cfg['general']['bind_port'],
@@ -153,3 +141,7 @@ if __name__ == "__main__":
         reloader=False,
         server='gevent'
     )
+
+
+if __name__ == "__main__":
+    main()

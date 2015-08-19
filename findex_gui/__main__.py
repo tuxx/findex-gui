@@ -3,17 +3,12 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from bottle import post, get, run, static_file, abort, \
-    redirect, response, request, debug, app, route, url, \
-    HTTPError, hook, Bottle
+from bottle import run, static_file, redirect, response, request, app, route
 from bottle import jinja2_template
-import bottle, time
-import urllib, os, json, random, jinja2
-from datetime import datetime
+import bottle, time, os
 
 from findex_common.cfg import Config
 from findex_gui.db.orm import Postgres
-import findex_gui.bin.utils
 
 from findex_gui.controllers.views.home import Home
 from findex_gui.controllers.views.browse import Browse
@@ -29,7 +24,7 @@ monkey.patch_all()
 os.environ['TZ'] = 'Europe/Amsterdam'
 time.tzset()
 
-cfg = Config()
+cfg = Config('gui.ini')
 app = app()
 database = Postgres(cfg, app)
 

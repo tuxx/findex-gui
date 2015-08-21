@@ -8,9 +8,10 @@ from findex_gui.controllers.findex.findex import Findex
 
 
 class Searcher():
-    def __init__(self, cfg, db):
+    def __init__(self, cfg, db, env):
         self.cfg = cfg
         self.db = db
+        self.env = env
         self.findex = Findex(self.db)
 
     def _key_check(self, keyword):
@@ -199,7 +200,7 @@ class Searcher():
             setattr(r, 'host', host)
 
         results['data'] = self.findex.set_humanize(results['data'])
-        results['data'] = self.findex.set_icons(results['data'])
+        results['data'] = self.findex.set_icons(env=self.env, files=results['data'])
         sdata['filtered'] = filtered
 
         return {'sdata': sdata, 'results': results, 'key': jinja2.escape(vars['key'][0])}

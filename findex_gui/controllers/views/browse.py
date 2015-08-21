@@ -33,13 +33,13 @@ class Browse():
             browser.fetch_files()
             env['load_dbtime'] = (datetime.now() - start_dbtime).total_seconds()
 
-            browser.prepare_files()
+            browser.prepare_files(env=env)
 
             data = {
                 'files': browser.files,
                 'breadcrumbs': browser.breadcrumbs(),
                 'action_fetches': browser.generate_action_fetches(),
-                'env': browser.env
+                'env': browser.data
             }
 
             return jinja2_template('main/browse_dir', env=env, data=data)

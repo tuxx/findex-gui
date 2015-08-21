@@ -1,13 +1,17 @@
 import os, jinja2, bottle
 from datetime import datetime
+from importlib import import_module
 
 from sqlalchemy.orm import sessionmaker
 
 from findex_gui.db.orm import Options
 from findex_common import utils
+from findex_common.exceptions import ThemeException
+
 
 class Theme():
-    def __init__(self, data):
+    def __init__(self, name, data):
+        self.name = name
         self.options = {}
 
         self.validate(data)
@@ -26,11 +30,11 @@ class Theme():
 
         for option in options:
             if not option in data:
-                #raise Exception("Error parsing a needed theme option from \"%s%s\". Option \"%s\" not found but should be present." % (self.theme_dir, self.theme_name, option))
-                raise Exception('xo')
+                raise ThemeException("Error parsing a needed option from theme \"%s\". Option \"%s\" not found in theme configuration file but should be present." % (self.name, option))
 
         for k, v in data.iteritems():
             self.options[k] = v
+
 
 class Themes():
     def __init__(self, db):
@@ -63,7 +67,7 @@ class Themes():
             options = ''.join(utils.file_read(path))
             blob = utils.is_json(options)
 
-            theme = Theme(data=blob)
+            theme = Theme(name=dir, data=blob)
             self.themes[theme['theme_name']] = theme.options
 
         except IOError:
@@ -77,7 +81,7 @@ class Themes():
 
     def get_theme(self):
         if self.active_theme:
-            if (datetime.now() - self.active_theme['date']) <= 300:
+            if (datetime.now() - self.active_theme['date']).total_seconds() <= 300:
                 return self.active_theme['name']
 
         return self.db.query(Options).filter(Options.key == 'theme_active').first()
@@ -95,7 +99,10 @@ class Themes():
         template_path = os.path.join(self.theme_dir, name, 'templates')
         bottle.TEMPLATE_PATH = [template_path]
         loader = jinja2.FileSystemLoader(template_path)
-        env = jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
-        env.globals.update({'test': '222222'})
+        jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
+        import_module('static.themes.%s.bin.views' % name)
 
         self.active_theme = {'name': name, 'date': datetime.now()}
+
+
+DATA = None

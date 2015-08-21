@@ -1,10 +1,9 @@
 import json
 import urllib
 from sqlalchemy import and_
-from bottle import response, jinja2_template
+from bottle import response
 
 from findex_gui.db.orm import Files, Hosts
-from findex_gui.controllers.helpers import data_strap
 
 from findex_common.utils import ArgValidate
 from findex_common.bytes2human import bytes2human
@@ -15,10 +14,6 @@ class Api():
         self.cfg = cfg
         self.db = db
         self.arg_validate = ArgValidate()
-
-    @data_strap
-    def api(self, env):
-        return jinja2_template('main/api', env=env)
 
     def parse(self):
         args = self.arg_validate.verify_args({'cmd': 'string'}, 'POST')

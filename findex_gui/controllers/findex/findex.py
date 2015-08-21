@@ -1,9 +1,12 @@
-from findex_gui.db.orm import Files, Hosts
+from importlib import import_module
+
 from sqlalchemy import and_, asc, desc
-from sqlalchemy.dialects import mysql
-from findex_gui.bin.icons import Icons
-from datetime import datetime
+from sqlalchemy.dialects import mysql, postgresql
+
+from findex_gui.db.orm import Files, Hosts
 from findex_common.utils import DataObjectManipulation
+
+import findex_gui.controllers.findex.themes as themes
 
 
 class Findex(object):
@@ -39,24 +42,15 @@ class Findex(object):
             setattr(f, 'file_url', file_url)
         return results
 
-    def set_icons(self, results):
-        icons = Icons()
-        img_dir = '/static/img/icons/blue/128/'
+    def set_icons(self, env, files):
+        try:
+            theme_icon_module = import_module('static.themes.%s.bin.icons' % env['theme_name'])
+            return theme_icon_module.set_icons(env=env, files=files)
+        except Exception as ex:
+            for f in files:
+                f.img_icon = '/static/img/error.png'
 
-        for f in results:
-            setattr(f, 'img_icon', '')
-
-            if f.file_isdir:
-                if f.file_name == '..':
-                    f.img_icon = img_dir + icons.additional_icons[20]
-                else:
-                    f.img_icon = img_dir + icons.additional_icons[21]
-            elif f.file_ext in icons.additional_icons_exts:
-                f.img_icon = img_dir + icons.additional_icons[icons.additional_icons_exts[f.file_ext]]
-            else:
-                f.img_icon = img_dir + icons.file_icons[f.file_format]
-
-        return results
+        return files
 
     def get_host_objects(self, id=None):
         query = self.db.query(Hosts)

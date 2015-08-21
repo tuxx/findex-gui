@@ -44,10 +44,6 @@ function required_input(id){
     setTimeout(function(){$('#'+id).fadeTo(200,1);}, 300);
 }
 
-$('#btn_help').click(function(){
-    $('#help').css('display', 'block');
-});
-
 function change_uri(uri){
     window.history.pushState("", "", uri);
 }

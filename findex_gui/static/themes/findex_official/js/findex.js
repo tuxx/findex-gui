@@ -195,4 +195,7 @@ $(document).ready(function(){
     $(".menu_item").on('mouseleave',function(){
       //$(this).animate({"marginTop": "0px"}, "fast");
     });
+    $('#btn_help').click(function(){
+        $('#help').css('display', 'block');
+    });
 });

@@ -12,11 +12,10 @@ from findex_gui.db.orm import Postgres
 
 from findex_gui.controllers.views.home import Home
 from findex_gui.controllers.views.browse import Browse
-from findex_gui.controllers.views.documentation import Documentation
-from findex_gui.controllers.views.api import Api
 from findex_gui.controllers.views.search import Search
-from findex_gui.controllers.views.research import Research
-from findex_gui.controllers.findex.themes import Themes
+
+import findex_gui.controllers.findex.themes as themes
+from findex_gui.controllers.findex.api import Api
 
 from gevent import monkey
 monkey.patch_all()
@@ -24,11 +23,11 @@ monkey.patch_all()
 os.environ['TZ'] = 'Europe/Amsterdam'
 time.tzset()
 
-cfg = Config('gui.ini')
+cfg = Config('gui.cfg')
 app = app()
 database = Postgres(cfg, app)
 
-themes = Themes(db=database)
+themes.DATA = themes.Themes(database)
 
 @route('/post', method='POST')
 def post(db):
@@ -83,30 +82,9 @@ def terms():
     response.set_header('content-type', 'text/plain')
     return f.read()
 
-@route('/research/')
-def research(db):
-    controller = Research(db)
-    return controller.research()
-
-@route('/research/mass-ftp-crawling/')
-def research(db):
-    controller = Research(db)
-    return controller.mass_ftp()
-
-@route('/documentation/')
-def docu(db):
-    controllers = Documentation(cfg, db)
-    return controllers.docu()
-
-
 @route('/favicon.ico', method='GET')
 def fav():
     return server_static('img/favicon.ico')
-
-@route('/api', method='GET')
-def api(db):
-    controller = Api(cfg, db)
-    return controller.api()
 
 
 @bottle.error(404)

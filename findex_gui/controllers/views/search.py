@@ -22,7 +22,7 @@ class Search():
         search_vars = var_parse(request.query)
         if 'key' in search_vars:
             try:
-                data = Searcher(self.cfg, self.db).search(search_vars)
+                data = Searcher(cfg=self.cfg, db=self.db, env=env).search(search_vars)
 
                 results = {-2: [], -1: [], 0: [], 1: [], 2: [], 3: [], 4: []}
                 for f in data['results']['data']:

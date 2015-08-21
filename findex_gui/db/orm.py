@@ -80,7 +80,7 @@ class Files(Base):
 
     searchable = Column(sql.String(23))
 
-    def __init__(self, file_name, file_path, file_ext, file_format, file_isdir, file_modified, file_perm, searchable, file_size, host):
+    def __init__(self, file_name, file_path, file_ext, file_format, file_isdir, file_modified, file_perm, searchable, file_size, host, img_icon=None):
         self.host = host
         self.file_name = file_name
         self.file_path = file_path
@@ -91,6 +91,7 @@ class Files(Base):
         self.file_modified = file_modified
         self.file_perm = file_perm
         self.searchable = searchable
+        self.img_icon = None
 
     # regular indexes
     ix_file_ext = Index('ix_file_ext', file_ext)

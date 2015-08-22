@@ -7,26 +7,29 @@ import time
 import atexit
 import signal
 
+PATH_PID = '/tmp/findex-gui.pid'
 
 def start_as_daemon():
+
     # Double-fork to daemonize the process.
     if os.fork() > 0:
         return
-    
+
     if os.fork() > 0:
         return
 
+    print('Starting the findex-gui service')
 
     # Connect SIGTERM and SIGHUP to sys.exit() so atexit gets called.    
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
 
-    # Create /tmp/findex-gui.pid atomically. Fail if it already exists.
+    # Create /tmp/findex-gui.pid automically. Fail if it already exists.
     try:
-        fd = os.open('/tmp/findex-gui.pid', os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        fd = os.open(PATH_PID, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
 
         # When process exits, clean up.
-        atexit.register(lambda: os.unlink('/tmp/findex-gui.pid'))
+        atexit.register(lambda: os.unlink(PATH_PID))
     except OSError as e:
         if e.errno == errno.EEXIST:
             print('PID file /tmp/findex-gui.pid exists, is findex-gui already running?', file=sys.stderr)
@@ -51,28 +54,30 @@ def start():
     """Start the findex-gui service."""
     start_as_daemon()
 
-
 @click.command()
 def stop():
     """Stop the findex-gui service."""
 
     # Try to read PID file.
     try:
-        with open('/tmp/findex-gui.pid', 'r') as f:
+        with open(PATH_PID, 'r') as f:
             pid = int(f.readline().strip())
     except IOError as e:
-        print('Could not read PID file, is findex-gui still running?', file=sys.stderr)
+        if e.errno == errno.ENOENT:
+            print('PID file %s does not exist, is findex-gui running?' % PATH_PID)
+        else:
+            print('Could not read PID file, is findex-gui still running?', file=sys.stderr)
         sys.exit(1)
 
     os.kill(pid, signal.SIGHUP)
-
+    print('Killed the findex-gui service.')
 
 @click.command()
 def restart():
     """Restart the findex-gui service."""
     
     try:
-        with open('/tmp/findex-gui.pid', 'r') as f:
+        with open(PATH_PID, 'r') as f:
             pid = int(f.readline().strip())
             os.kill(pid, signal.SIGHUP)
     except IOError as e:

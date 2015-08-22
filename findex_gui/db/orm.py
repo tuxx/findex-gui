@@ -56,8 +56,8 @@ class Postgres():
                 return psycopg2.connect(host=host, user=self._db_user, dbname=self._db_database, password=self._db_pass)
             except psycopg2.OperationalError as e:
                 print 'Failed to connect to %s: %s' % (host, e)
-        print 'Panic! No servers left.'
-        return None
+
+        raise psycopg2.OperationalError("Ran out of database servers - exiting")
 
 
 class Files(Base):

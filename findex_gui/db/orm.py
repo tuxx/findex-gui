@@ -63,7 +63,7 @@ class Postgres():
 class Files(Base):
     __tablename__ = 'files'
  
-    id = Column(sql.Integer, Sequence('id_seq'), primary_key=True)
+    id = Column(sql.Integer, primary_key=True)
 
     host_id = Column(sql.Integer())
 
@@ -115,7 +115,7 @@ class Files(Base):
 class Hosts(Base):
     __tablename__ = 'hosts'
 
-    id = Column(sql.Integer, Sequence('id_seq'), primary_key=True)
+    id = Column(sql.Integer, primary_key=True)
 
     address = Column(INET())
     date_crawled = Column(sql.DateTime())
@@ -135,7 +135,7 @@ class Hosts(Base):
 class Options(Base):
     __tablename__ = 'options'
 
-    id = Column(sql.Integer, Sequence('id_seq'), primary_key=True)
+    id = Column(sql.Integer, primary_key=True)
 
     key = Column(sql.String())
     val = Column(sql.String())

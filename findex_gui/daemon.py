@@ -18,8 +18,6 @@ def start_as_daemon():
     if os.fork() > 0:
         return
 
-    print('Starting the findex-gui service')
-
     # Connect SIGTERM and SIGHUP to sys.exit() so atexit gets called.    
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     signal.signal(signal.SIGHUP, lambda *_: sys.exit(0))
@@ -36,13 +34,14 @@ def start_as_daemon():
             sys.exit(1)
         else:
             raise
+    
     os.write(fd, str(os.getpid()) + '\n')
     os.close(fd)
 
     # Start main service.
+    print('Starting the findex-gui service')
     from findex_gui.__main__ import main
     main()
-
 
 @click.group()
 def cli():
@@ -53,6 +52,7 @@ def cli():
 def start():
     """Start the findex-gui service."""
     start_as_daemon()
+
 
 @click.command()
 def stop():
@@ -66,11 +66,12 @@ def stop():
         if e.errno == errno.ENOENT:
             print('PID file %s does not exist, is findex-gui running?' % PATH_PID)
         else:
-            print('Could not read PID file, is findex-gui still running?', file=sys.stderr)
+            print('Could not read PID file %s, is findex-gui still running?' % PATH_PID, file=sys.stderr)
         sys.exit(1)
 
     os.kill(pid, signal.SIGHUP)
     print('Killed the findex-gui service.')
+
 
 @click.command()
 def restart():

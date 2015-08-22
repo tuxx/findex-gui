@@ -74,6 +74,8 @@ def search_(db):
 
 @route('/static/<filename:path>')
 def server_static(filename):
+    if filename.endswith(('.py', '.pyc')):
+        return
     return static_file(filename, root=os.path.join(os.path.dirname(__file__), 'static'))
 
 @route('/terms')

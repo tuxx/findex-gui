@@ -100,7 +100,7 @@ class Themes():
         bottle.TEMPLATE_PATH = [template_path]
         loader = jinja2.FileSystemLoader(template_path)
         jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
-        import_module('static.themes.%s.bin.views' % name)
+        import_module('findex_gui.static.themes.%s.bin.views' % name)
 
         self.active_theme = {'name': name, 'date': datetime.now()}
 

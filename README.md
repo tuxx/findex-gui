@@ -30,7 +30,7 @@ As the platform is useless without the `findex-crawl` package, Please wait until
   - Python >= **2.7.3**
   - Postgres >= **9.4**
   - RabbitMQ >= **3.5.4** (optional)
-  - `findex-common` >= **0.2.0**
+  - `findex-common` >= **0.2.1**
 
 ### Installation
 There is no documentation yet. However; if you want to install it anyway, follow these steps:

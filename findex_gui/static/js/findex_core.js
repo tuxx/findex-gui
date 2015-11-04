@@ -31,6 +31,28 @@ function post(data){
     });
 }
 
+function api(url, data, method, callback){
+    var username = 'admin';
+    var password = 'admin';
+
+    $.ajax({
+        type: method,
+        url: '/api/' + url,
+        data: data,
+        dataType: 'json',
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization",
+                "Basic " + btoa(username + ":" + password));
+        },
+        success: function(res){
+            callback(res)
+        },
+        error:function(zemmel){
+
+        }
+    });
+}
+
 function errorBox(errors){
     var text = '';
     for(var i = 0; i != errors.length ; i++){

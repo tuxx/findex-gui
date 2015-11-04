@@ -1,0 +1,263 @@
+{% extends "base_home.html" %}
+{% block content %}
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<link rel="stylesheet" href="">
+<div class="wrapper">
+    <div style="height:80px;"></div>
+
+</div>
+<style>
+    td{
+        line-height:1;
+    }
+    .progress {
+        margin-bottom: 0px;
+    }
+    thead>tr>th:first-child{
+        width:16px;
+    }
+    thead>tr>th:nth-child(2){
+        width:200px;
+    }
+    thead>tr>th:nth-child(3){
+        width:160px;
+    }
+    thead>tr>th:nth-child(3){
+        width:260px;
+    }
+    pre{
+        font-size:12px;
+    }
+    #content>p>img{
+        width: 80%;
+        margin: 0 auto;
+        display: block;
+    }
+</style>
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-left">
+
+        <!-- sidebar -->
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+            <div>
+                <ul class="nav" id="sidebar-nav">
+                    <li><a href="#">GUI</a></li>
+                    <li><a href="#problem">Crawlbots</a></li>
+                    <li><a href="#why">Tasks</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- main area -->
+        <div id="content" class="col-xs-12 col-sm-9" data-spy="scroll" data-target="#sidebar-nav">
+            <h2 id="gui">GUI</h2>
+            <h4>Appearance</h4>
+            <p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="max-width: 200px;">
+                            <label for="sel1"><h5>Theme</h5></label>
+                            <select class="form-control" id="selectbox_themes">
+                            </select>
+                        </div>
+                        <table class="table table-striped" id="table_theme">
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Preview</h5>
+                        <img style="border: 1px solid #C1C1C1;width:100%;" src="/static/themes/findex_official/preview.jpg"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+
+                    </div>
+                    <div class="col-md-6">
+                        <p style="font-size:14px;" id="theme_description_text"></p>
+                    </div>
+                </div>
+            </p>
+
+            <h2 id="section1">Crawlbots</h2>
+            <h5 id="crawlbot_counter">0 online</h5>
+            <p>
+                <table id="jsontable_crawlbots" class="display table table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;"></th>
+                            <th style="width: 150px;">Name</th>
+                            <th style="width: 150px;">Hostname</th>
+                            <th style="width: 80px;">JSON-RPC</th>
+                            <th style="width: 80px;">AMQP</th>
+                            <th style="width: 50px;">Status</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                </table>
+
+            </p>
+
+            <br>
+            <h2 id="tasks">Tasks</h2>
+            <p>
+                Oblbal
+            </p>
+        </div>
+        <!-- /.col-xs-12 main -->
+    </div>
+    <!--/.row-->
+</div><!--/.container-->
+</div><!--/.page-container-->
+
+</div>
+
+<script>
+
+$(document).ready(function() {
+    var crawlbots = {};
+    var crawlbots_table = $('#jsontable_crawlbots').DataTable({
+        "bFilter": false,
+        "bPaginate": false,
+        "sDom": '<"top">rt<"bottom"flp><"clear">',
+        "createdRow": function ( row, data, index ) {
+            for(var i = 0; i != data.length; i++){
+                if(data[i] == 'OK' || data[i] == 'ONLINE'){
+                    $('td', row).eq(i).addClass('bot-ok');
+                } else if(data[i] == 'WARNING'){
+                    $('td', row).eq(i).addClass('bot-warning');
+                } else if(data[i] == 'ERROR'){
+                    $('td', row).eq(i).addClass('bot-error');
+                    $('td:eq('+i+')', row).append("<div id='"+data[1]+"' class='btn_crawlbot_error_infobox'></div>");
+                }
+            }
+
+            if(data[5] == 'ONLINE' || data[5] == 'WARNING') {
+                $('td:eq(0)', row).append("<div id='online' class='icon_crawlbot'></div>");
+            } else {
+                $('td:eq(0)', row).append("<div id='offline' class='icon_crawlbot'></div>");
+            }
+        },
+        "columnDefs": [ {
+            "targets": -1,
+            "data": null,
+            "defaultContent": "<button type='button' class='btn btn-default btn-xs'>Details</button>"
+        } ]
+    });
+
+    function json_bots(data){
+        crawlbots_table.clear();
+        crawlbots = {};
+
+        data = data['crawlbots/list'];
+
+        var online_counter = 0;
+
+        for (var i = 0; i < data.length; i++) {
+            var obj = data[i];
+
+            crawlbots[obj['crawler_name']] = obj;
+
+            if(obj['status'] == 0){
+                crawlbots_table.row.add(
+                    ['', obj['crawler_name'], obj['hostname'], obj['jsonrpc'], obj['amqp'], 'OFFLINE', '']
+                ).draw(false);
+            }
+            else if(obj['status'] == 1){
+                crawlbots_table.row.add(
+                    ['', obj['crawler_name'], obj['hostname'], obj['status_jsonrpc']['status'], obj['status_amqp']['status'], 'WARNING', '']
+                ).draw(false);
+
+                online_counter++;
+            }
+            else if(obj['status'] == 2){
+                crawlbots_table.row.add(
+                    ['', obj['crawler_name'], obj['hostname'], obj['status_jsonrpc']['status'], obj['status_amqp']['status'], 'ONLINE', '']
+                ).draw(false);
+
+                online_counter++;
+            }
+        }
+        $('#crawlbot_counter').text(online_counter + ' online');
+    }
+
+    function json_themes(data){
+
+        var obj = data['themes/list'];
+        var list = obj['list'];
+        var active = obj['active'];
+
+        var options = {};
+        var active_in_list = -1;
+        for (var i = 0; i != list.length; i++) {
+            options[i+1] = list[i]['theme_name'];
+
+            if(active == list[i]['theme_name']){
+                active_in_list = i;
+            }
+        }
+
+        var active_theme = list[active_in_list];
+
+        $.each(options, function(key, value) {
+             $('#selectbox_themes')
+                 .append($("<option></option>")
+                 .attr("value",key)
+                 .text(value));
+        });
+
+        $('#selectbox_themes>option:eq('+active_in_list+')').prop('selected', true);
+
+        var theme_table_content = '';
+
+        for(var key in active_theme){
+            if(key == 'theme_description' || key == 'author_name'){
+                continue;
+            }
+            theme_table_content += '<tr><td>'+key+'</td><td>'+active_theme[key]+'</td></tr>';
+        }
+
+        $('#table_theme>tbody').html(theme_table_content);
+        $('#theme_description_text').html(active_theme['theme_description']);
+
+    }
+
+    $('body').on('click', 'div.btn_crawlbot_error_infobox', function() {
+        var id = $(this).attr('id');
+        var obj = crawlbots[id];
+
+        var data = [];
+
+        if(obj['status_amqp']['status'] == 'ERROR'){
+            data.push(obj['status_amqp']['message']);
+        }
+
+        if(obj['status_jsonrpc']['status'] == 'ERROR'){
+            data.push(obj['status_jsonrpc']['message']);
+        }
+
+        var error_message = '';
+
+        for(var i = 0; i != data.length; i++){
+            error_message += '<h4>Error</h4>';
+            error_message += '<p>'+data[i]+'</p>';
+        }
+
+        BootstrapDialog.show({
+            title: id,
+            message: error_message
+        });
+    });
+
+    setInterval(function(){
+        $.getJSON( "/api/crawlbots/list", json_bots);
+    }, 3000);
+
+    $.getJSON( "/api/crawlbots/list", json_bots);
+    $.getJSON("/api/themes/list", json_themes);
+});
+</script>
+
+{% endblock %}

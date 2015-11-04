@@ -1,0 +1,199 @@
+{% extends "base_home.html" %}
+{% block content %}
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<link rel="stylesheet" href="">
+
+<div class="container">
+
+    <div class="row">
+        <h2>Findex</h2>
+        <legend>First time installation</legend>
+        <div class="alert alert-info">
+            You're seeing this page because the findex configuration file was not found at <strong>~/.config/findex/gui.cfg</strong>.
+        </div>
+
+        <div class="well">
+            <h4>Database</h4>
+            <form class="form-horizontal">
+            <fieldset>
+
+            <!-- Form Name -->
+
+            <!-- Multiple Radios -->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="db_type">Engine</label>
+              <div class="col-md-4">
+              <div class="radio">
+                <label for="db_type-0">
+                  <input class="db_type" type="radio" name="db_type" id="db_type-0" value="psql" checked="checked">
+                  PostgreSQL
+                </label>
+                </div>
+              <div class="radio">
+                <label for="db_type-1">
+                  <input class="db_type" type="radio" name="db_type" id="db_type-1" value="mysql">
+                  MySQL (not supported yet)
+                </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="db_host">Host</label>
+              <div class="col-md-4">
+              <input id="db_host" name="db_host" type="text" placeholder="database host" class="form-control input-md" required="">
+                  <span class="help-block">
+                      If you cluster your database hosts and would like to connect to multiple instances, just fill in 1 database host here and change it later in the config file.
+                  </span>
+              </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="db_port">Port</label>
+              <div class="col-md-4">
+              <input id="db_port" name="db_port" type="text" placeholder="database port" class="form-control input-md" required="">
+
+              </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="db_name">Name</label>
+              <div class="col-md-4">
+              <input id="db_name" name="db_name" type="text" placeholder="database name" class="form-control input-md" required="">
+
+              </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="db_user">User</label>
+              <div class="col-md-4">
+              <input id="db_user" name="db_user" type="text" placeholder="database user" class="form-control input-md" required="">
+
+              </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="db_pass">Password</label>
+              <div class="col-md-4">
+              <input id="db_pass" name="db_pass" type="text" placeholder="database password" class="form-control input-md" required="">
+
+              </div>
+            </div>
+
+            <center>
+                <div class="btn-group" style="display:table;">
+                    <button id="btn_db_testconn" type="button" class="btn btn-info btn-sm">Test Connection</button>
+                </div>
+                <span style="display:block;margin-top:10px;font-weight:bold;margin-bottom:40px;" id="txt_db_testconn"></span>
+            </center>
+
+            </fieldset>
+            </form>
+
+            <h4>Web Application</h4>
+            <form class="form-horizontal">
+            <fieldset>
+
+            <!-- Form Name -->
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="gui_host">Bind Host</label>
+              <div class="col-md-4">
+              <input id="gui_host" name="gui_host" type="text" placeholder="GUI bind host" value="127.0.0.1" class="form-control input-md" required="">
+
+              </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-4 control-label" for="gui_port">Bind Port</label>
+              <div class="col-md-4">
+              <input id="gui_port" name="gui_port" type="text" placeholder="GUI bind port" value="2010" class="form-control input-md" required="">
+
+              </div>
+            </div>
+            </fieldset>
+            </form>
+            <center>
+                <div class="btn-group" style="display:table;">
+                    <button id="btn_writecfg" type="button" class="btn btn-success btn-sm">Finish installation</button>
+                </div>
+                <span style="display:block;margin-top:10px;font-weight:bold;margin-bottom:40px;" id="txt_writecfg"></span>
+            </center>
+        </div>
+
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function db_testconn(data){
+        data = data['findex/db_test'];
+
+        if(data['status'] == 'FAIL'){
+            $('#txt_db_testconn').html('Failed: ' + data['message']);
+        } else {
+            $('#txt_db_testconn').html('OK: ' + data['message']);
+        }
+    }
+
+    function write_cfg(data){
+        data = data['findex/writecfg'];
+
+        if(data['status'] == 'FAIL'){
+            $('#txt_writecfg').html('Failed: ' + data['message']);
+        } else {
+            window.location.href = '/';
+        }
+    }
+
+    $('#btn_db_testconn').click(function(){
+        var db_type = $('input[name=db_type]:checked').val();
+        var db_host = $('#db_host').val();
+        var db_port = $('#db_port').val();
+        var db_user = $('#db_user').val();
+        var db_pass = $('#db_pass').val();
+        var db_name = $('#db_name').val();
+
+        var data = "db_type=" + db_type;
+        data += "&db_host=" + db_host;
+        data += "&db_port=" + db_port;
+        data += "&db_user=" + db_user;
+        data += "&db_password=" + db_pass;
+        data += "&db_name=" + db_name;
+
+        $.post("/api/findex/db_test", data, db_testconn);
+    });
+
+    $('#btn_writecfg').click(function(){
+        var db_type = $('input[name=db_type]:checked').val();
+        var db_host = $('#db_host').val();
+        var db_port = $('#db_port').val();
+        var db_user = $('#db_user').val();
+        var db_pass = $('#db_pass').val();
+        var db_name = $('#db_name').val();
+
+        var gui_host = $('#gui_host').val();
+        var gui_port = $('#gui_port').val();
+
+        var data = "db_type=" + db_type;
+        data += "&db_host=" + db_host;
+        data += "&db_port=" + db_port;
+        data += "&db_user=" + db_user;
+        data += "&db_password=" + db_pass;
+        data += "&db_name=" + db_name;
+
+        data += '&gui_host=' + gui_host;
+        data += '&gui_port=' + gui_port;
+
+        $.post("/api/findex/writecfg", data, write_cfg);
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,3 +1,10 @@
+from gevent import monkey
+monkey.patch_all()
+
+import psycogreen.gevent
+psycogreen.gevent.patch_psycopg()
+
+
 import sqlalchemy as sql
 from sqlalchemy import or_
 import sqlalchemy.pool as pool
@@ -9,12 +16,7 @@ import random
 import psycogreen
 import psycopg2
 
-from gevent import monkey
-monkey.patch_all()
 
-import psycogreen.gevent
-psycogreen.gevent.patch_psycopg()
- 
 Base = declarative_base()
 
 
@@ -22,19 +24,19 @@ class Postgres():
     def __init__(self, cfg, app=None):
         self.cfg = cfg
 
-        self._db_hosts = self.cfg['db']['hosts']
-        self._db_port = self.cfg['db']['port']
-        self._db_database = self.cfg['db']['database']
-        self._db_user = self.cfg['db']['username']
-        self._db_pass = self.cfg['db']['password']
+        self._db_hosts = self.cfg['database']['host']
+        self._db_port = self.cfg['database']['port']
+        self._db_database = self.cfg['database']['database']
+        self._db_user = self.cfg['database']['username']
+        self._db_pass = self.cfg['database']['password']
 
         if not isinstance(self._db_hosts, list):
             self._db_hosts = [self._db_hosts]
         else:
             if ',' in self._db_hosts: self._db_hosts = self._db_hosts.split(',')
 
-        self.pool = pool.QueuePool(self._getconn, max_overflow=1, pool_size=2, echo=self.cfg['general']['debug'])
-        self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=self.cfg['general']['debug'])
+        self.pool = pool.QueuePool(self._getconn, max_overflow=1, pool_size=2, echo=self.cfg['database']['debug'])
+        self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=self.cfg['database']['debug'])
 
         self.plugin = sqlalchemy.Plugin(
             self.engine,
@@ -56,8 +58,8 @@ class Postgres():
                 return psycopg2.connect(host=host, user=self._db_user, dbname=self._db_database, password=self._db_pass)
             except psycopg2.OperationalError as e:
                 print 'Failed to connect to %s: %s' % (host, e)
-        print 'Panic! No servers left.'
-        return None
+
+        raise psycopg2.OperationalError("Ran out of database servers - exiting")
 
 
 class Files(Base):
@@ -65,7 +67,7 @@ class Files(Base):
  
     id = Column(sql.Integer, primary_key=True)
 
-    host_id = Column(sql.Integer())
+    resource_id = Column(sql.Integer())
 
     file_name = Column(sql.String())
     file_path = Column(sql.String())
@@ -80,8 +82,8 @@ class Files(Base):
 
     searchable = Column(sql.String(23))
 
-    def __init__(self, file_name, file_path, file_ext, file_format, file_isdir, file_modified, file_perm, searchable, file_size, host, img_icon=None):
-        self.host = host
+    def __init__(self, file_name, file_path, file_ext, file_format, file_isdir, file_modified, file_perm, searchable, file_size, resource_id, img_icon=None):
+        self.resource_id = resource_id
         self.file_name = file_name
         self.file_path = file_path
         self.file_ext = file_ext
@@ -98,7 +100,7 @@ class Files(Base):
     ix_file_size = Index('ix_file_size', file_size)
 
     # multi column indexes
-    ix_host_id_file_path = Index('ix_host_id_file_path', host_id, file_path)
+    ix_host_id_file_path = Index('ix_resource_id_file_path', resource_id, file_path)
     ix_file_format_searchable = Index('ix_file_format_searchable', file_format, searchable)
 
     # partial text search LIKE 'needle%'
@@ -112,24 +114,52 @@ class Files(Base):
     })
 
 
-class Hosts(Base):
-    __tablename__ = 'hosts'
+class Crawlers(Base):
+    __tablename__ = 'crawlers'
+
+    id = Column(sql.Integer, primary_key=True)
+    hostname = Column(sql.String(), nullable=False)
+    crawler_name = Column(sql.String(), nullable=False)
+
+    jsonrpc_bind_host = Column(INET())
+    jsonrpc_bind_port = Column(sql.Integer())
+
+    jsonrpc = Column(sql.Boolean())
+    amqp = Column(sql.Boolean())
+
+    heartbeat = Column(sql.TIMESTAMP())
+
+
+class Resources(Base):
+    __tablename__ = 'resources'
 
     id = Column(sql.Integer, primary_key=True)
 
+    name = Column(sql.String(), nullable=False)
+    description = Column(sql.String())
+
     address = Column(INET())
-    date_crawled = Column(sql.DateTime())
+    display_url = Column(sql.String(), nullable=False)
+
+    date_added = Column(sql.DateTime())
+    date_crawl_start = Column(sql.DateTime())
+    date_crawl_end = Column(sql.DateTime())
+
     file_count = Column(sql.Integer())
-    protocol = Column(sql.Integer())
+    protocol = Column(sql.Integer(), nullable=False)
 
     # regular indexes
     ix_address = Index('ix_address', address)
 
-    def __init__(self, address, date_crawled, file_count, protocol):
+    def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description):
         self.address = address
-        self.date_crawled = date_crawled
+        self.display_url = display_url
+        self.date_added = date_added
+        self.date_crawl_start = date_crawl_start
+        self.date_crawl_end = date_crawl_end
         self.file_count = file_count
         self.protocol = protocol
+        self.description = description
 
 
 class Options(Base):

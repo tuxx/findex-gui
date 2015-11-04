@@ -1,9 +1,9 @@
 from bottle import route
 
 from findex_gui.static.themes.findex_official.bin.controllers import ThemeControllers
-from findex_common.cfg import Config
+from findex_gui.bin.config import FindexGuiConfig
 
-cfg = Config('gui.cfg')
+cfg = FindexGuiConfig()
 
 
 @route('/api', method='GET')

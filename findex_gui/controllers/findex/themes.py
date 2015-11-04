@@ -37,14 +37,17 @@ class Theme():
 
 
 class Themes():
-    def __init__(self, db):
-        self.db = sessionmaker(bind=db.engine)()
+    def __init__(self):
+        self.db = None
         self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'themes')
         self.themes = {}
 
         self.active_theme = {}
 
         self.load()
+
+    def setup_db(self, db):
+        self.db = sessionmaker(bind=db.engine)()
 
     def load(self):
         dirs = os.listdir(self.theme_dir)
@@ -84,25 +87,34 @@ class Themes():
             if (datetime.now() - self.active_theme['date']).total_seconds() <= 300:
                 return self.active_theme['name']
 
-        return self.db.query(Options).filter(Options.key == 'theme_active').first()
+        if self.db:
+            return self.db.query(Options).filter(Options.key == 'theme_active').first()
+
+    def get_themes(self):
+        data = []
+        for k, v in self.themes.iteritems():
+            data.append(v)
+
+        return data
 
     def change_theme(self, name):
         theme = self.get_theme()
 
         if not theme:
-            self.db.add(Options(key='theme_active', val=name))
-            self.db.commit()
+            if self.db:
+                self.db.add(Options(key='theme_active', val=name))
+                self.db.commit()
         elif theme.val != name:
             theme.val = name
-            self.db.commit()
+
+            if self.db:
+                self.db.commit()
 
         template_path = os.path.join(self.theme_dir, name, 'templates')
-        bottle.TEMPLATE_PATH = [template_path]
+        bottle.TEMPLATE_PATH = ['findex_gui/static/themes/_admin/', template_path]
+
         loader = jinja2.FileSystemLoader(template_path)
         jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
         import_module('findex_gui.static.themes.%s.bin.views' % name)
 
         self.active_theme = {'name': name, 'date': datetime.now()}
-
-
-DATA = None

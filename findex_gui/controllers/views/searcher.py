@@ -2,7 +2,7 @@ import jinja2
 from datetime import datetime
 from urllib import quote_plus
 
-from findex_gui.db.orm import Files, Hosts
+from findex_gui.db.orm import Files, Resources
 from findex_common.exceptions import SearchException
 from findex_gui.controllers.findex.findex import Findex
 
@@ -76,7 +76,7 @@ class Searcher():
                 if not dhosts[0] == '*':
                     host_ids = []
                     for host in dhosts:
-                        host_results = self.db.query(Hosts).filter(Hosts.address==host).filter(Hosts.protocol.in_(sdata['protocols'])).all()
+                        host_results = self.db.query(Resources).filter(Resources.address==host).filter(Resources.protocol.in_(sdata['protocols'])).all()
 
                         for host_result in host_results:
                             host_ids.append(host_result.id)
@@ -87,7 +87,7 @@ class Searcher():
                         raise SearchException('Could not find any host entries for specified host(s)')
 
         if sdata['hosts']:
-            q = q.filter(Files.host_id.in_(sdata['hosts']))
+            q = q.filter(Files.resource_id.in_(sdata['hosts']))
             filtered = True
 
         if 'cats' in vars:
@@ -182,7 +182,7 @@ class Searcher():
 
             if isinstance(host, list):
                 host = int(host[0])
-                q = q.filter(Files.host_id == host)
+                q = q.filter(Files.resource_id == host)
                 filtered = True
 
         q = q.filter(Files.searchable.like('%'+val+'%')).limit(600)
@@ -196,8 +196,8 @@ class Searcher():
 
         # to-do: dont do this here
         for r in results['data']:
-            host = self.findex.get_host_objects(r.host_id)
-            setattr(r, 'host', host)
+            host = self.findex.get_resource_objects(r.resource_id)
+            setattr(r, 'resource', host)
 
         results['data'] = self.findex.set_humanize(results['data'])
         results['data'] = self.findex.set_icons(env=self.env, files=results['data'])

@@ -71,7 +71,9 @@
                             </div>
                             <div class="actions">
                                 <div class="btn-group btn-group-sm">
-                                    <button id="btn_action_fetch" type="button" class="btn btn-default"><b>Fetch</b></button>
+                                    {% if data['action_fetches'] %}
+                                        <button id="btn_action_fetch" type="button" class="btn btn-default"><b>Fetch</b></button>
+                                    {% endif %}
                                     <button id="btn_action_raw" type="button" class="btn btn-default"><b>Raw</b></button>
                                     <button id="btn_action_copy" type="button" class="btn btn-default"><b>Filter</b></button>
                                 </div>
@@ -95,29 +97,31 @@
                             {% endif %}
                         </div>
 
-                        <div class="action_more">
-                            <div id="action_raw_container" class="action_container">
-                                <div style="overflow:hidden;margin-left:20px;">
-                                    <a href="?raw=plain">plain </a> <a href="?raw=json">json </a> <a href="?raw=xml">xml </a>
-                                </div>
-                            </div>
-
-                            <div id="action_fetch_container" class="action_container">
-                                <div class="cmd_box">
-                                    <b>wget</b>
-                                    <div class="input-group">
-                                        <input class="form-control" type="text" id="fetch_wget" placeholder="" value="{{ data['action_fetches']['wget'] }}">
+                        {% if data['action_fetches'] %}
+                            <div class="action_more">
+                                <div id="action_raw_container" class="action_container">
+                                    <div style="overflow:hidden;margin-left:20px;">
+                                        <a href="?raw=plain">plain </a> <a href="?raw=json">json </a> <a href="?raw=xml">xml </a>
                                     </div>
                                 </div>
 
-                                <div class="cmd_box">
-                                    <b>lftp</b>
-                                    <div class="input-group">
-                                        <input class="form-control" type="text" id="fetch_lftp" placeholder="" value="{{ data['action_fetches']['lftp'] }}">
+                                <div id="action_fetch_container" class="action_container">
+                                    <div class="cmd_box">
+                                        <b>wget</b>
+                                        <div class="input-group">
+                                            <input class="form-control" type="text" id="fetch_wget" placeholder="" value="{{ data['action_fetches']['wget'] }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="cmd_box">
+                                        <b>lftp</b>
+                                        <div class="input-group">
+                                            <input class="form-control" type="text" id="fetch_lftp" placeholder="" value="{{ data['action_fetches']['lftp'] }}">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        {% endif %}
 
                         <div style="padding-top:6px;">
                             <table id="navigationTable" class="table table-hover">

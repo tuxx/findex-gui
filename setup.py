@@ -3,7 +3,7 @@ import sys
 import os
 
 
-__version__ = '0.0.0'
+__version__ = '0.0.1'
 
 
 requires = [
@@ -16,7 +16,8 @@ requires = [
     'bottle',
     'psycogreen',
     'findex-common',
-    'click'
+    'click',
+    'passlib'
 ]
 
 

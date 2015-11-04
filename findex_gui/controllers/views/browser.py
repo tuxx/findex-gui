@@ -1,7 +1,7 @@
 from urllib import quote_plus, unquote_plus
 from datetime import datetime
 
-from findex_gui.db.orm import Files, Hosts
+from findex_gui.db.orm import Files, Resources
 from findex_gui.controllers.findex.findex import Findex
 
 from findex_common.bytes2human import bytes2human
@@ -9,9 +9,9 @@ from findex_common.exceptions import BrowseException
 
 
 class Browser():
-    def __init__(self, db):
+    def __init__(self, db, findex):
         self.db = db
-        self.findex = Findex(db)
+        self.findex = findex
 
         self.env = {}
         self.data = {}
@@ -21,7 +21,7 @@ class Browser():
         self.data['isdir'] = path.endswith('/')
 
         spl = path.split('/')
-        self.data['host'] = spl[0]
+        self.data['resource_name'] = spl[0].lower()
         self.data['file_path'] = '/' + '/'.join(spl[1:-1])
 
         if not self.data['isdir']: self.data['file_name'] = path.split('/')[-1]
@@ -30,16 +30,17 @@ class Browser():
         self.data['file_path_quoted'] = quote_plus(self.data['file_path'])
 
     def fetch_files(self):
-        host = self.db.query(Hosts).filter_by(
-            address=self.data['host']
+        resource = self.db.query(Resources).filter_by(
+            name=self.data['resource_name']
         ).first()
 
-        if not host:
-            raise BrowseException('No host found')
+        if not resource:
+            raise BrowseException('No resource found')
 
-        self.data['host_id'] = host.id
-        files = self.findex.get_files_objects(host_id=host.id, file_path=self.data['file_path_quoted'])
+        self.data['resource_id'] = resource.id
+        self.data['resource'] = resource
 
+        files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path_quoted'])
         if not files:
             raise BrowseException('No files found')
 
@@ -56,7 +57,7 @@ class Browser():
             x = Files(
                 file_name='..', file_path='../', file_ext='', file_format=-1,
                 file_isdir=True, file_modified=datetime.now(), file_perm=None, searchable=None,
-                file_size=0, host=self.data['host']
+                file_size=0, resource_id=self.data['resource_id']
             )
             setattr(x, 'file_name_human', '..')
             self.files.insert(0, x)
@@ -70,7 +71,10 @@ class Browser():
             total_size += f.file_size
 
     def generate_action_fetches(self):
-        url = 'ftp://%s' % self.data['host']
+        if not self.data['resource'].protocol in [0,4]:
+            return
+
+        url = '%s' % self.data['resource'].display_url
 
         if self.data['file_path'] == '/':
             path = ''
@@ -98,7 +102,7 @@ class Browser():
         return dict(wget=wget, lftp=lftp)
 
     def breadcrumbs(self):
-        data = [self.data['host']]
+        data = [self.data['resource_name']]
         data += [z for z in self.data['file_path'].split('/')[1:] if z]
 
         return data

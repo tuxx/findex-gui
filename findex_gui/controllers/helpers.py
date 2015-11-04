@@ -1,3 +1,4 @@
+import bottle
 import findex_gui.controllers.findex.themes as themes
 
 
@@ -12,7 +13,7 @@ def data_strap(f):
         SELECT reltuples::int FROM pg_class WHERE relname ='files'
         """).first()[0])
 
-        env['theme_name'] = themes.DATA.get_theme()
+        env['theme_name'] = bottle.theme.get_theme()
 
         if not isinstance(env, dict):
             return env

@@ -221,14 +221,14 @@
                 {% if results %}
                     {% for f in results %}
                         <div id="{{f.id}}" class="sitem_container">
-                            <a id="link" href="/browse/{{f.host.address}}/{{f.file_path_human[1:]}}#{{f.id}}" target="_self">
+                            <a id="link" href="/browse/{{f.resource.name}}/{{f.file_path_human[1:]}}#{{f.id}}" target="_self">
                                 <div class="sitem_info">
                                     <div class="thumb" style="background: url('{{f.img_icon}}');"></div>
 
                                     <div class="info">
                                         <span><b>{{f.file_name_human}}</b></span>
                                         <br>
-                                        <span class="info_path"><b>{{f.host.address}}</b> - {{f.file_path_human[:115]}}...</span>
+                                        <span class="info_path"><b>{{f.resource.name}}</b> - {{f.file_path_human[:115]}}...</span>
                                     </div>
                                 </div>
                             </a>
@@ -381,8 +381,9 @@
                         'size': "{{f.file_size_human}}",
                         'name': "{{f.file_name_human}}",
                         'icon': '{{f.img_icon}}',
-                        'host': '{{f.host.address}}',
-                        'protocol': '{{f.host.protocol}}',
+                        'resource_name': '{{f.resource.name}}',
+                        'resource_address': '{{f.resource.address}}',
+                        'protocol': '{{f.resource.protocol}}',
                         'date_modified': '{{f.file_modified_human}}',
                         'isdir': '{{f.file_isdir}}',
                         'ext': '{{f.file_ext}}',
@@ -408,12 +409,12 @@
                     var data = search_data[id];
                     $('#search_results>#description>div>#thumb>img').attr('src', data['icon']);
                     $('#search_results>#description>div>#description').html(data['name']);
-                    $('#options>a#browse_host').attr('href', '/browse/' + data['host']).text('Browse Host');
-                    $('#options>a#browse_path').attr('href', '/browse/' + data['host'] + data['path']).text('Browse Path');
+                    $('#options>a#browse_host').attr('href', '/browse/' + data['resource_name']).text('Browse Host');
+                    $('#options>a#browse_path').attr('href', '/browse/' + data['resource_name'] + data['path']).text('Browse Path');
 
                     var table_rows = '';
                     var columns = [
-                        {'key': 'host', 'title': 'Host'},
+                        {'key': 'resource_address', 'title': 'Host'},
                         {'key': 'isdir', 'title': 'Dir.'},
                         {'key': 'ext', 'title': 'Ext.'},
                         {'key': 'size', 'title': 'Size'},

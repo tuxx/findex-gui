@@ -3,7 +3,7 @@ from importlib import import_module
 from sqlalchemy import and_, asc, desc
 from sqlalchemy.dialects import mysql, postgresql
 
-from findex_gui.db.orm import Files, Hosts
+from findex_gui.db.orm import Files, Resources
 from findex_common.utils import DataObjectManipulation
 
 import findex_gui.controllers.findex.themes as themes
@@ -22,8 +22,8 @@ class Findex(object):
             return self._cache[section][id]
 
     def _set_cache(self, item):
-        if isinstance(item, Hosts):
-            k = 'hosts'
+        if isinstance(item, Resources):
+            k = 'resources'
         elif isinstance(item, Files):
             k = 'files'
         else:
@@ -52,22 +52,25 @@ class Findex(object):
 
         return files
 
-    def get_host_objects(self, id=None):
-        query = self.db.query(Hosts)
-
-        cached = self._get_cache('hosts', id)
-        if cached:
-            return cached
+    def get_resource_objects(self, id=None):
+        query = self.db.query(Resources)
 
         if isinstance(id, (int, long)):
-            query = query.filter(Hosts.id == id)
+            cached = self._get_cache('resources', id)
+            if cached:
+                return cached
 
-        result = query.first()
+            query = query.filter(Resources.id == id)
+
+        result = query.all()
+        if len(result) == 1:
+            result = result[0]
+
         self._set_cache(result)
 
         return result
 
-    def get_files_objects(self, id=None, host_id=None, file_path=None, total_count=None, offset=None):
+    def get_files_objects(self, id=None, resource_id=None, file_path=None, total_count=None, offset=None):
         """
             total_count: number of results to fetch
             offset: the offset in db
@@ -78,9 +81,9 @@ class Findex(object):
             _and = and_()
             _and.append(Files.id == id)
             query = query.filter(_and)
-        elif isinstance(host_id, (int, long)):
+        elif isinstance(resource_id, (int, long)):
             _and = and_()
-            _and.append(Files.host_id == host_id)
+            _and.append(Files.resource_id == resource_id)
             query = query.filter(_and)
 
         if isinstance(file_path, (str, unicode)):

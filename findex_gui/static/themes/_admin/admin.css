@@ -1,0 +1,45 @@
+table#jsontable_crawlbots>tbody>tr>td.bot-ok{
+    background-color: #FBFBFB;
+    font-weight: bold;
+}
+table#jsontable_crawlbots>tbody>tr>td.bot-warning{
+    font-weight: bold;
+    color: darkorange;
+    background-color: #FBFBFB;
+}
+table#jsontable_crawlbots>tbody>tr>td.bot-error{
+    font-weight: bold;
+    color: red;
+    background-color: #FBFBFB;
+}
+table#jsontable_crawlbots>tbody>tr>td>div.btn_crawlbot_error_infobox{
+    width:20px;
+    height:20px;
+    float:right;
+    background-image: url('/static/img/questionmark.gif');
+    background-repeat: no-repeat;
+    background-position-x:4px;
+    background-position-y:2px;
+    cursor: pointer;
+}
+table#jsontable_crawlbots>tbody>tr>td:first-child>div.icon_crawlbot{
+    width:26px;
+    height:26px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+div.icon_crawlbot#online{
+    background-image: url('/static/img/spider2.png');
+}
+div.icon_crawlbot#offline{
+    background-image: url('/static/img/spider.png');
+}
+table#jsontable_crawlbots>thead>tr>th{
+    font-size: 12px;
+    font-weight: bold;
+    padding: 8px;
+    margin: 8px;
+}
+table#jsontable_crawlbots>tbody>tr>td{
+    font-size:14px;
+}

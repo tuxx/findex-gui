@@ -2,7 +2,7 @@
 from datetime import datetime
 from bottle import jinja2_template
 
-from findex_gui.db.orm import Hosts
+from findex_gui.db.orm import Resources
 from findex_gui.controllers.views.browser import Browser
 from findex_gui.controllers.findex.findex import Findex
 from findex_gui.controllers.helpers import data_strap
@@ -17,7 +17,7 @@ class Browse():
     @data_strap
     def hosts(self, env):
         data = {}
-        data['hosts'] = self.db.query(Hosts).all()
+        data['hosts'] = self.db.query(Resources).list()
 
         return jinja2_template('main/browse_hosts', env=env, data=data)
 
@@ -25,7 +25,8 @@ class Browse():
     def browse(self, path, env):
         env['load_dbtime'] = 0
 
-        browser = Browser(db=self.db)
+        browser = Browser(db=self.db, findex=self.findex)
+
         try:
             browser.parse_incoming_path(path)
 
@@ -44,6 +45,7 @@ class Browse():
 
             return jinja2_template('main/browse_dir', env=env, data=data)
         except Exception as ex:
+            print str(ex)
             return jinja2_template('main/error', env=env, data={
                 'error': 'no files were found'
             })
@@ -62,8 +64,8 @@ class Browse():
 
             f = f[0]
 
-            h = self.db.query(Hosts).filter_by(
-                id=f.host_id
+            h = self.db.query(Resources).filter_by(
+                id=f.resource_id
             ).first()
 
             if f and h:

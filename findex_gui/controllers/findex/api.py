@@ -1,12 +1,57 @@
 import json
 import urllib
 from sqlalchemy import and_
-from bottle import response
+from bottle import response, route, HTTPError
 
-from findex_gui.db.orm import Files, Hosts
+from findex_gui.db.orm import Files, Resources
+from findex_gui.bin.config import FindexGuiConfig
+from findex_gui.controllers.findex.auth import basic_auth
+from findex_gui.controllers.findex.crawlers import CrawlBots
+import findex_gui.controllers.findex.themes as themes
 
 from findex_common.utils import ArgValidate
 from findex_common.bytes2human import bytes2human
+
+
+cfg = FindexGuiConfig()
+
+
+@route('/api/crawlbots/list', method='GET')
+def crawlbot_list(db):
+    auth = basic_auth()
+    if isinstance(auth, HTTPError):
+        return auth
+
+    crawlbots = CrawlBots(cfg, db)
+    data = crawlbots.list()
+
+    return {'crawlbots/list': data}
+
+@route('/api/themes/list', method='GET')
+def themes_list(db):
+    auth = basic_auth()
+    if isinstance(auth, HTTPError):
+        return auth
+
+    list = themes.DATA.get_themes()
+    active = themes.DATA.get_theme()
+
+    return {
+        'themes/list': {
+            'list': list,
+            'active': active
+        }
+    }
+
+
+@route('/api/search/')
+def search(db):
+    pass
+
+
+@route('/api/<name>', method='GET')
+def recipe_show( name="" ):
+    pass
 
 
 class Api():
@@ -14,6 +59,12 @@ class Api():
         self.cfg = cfg
         self.db = db
         self.arg_validate = ArgValidate()
+
+    def admin_crawlbots_list(self, method='GET'):
+        crawls = CrawlBots(self.cfg, self.db)
+        data = crawls.list()
+
+        return json.dumps(data)
 
     def parse(self):
         args = self.arg_validate.verify_args({'cmd': 'string'}, 'POST')
@@ -47,13 +98,13 @@ class Api():
             for i in range(0, 5):
                 results = self.db.query(Files).filter(
                     and_(Files.file_isdir == False, Files.searchable.like(val+'%'), Files.file_format == i)
-                ).limit(6).all()
+                ).limit(6).list()
 
                 if not results:
                     data[i] = []
 
                 for result in results:
-                    host = self.db.query(Hosts).filter_by(id=result.host_id).first()
+                    host = self.db.query(Resources).filter_by(id=result.resource_id).first()
                     if not host:
                         continue
 

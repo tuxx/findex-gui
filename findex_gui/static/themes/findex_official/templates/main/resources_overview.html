@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    html,body{
+        height: 100%;
+    }
+</style>
+
+<div class="bg_container">
+    <div class="bg_lower_container">
+        <div class="bg_leftcorner">
+
+        </div>
+        <div class="bg_repeat">
+
+        </div>
+
+    </div>
+</div>
+
+<div style="height:100px;"></div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-5">
+            <table id="navigationTable" class="table table-hover">
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th style="min-width: 50px;">address</th>
+                    <th>file count</th>
+                </tr>
+                </thead>
+                <tbody data-link="row" class="rowlink">
+                    {% for h in data['hosts'] %}
+                        <tr rel="popover" title="">
+                            <td>{{h.id}}</td>
+                            <td>
+                                <a href="/browse/{{h.address}}/">
+                                    <b>{{h.address}}</b>
+                                </a>
+                            </td>
+                            <td>-</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

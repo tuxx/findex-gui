@@ -772,9 +772,10 @@ div#action_fetch_container>div.cmd_box>.input-group {
 }
 div#action_fetch_container>div.cmd_box>.input-group>input {
     border-radius: 4px;
-    background: #F1F1F1;
+    background: white;
     border-color: #BDBDBD;
     color: #9C9C9C;
+    font-weight: bold;
 }
 /*
 * Footer
@@ -890,7 +891,7 @@ footer#colophon>#container {
     padding-top:20px;
     border-right: 1px solid #D4D4D4;
     min-height: 800px;
-    box-shadow: 5px 5px 5px rgba(136, 136, 136, 0.10);
+    box-shadow: 5px 5px 5px rgba(136, 136, 136, 0.06);
 }
 .tab-content>div>.sitem_container{
     border-bottom: 1px solid #dddddd;
@@ -1059,4 +1060,9 @@ div.tagsinput {
 }
 div.tagsinput input {
     width:80px !important;
+}
+
+.modal-dialog {
+    width: 600px;
+    margin: 100px auto;
 }

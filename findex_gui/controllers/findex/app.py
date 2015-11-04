@@ -103,7 +103,8 @@ class FindexApp():
         def server_static(filename):
             if filename.endswith(('.py', '.pyc')):
                 return
-            return static_file(filename, root=os.path.join(os.path.dirname(__file__), 'static'))
+
+            return static_file(filename, root=os.path.join(os.path.dirname(__file__), 'static').replace('controllers/findex/', ''))
 
         @route('/favicon.ico', method='GET')
         def fav():

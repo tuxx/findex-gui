@@ -1,12 +1,38 @@
 {% extends "base_home.html" %}
 {% block content %}
-<script src="http://code.highcharts.com/highcharts.js"></script>
-<link rel="stylesheet" href="">
+
+<style>
+#msgbox{
+    float: none; margin-top: 20px; margin-bottom:40px;
+}
+
+</style>
+
+<div class="menu_top">
+    <a href="/" class="menu_item menu_btn" style="width: 104px;">
+        <img src="/static/img/logo.png"/>
+    </a>
+
+    <div class="menu_item" style="padding-top:6px;">
+        <div class="db_counter">
+            SETUP
+        </div>
+    </div>
+
+    <div class="menu_item divider"></div>
+
+    <div class="menu_item menu_btn" style="padding-top:6px;">
+        <a class="menu_knopje disabled" href="http://cedsys.nl">CedSys.nl</a>
+    </div>
+</div>
+
+<div class="wrapper">
+    <div style="height:80px;"></div>
+</div>
 
 <div class="container">
 
     <div class="row">
-        <h2>Findex</h2>
         <legend>First time installation</legend>
         <div class="alert alert-info">
             You're seeing this page because the findex configuration file was not found at <strong>~/.config/findex/gui.cfg</strong>.
@@ -89,7 +115,12 @@
                 <div class="btn-group" style="display:table;">
                     <button id="btn_db_testconn" type="button" class="btn btn-info btn-sm">Test Connection</button>
                 </div>
-                <span style="display:block;margin-top:10px;font-weight:bold;margin-bottom:40px;" id="txt_db_testconn"></span>
+                <div class="col-md-10" id="msgbox">
+                    <div class="alert" style="display:none;" id="div_db_testconn">
+                        <span id="txt_db_testconn"></span>
+                    </div>
+                </div>
+
             </center>
 
             </fieldset>
@@ -121,7 +152,7 @@
             </form>
             <center>
                 <div class="btn-group" style="display:table;">
-                    <button id="btn_writecfg" type="button" class="btn btn-success btn-sm">Finish installation</button>
+                    <button id="btn_writecfg" type="button" class="btn btn-success btn-sm">Finish Setup</button>
                 </div>
                 <span style="display:block;margin-top:10px;font-weight:bold;margin-bottom:40px;" id="txt_writecfg"></span>
             </center>
@@ -135,9 +166,15 @@ $(document).ready(function() {
     function db_testconn(data){
         data = data['findex/db_test'];
 
+        $('#div_db_testconn').removeClass();
+        $('#div_db_testconn').addClass('alert');
+        $('#div_db_testconn').css('display', 'block');
+
         if(data['status'] == 'FAIL'){
+            $('#div_db_testconn').addClass('alert-warning');
             $('#txt_db_testconn').html('Failed: ' + data['message']);
         } else {
+            $('#div_db_testconn').addClass('alert-success');
             $('#txt_db_testconn').html('OK: ' + data['message']);
         }
     }

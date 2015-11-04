@@ -253,7 +253,6 @@ class FindexApp():
         self.app.dyna_regexes = {}
         self.app.dyna_routes = {}
         self.app.rules = []
-        themes.DATA = None
 
     def hook_db(self):
         self.db = Postgres(self.cfg, self.app)

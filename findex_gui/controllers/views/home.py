@@ -13,6 +13,5 @@ class Home():
     @data_strap
     def root(self, env):
         from findex_gui.controllers.views.resourcer import JsonRpcClient
-        JsonRpcClient().test()
 
         return jinja2_template('main/home', env=env)

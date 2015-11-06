@@ -111,7 +111,7 @@ class Themes():
                 self.db.commit()
 
         template_path = os.path.join(self.theme_dir, name, 'templates')
-        bottle.TEMPLATE_PATH = ['findex_gui/static/themes/_admin/', template_path]
+        bottle.TEMPLATE_PATH = ['findex_gui/static/themes/', template_path]
 
         loader = jinja2.FileSystemLoader(template_path)
         jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)

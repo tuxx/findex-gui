@@ -1,0 +1,85 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+{% include '_admin/templates/navigation/header.html' %}
+
+<div class="container" style="margin-top: 40px;">
+    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
+
+        <!-- sidebar -->
+        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
+            {% include '_admin/templates/navigation/sidebar.html' %}
+        </div>
+
+        <!-- main area -->
+        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
+            <h3>{{ data['bot']['crawler_name'] }}</h3>
+            <p>
+                This is a crawl bot responsible for crawling resources.
+                Use this page to view if your bot is working correctly and schedule tasks.
+            </p>
+
+            <div class="row">
+                <div class="col-md-5">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <td>Hostname</td>
+                                <td>{{ data['bot']['hostname'] }}</td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td>{{ data['bot']['status'] }}</td>
+                            </tr>
+                            <tr>
+                                <td>Last Seen</td>
+                                <td>{{ data['bot']['heartbeat_human']}} - {{ data['bot']['last_seen'] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>JSON-RPC</h3>
+
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <td>Hostname</td>
+                                <td>{{ data['bot']['hostname'] }}</td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td>{{ data['bot']['status'] }}</td>
+                            </tr>
+                            <tr>
+                                <td>Last Seen</td>
+                                <td>{{ data['bot']['heartbeat_human']}} - {{ data['bot']['last_seen'] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h3>AMQP</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Tasks</h3>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+});
+</script>
+
+{% endblock %}

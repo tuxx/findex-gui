@@ -1,4 +1,4 @@
-{% extends "base_home.html" %}
+{% extends "_admin/templates/helpers/base.html" %}
 {% block content %}
 
 <style>
@@ -106,7 +106,7 @@
             <div class="form-group">
               <label class="col-md-4 control-label" for="db_pass">Password</label>
               <div class="col-md-4">
-              <input id="db_pass" name="db_pass" type="text" placeholder="database password" class="form-control input-md" required="">
+              <input id="db_pass" name="db_pass" type="password" placeholder="database password" class="form-control input-md" required="">
 
               </div>
             </div>
@@ -218,15 +218,15 @@ $(document).ready(function() {
         var gui_host = $('#gui_host').val();
         var gui_port = $('#gui_port').val();
 
-        var data = "db_type=" + db_type;
-        data += "&db_host=" + db_host;
-        data += "&db_port=" + db_port;
-        data += "&db_user=" + db_user;
-        data += "&db_password=" + db_pass;
-        data += "&db_name=" + db_name;
+        var data = "database_type=" + db_type;
+        data += "&database_host=" + db_host;
+        data += "&database_port=" + db_port;
+        data += "&database_username=" + db_user;
+        data += "&database_password=" + db_pass;
+        data += "&database_database=" + db_name;
 
-        data += '&gui_host=' + gui_host;
-        data += '&gui_port=' + gui_port;
+        data += '&gui_bind_host=' + gui_host;
+        data += '&gui_bind_port=' + gui_port;
 
         $.post("/api/findex/writecfg", data, write_cfg);
     });

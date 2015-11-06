@@ -10,7 +10,7 @@ from findex_gui.controllers.views.admin import Admin
 
 import findex_gui.controllers.findex.themes as themes
 from findex_gui.controllers.findex.auth import basic_auth
-from findex_gui.controllers.findex.api import Api
+from findex_gui.controllers.findex.api import FindexApi
 
 
 class FindexApp():
@@ -18,35 +18,30 @@ class FindexApp():
         self.app = app()
         self.cfg = cfg
         self.db = None
+        self.api = None
 
         setattr(bottle, 'theme', themes.Themes())
-        
+
+        # init default web routes
         self.routes_default()
 
-    def routes_main(self):
-        self.routes_nuke()
+    def main(self):
+        # nuke existing web routes
+        self.nuke()
 
+        # install SqlAlchemy bottle.py plugin
         self.hook_db()
 
-        @route('/admin')
-        def admin(db):
-            auth = basic_auth()
-            if isinstance(auth, HTTPError):
-                return auth
+        # init API routes
+        self.api = FindexApi(self.cfg)
 
-            controller = Admin(self.cfg, db)
-            return controller.admin()
-
-        @route('/post', method='POST')
-        def post(db):
-            controller = Api(self.cfg, db).parse()
-            return controller
-        
+        # init web routes
         @route('/')
         def root(db):
+            print self.api
             controller = Home(self.cfg, db)
             return controller.root()
-        
+
         @route('/browse')
         def browse(db):
             controller = Browse(self.cfg, db)
@@ -79,13 +74,43 @@ class FindexApp():
         def search_(db):
             controller = Search(self.cfg, db)
             return controller.search()
-        
-        @route('/terms')
-        def terms():
-            f = open(os.path.join(os.path.dirname(__file__), 'static', 'terms'))
-            response.set_header('content-type', 'text/plain')
-            return f.read()
-        
+
+        @route('/admin')
+        def admin():
+            auth = basic_auth()
+            if isinstance(auth, HTTPError):
+                return auth
+
+            return redirect('/admin/general')
+
+        @route('/admin/')
+        def adminx():
+            return admin()
+
+        @route('/admin/<name>')
+        def admin_dyn(db, name):
+            auth = basic_auth()
+            if isinstance(auth, HTTPError):
+                return auth
+
+            controller = Admin(self.cfg, db)
+
+            try:
+                func = getattr(controller, name)
+            except:
+                return redirect('/admin/general')
+
+            return func()
+
+        @route('/admin/bots/<path:path>')
+        def admin_bot(path, db):
+            auth = basic_auth()
+            if isinstance(auth, HTTPError):
+                return auth
+
+            controller = Admin(self.cfg, db)
+            return controller.bot(path)
+
         @error(404)
         @error(405)
         @error(500)
@@ -115,6 +140,12 @@ class FindexApp():
             response.content_type = 'text/plain'
             return "User-agent: *\nDisallow: /browse/\nDisallow: /search\nDisallow: /goto/"
 
+        @route('/terms')
+        def terms():
+            f = open(os.path.join(os.path.dirname(__file__), 'static', 'terms'))
+            response.set_header('content-type', 'text/plain')
+            return f.read()
+
         @error(404)
         @error(405)
         @error(500)
@@ -127,19 +158,32 @@ class FindexApp():
             return str(error)
 
     def routes_setup(self):
-        self.routes_nuke()
+        # remove existing web routes
+        self.nuke()
 
+        # init web routes
         @route('/')
         def root():
             return redirect('/install')
 
         @route('/install')
         def install():
-            return jinja2_template('installation')
+            return jinja2_template('_admin/templates/main/installation')
 
         @route('/api/findex/writecfg', method='POST')
         def writecfg():
-            expected = ['db_host', 'db_port', 'db_name', 'db_user', 'db_password', 'db_type', 'gui_host', 'gui_port']
+            expected = [
+                'database_host',
+                'database_port',
+                'database_database',
+                'database_username',
+                'database_password',
+                'database_type',
+                'database_type',
+                'gui_bind_host',
+                'gui_bind_port'
+            ]
+
             params = bottle.request.params.dict
             data = {}
 
@@ -160,17 +204,22 @@ class FindexApp():
                             }
                         }
 
-                    data[k] = v[0]
+                    spl = k.split('_', 1)
+                    section = spl[0]
+                    key = spl[1]
+                    val = v[0]
 
-            if data['db_type'] == 'psql':
+                    self.cfg[section][key] = val
+
+            if self.cfg['database']['type'] == 'psql':
                 from findex_gui.db.db import Postgres as psql
 
                 connection = psql().test_connection(
-                    dbname=data['db_name'],
-                    user=data['db_user'],
-                    host=data['db_host'],
-                    port=data['db_port'],
-                    password=data['db_password']
+                    dbname=self.cfg['database']['database'],
+                    user=self.cfg['database']['username'],
+                    host=self.cfg['database']['host'],
+                    port=self.cfg['database']['port'],
+                    password=self.cfg['database']['password']
                 )
 
                 if not connection['result']:
@@ -181,20 +230,13 @@ class FindexApp():
                         }
                     }
 
-            self.cfg.db_host = data['db_host']
-            self.cfg.db_port = data['db_port']
-            self.cfg.db_user = data['db_user']
-            self.cfg.db_password = data['db_password']
-            self.cfg.db_name = data['db_name']
-            self.cfg.db_type = data['db_type']
+            # to-do: change these for production
+            self.cfg['gui']['debug'] = False
+            self.cfg['database']['debug'] = True
 
-            self.cfg.gui_host = data['gui_host']
-            self.cfg.gui_port = data['gui_port']
             self.cfg.write()
 
-            self.cfg.load()
-
-            self.routes_main()
+            self.main()
 
             return {
                 'findex/writecfg': {
@@ -248,12 +290,14 @@ class FindexApp():
                 }
             }
         
-    def routes_nuke(self):
+    def nuke(self):
         self.app.routes = []
         self.app.router.static['GET'] = {}
         self.app.dyna_regexes = {}
         self.app.dyna_routes = {}
         self.app.rules = []
+
+        self.api = None
 
     def hook_db(self):
         self.db = Postgres(self.cfg, self.app)

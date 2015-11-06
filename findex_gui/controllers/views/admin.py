@@ -15,11 +15,36 @@ class Admin():
         self.db = db
         self.findex = Findex(db=self.db)
 
+
     @data_strap
-    def admin(self, env):
+    def general(self, env):
+        env['section'] = ['General']
         data = {}
 
-        crawls = CrawlBots(cfg=self.cfg, db=self.db)
-        data['bots'] = crawls.list()
+        return jinja2_template('_admin/templates/main/general', env=env, data=data)
 
-        return jinja2_template('admin', env=env, data=data)
+    @data_strap
+    def themes(self, env):
+        env['section'] = ['Themes']
+        data = {}
+
+        return jinja2_template('_admin/templates/main/themes', env=env, data=data)
+
+    @data_strap
+    def bots(self, env):
+        env['section'] = ['Bots']
+        data = {}
+
+        return jinja2_template('_admin/templates/main/bots', env=env, data=data)
+
+    @data_strap
+    def bot(self, bot_id, env):
+        data = {}
+
+        crawl = CrawlBots(cfg=self.cfg, db=self.db)
+        bot = crawl.get_bot(bot_id)
+
+        data['bot'] = bot
+        env['section'] = ['Bots', bot['crawler_name']]
+
+        return jinja2_template('_admin/templates/main/bot', env=env, data=data)

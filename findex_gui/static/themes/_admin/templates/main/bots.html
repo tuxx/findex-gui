@@ -1,0 +1,160 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+{% include '_admin/templates/navigation/header.html' %}
+
+<div class="container" style="margin-top: 40px;">
+    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
+
+        <!-- sidebar -->
+        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
+            {% include '_admin/templates/navigation/sidebar.html' %}
+        </div>
+
+        <!-- main area -->
+        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
+            <h3>Bots</h3>
+            <h5 id="crawlbot_counter">0 online</h5>
+
+            <p>
+                <table id="jsontable_crawlbots" class="display table table-bordered table-striped" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;">ID</th>
+                            <th style="width: 150px;">Name</th>
+                            <th style="width: 150px;">Hostname</th>
+                            <th style="width: 80px;">JSON-RPC</th>
+                            <th style="width: 80px;">AMQP</th>
+                            <th style="width: 50px;">Status</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                </table>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    var crawlbots = {};
+
+    var crawlbots_table = $('#jsontable_crawlbots').DataTable({
+        "bFilter": false,
+        "bPaginate": false,
+        "sDom": '<"top">rt<"bottom"flp><"clear">',
+        "createdRow": function ( row, data, index ) {
+            row.id = data[0];
+
+            for(var i = 0; i != data.length; i++){
+                if(data[i] == 'OK' || data[i] == 'ONLINE'){
+                    $('td', row).eq(i).addClass('bot-ok');
+                } else if(data[i] == 'WARNING'){
+                    $('td', row).eq(i).addClass('bot-warning');
+                } else if(data[i] == 'ERROR'){
+                    $('td', row).eq(i).addClass('bot-error');
+                    $('td:eq('+i+')', row).append("<div id='"+data[1]+"' class='btn_crawlbot_error_infobox'></div>");
+                }
+            }
+
+            if(data[5] == 'ONLINE' || data[5] == 'WARNING') {
+                //$('td:eq(0)', row).append("<div id='online' class='icon_crawlbot'></div>");
+            } else {
+                //$('td:eq(0)', row).append("<div id='offline' class='icon_crawlbot'></div>");
+            }
+        },
+        "columnDefs": [ {
+            "targets": -1,
+            "data": null,
+            "defaultContent": "<button type='button' class='btn btn-default btn-xs btn_bot_details'>Details</button>"
+        }],
+        "fnDrawCallback": function (oSettings) {
+            console.log('DataTable drawn');
+        }
+    });
+
+    function json_bots(data){
+        crawlbots_table.clear();
+        crawlbots = {};
+
+        data = data['bots/list'];
+
+        var online_counter = 0;
+
+        for (var i = 0; i < data.length; i++) {
+            var obj = data[i];
+
+            crawlbots[obj['crawler_name']] = obj;
+
+            var protocols = ['jsonrpc', 'amqp'];
+            for(var u = 0; u != protocols.length; u+=1){
+                if(obj[protocols[u]])obj[protocols[u]] = 'enabled';
+                else  obj[protocols[u]] = 'disabled';
+            }
+
+            if(obj['status'] == 0){
+                crawlbots_table.row.add(
+                    [obj['id'], obj['crawler_name'], obj['hostname'], obj['jsonrpc'], obj['amqp'], 'OFFLINE', '']
+                ).draw(false);
+            }
+            else if(obj['status'] == 1){
+                crawlbots_table.row.add(
+                    [obj['id'], obj['crawler_name'], obj['hostname'], obj['status_jsonrpc']['status'], obj['status_amqp']['status'], 'WARNING', '']
+                ).draw(false);
+
+                online_counter++;
+            }
+            else if(obj['status'] == 2){
+                crawlbots_table.row.add(
+                    [obj['id'], obj['crawler_name'], obj['hostname'], obj['status_jsonrpc']['status'], obj['status_amqp']['status'], 'ONLINE', '']
+                ).draw(false);
+
+                online_counter++;
+            }
+        }
+        $('#crawlbot_counter').text(online_counter + ' online');
+    }
+
+    $('body').on('click', 'div.btn_crawlbot_error_infobox', function() {
+        var id = $(this).attr('id');
+        var obj = crawlbots[id];
+
+        var data = [];
+
+        if(obj['status_amqp']['status'] == 'ERROR'){
+            data.push(obj['status_amqp']['message']);
+        }
+
+        if(obj['status_jsonrpc']['status'] == 'ERROR'){
+            data.push(obj['status_jsonrpc']['message']);
+        }
+
+        var error_message = '';
+
+        for(var i = 0; i != data.length; i++){
+            error_message += '<h4>Error</h4>';
+            error_message += '<p>'+data[i]+'</p>';
+        }
+
+        BootstrapDialog.show({
+            title: id,
+            message: error_message
+        });
+    });
+
+    $('body').on('click', '.btn_bot_details', function(){
+        // hacky ;/
+        var id = $(this).parent().parent().attr('id');
+        window.location.href = '/admin/bots/' + id;
+    });
+
+    setInterval(function(){
+        //$.getJSON( "/api/bots/list", json_bots);
+    }, 3000);
+
+
+    $.getJSON( "/api/bots/list", json_bots);
+});
+</script>
+
+{% endblock %}

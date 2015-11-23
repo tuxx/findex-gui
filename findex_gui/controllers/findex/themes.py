@@ -50,8 +50,11 @@ class Themes():
         self.db = sessionmaker(bind=db.engine)()
 
     def load(self):
-        dirs = os.listdir(self.theme_dir)
-        for d in [z for z in dirs if not z.startswith('_')]:
+        import glob
+
+        dirs = [os.path.join(self.theme_dir, o) for o in os.listdir(self.theme_dir) if os.path.isdir(os.path.join(self.theme_dir, o))]
+
+        for d in dirs:
             self.validate_dir(d)
 
         active_theme = self.get_theme()
@@ -65,7 +68,7 @@ class Themes():
             if dir in self.themes:
                 raise Exception('Duplicate theme. Is it already added?')
 
-            path = '%s/%s/theme.json' % (self.theme_dir, dir)
+            path = '%s/theme.json' % dir
 
             options = ''.join(utils.file_read(path))
             blob = utils.is_json(options)
@@ -88,7 +91,8 @@ class Themes():
                 return self.active_theme['name']
 
         if self.db:
-            return self.db.query(Options).filter(Options.key == 'theme_active').first()
+            opt = self.db.query(Options).filter(Options.key == 'theme_active').first()
+            return opt.val
 
     def get_themes(self):
         data = []

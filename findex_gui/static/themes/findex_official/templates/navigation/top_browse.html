@@ -1,7 +1,7 @@
 <div class="menu_dropdown"></div>
 
 <div class="nav-top-browse">
-    <div class="nav">
+    <div id="navbar" class="nav">
         <div class="menu_item menu_btn">
             <span class="fa fa-bars" aria-hidden="true"></span>
         </div>
@@ -11,7 +11,7 @@
         </div>
 
         <div id="search_box" class="menu_item menu_inp" style="display:none;">
-            <input id="nav-top-inp" type="text" placeholder="Quick Search">
+            <input id="nav-top-inp" type="text" placeholder="Search...">
         </div>
 
         <div class="menu_item divider">
@@ -113,141 +113,141 @@
 </style>
 
 <script>
+{#    $(document).ready(function(){#}
+{#        $('#btn_search').click(function(){#}
+{#            window.document.location = '/search';#}
+{#        });#}
+{#    });#}
     $(document).ready(function(){
+        var nav_top_browse_search = false;
+        var nav_top_search_open = false;
+
         $('#btn_search').click(function(){
-            window.document.location = '/search';
+            if(!nav_top_browse_search){
+                nav_top_browse_search = true;
+
+                $('#search_box').show();
+                $('#search_box>input').focus();
+            } else {
+                nav_top_browse_search = false;
+                $('#search_box').removeAttr('value');
+                $('#search_box').hide();
+
+                if(nav_top_search_open){
+                    nav_top_search_toggle();
+                }
+            }
         });
+
+        $(document).on('click', '.clickable-row',function() {
+            window.document.location = '/browse' + $(this).data("url");
+        });
+
+        $('.nav-top-browse>.search>.row>.col-md-2>ul>li').mouseover(function(){
+            $('.nav-top-browse>.search>.row>.col-md-2>ul>li').css('background-color', 'transparent');
+            $(this).css('background-color', 'rgb(54, 135, 207)');
+
+            search_item_changed($(this).attr('id'));
+        });
+
+        function search_item_changed(id){
+            searchCat = id;
+
+            var table = makeTable();
+            $('#table_container').html(table);
+        }
+
+        function nav_top_search_toggle(){
+            if(!nav_top_search_open){
+                nav_top_search_open = true;
+                $('.nav-top-browse').css('height', '220px');
+            } else {
+                nav_top_search_open = false;
+                $('.nav-top-browse').css('height', '38px');
+            }
+        }
+
+        $('#search_box>input').keyup(function (e) {
+            var val = $(this).val();
+            if (e.keyCode == 13){
+                if(val != ''){
+                    var uri = '/search?key='+val+'&server=[*]&protocol=[*]';
+                    goto_uri(uri);
+                }
+            }
+
+{#            if(val.length >= 4){#}
+{#                post(val, searchCat);#}
+{#                if(!nav_top_search_open){#}
+{#                    nav_top_search_toggle();#}
+{#                }#}
+{#            }#}
+{#            else if(val.length < 4){#}
+{#                if(nav_top_search_open){#}
+{#                    nav_top_search_toggle();#}
+{#                }#}
+{#            }#}
+        });
+
+        function post(search_query, format){
+            $.ajax({
+                type: 'POST',
+                url: '/post',
+                data: 'cmd=menu_search_dropdown&val=' + search_query + '&format=' + format,
+                dataType: 'json',
+                success: function(result){
+                    searchCallback(result)
+                },
+                error:function(zemmel){
+
+                }
+            });
+        }
+
+        var searchData = {'1':[],'2':[],'3':[],'4':[]};
+        var searchCat = 1;
+
+        function searchCallback(result){
+            $('.menu_dropdown').empty();
+
+            if (result.hasOwnProperty('menu_search_dropdown')) {
+                if (result['menu_search_dropdown'] == 'OK') {
+                    searchData = result['data'];
+
+                    $(".nav-top-browse>.search>.row>.col-md-2>ul>li").each(function(){
+                        var id = $(this).attr('id');
+                        $(this).text($(this).attr('data-text') + ' (' + searchData[id].length + ')');
+                    });
+
+                    search_item_changed(searchCat);
+                }
+                else{
+                    console.log('An error occured sending the data through post');
+                }
+            }
+        }
+
+        function makeTable(){
+            var data = searchData[searchCat];
+            console.log('setting table for data: ' + searchCat);
+            if(data){
+                var table = "<table id=\"quick_search-table\" class=\"table\"><tbody>";
+
+                for (var i = 0; i != data.length; i++) {
+                    var href = data[i]["href"];
+                    var name = data[i]["file_name"];
+                    var size = data[i]["file_size"];
+                    var host = data[i]["host"];
+
+                    table += "<tr class=\'clickable-row\' data-url=\'" + href + "\'><td>" + name + "</td><td>" + size + "</td><td>" + host + "</td></tr>";
+                }
+
+                table += "</tbody></table>";
+                return table;
+            }
+            else{
+                $('#table_container').html('');
+            }
+        }
     });
-    <!--$(document).ready(function(){-->
-        <!--var nav_top_browse_search = false;-->
-        <!--var nav_top_search_open = false;-->
-
-        <!--$('#btn_search').click(function(){-->
-            <!--if(!nav_top_browse_search){-->
-                <!--nav_top_browse_search = true;-->
-
-                <!--$('#search_box').show();-->
-                <!--$('#search_box>input').focus();-->
-            <!--} else {-->
-                <!--nav_top_browse_search = false;-->
-                <!--$('#search_box').removeAttr('value');-->
-                <!--$('#search_box').hide();-->
-
-                <!--if(nav_top_search_open){-->
-                    <!--nav_top_search_toggle();-->
-                <!--}-->
-            <!--}-->
-        <!--});-->
-
-        <!--$(document).on('click', '.clickable-row',function() {-->
-            <!--window.document.location = '/browse' + $(this).data("url");-->
-        <!--});-->
-
-        <!--$('.nav-top-browse>.search>.row>.col-md-2>ul>li').mouseover(function(){-->
-            <!--$('.nav-top-browse>.search>.row>.col-md-2>ul>li').css('background-color', 'transparent');-->
-            <!--$(this).css('background-color', 'rgb(54, 135, 207)');-->
-
-            <!--search_item_changed($(this).attr('id'));-->
-        <!--});-->
-
-        <!--function search_item_changed(id){-->
-            <!--searchCat = id;-->
-
-            <!--var table = makeTable();-->
-            <!--$('#table_container').html(table);-->
-        <!--}-->
-
-        <!--function nav_top_search_toggle(){-->
-            <!--if(!nav_top_search_open){-->
-                <!--nav_top_search_open = true;-->
-                <!--$('.nav-top-browse').css('height', '220px');-->
-            <!--} else {-->
-                <!--nav_top_search_open = false;-->
-                <!--$('.nav-top-browse').css('height', '38px');-->
-            <!--}-->
-        <!--}-->
-
-        <!--$('#search_box>input').keyup(function (e) {-->
-            <!--var val = $(this).val();-->
-            <!--if (e.keyCode == 13){-->
-                <!--if(val != ''){-->
-                    <!--var uri = '/search?key='+val+'&server=[*]&protocol=[*]';-->
-                    <!--goto_uri(uri);-->
-                <!--}-->
-            <!--}-->
-
-            <!--if(val.length >= 4){-->
-                <!--post(val, searchCat);-->
-                <!--if(!nav_top_search_open){-->
-                    <!--nav_top_search_toggle();-->
-                <!--}-->
-            <!--}-->
-            <!--else if(val.length < 4){-->
-                <!--if(nav_top_search_open){-->
-                    <!--nav_top_search_toggle();-->
-                <!--}-->
-            <!--}-->
-        <!--});-->
-
-        <!--function post(search_query, format){-->
-            <!--$.ajax({-->
-                <!--type: 'POST',-->
-                <!--url: '/post',-->
-                <!--data: 'cmd=menu_search_dropdown&val=' + search_query + '&format=' + format,-->
-                <!--dataType: 'json',-->
-                <!--success: function(result){-->
-                    <!--searchCallback(result)-->
-                <!--},-->
-                <!--error:function(zemmel){-->
-
-                <!--}-->
-            <!--});-->
-        <!--}-->
-
-        <!--var searchData = {'1':[],'2':[],'3':[],'4':[]};-->
-        <!--var searchCat = 1;-->
-
-        <!--function searchCallback(result){-->
-            <!--$('.menu_dropdown').empty();-->
-
-            <!--if (result.hasOwnProperty('menu_search_dropdown')) {-->
-                <!--if (result['menu_search_dropdown'] == 'OK') {-->
-                    <!--searchData = result['data'];-->
-
-                    <!--$(".nav-top-browse>.search>.row>.col-md-2>ul>li").each(function(){-->
-                        <!--var id = $(this).attr('id');-->
-                        <!--$(this).text($(this).attr('data-text') + ' (' + searchData[id].length + ')');-->
-                    <!--});-->
-
-                    <!--search_item_changed(searchCat);-->
-                <!--}-->
-                <!--else{-->
-                    <!--console.log('An error occured sending the data through post');-->
-                <!--}-->
-            <!--}-->
-        <!--}-->
-
-        <!--function makeTable(){-->
-            <!--var data = searchData[searchCat];-->
-            <!--console.log('setting table for data: ' + searchCat);-->
-            <!--if(data){-->
-                <!--var table = "<table id=\"quick_search-table\" class=\"table\"><tbody>";-->
-
-                <!--for (var i = 0; i != data.length; i++) {-->
-                    <!--var href = data[i]["href"];-->
-                    <!--var name = data[i]["file_name"];-->
-                    <!--var size = data[i]["file_size"];-->
-                    <!--var host = data[i]["host"];-->
-
-                    <!--table += "<tr class=\'clickable-row\' data-url=\'" + href + "\'><td>" + name + "</td><td>" + size + "</td><td>" + host + "</td></tr>";-->
-                <!--}-->
-
-                <!--table += "</tbody></table>";-->
-                <!--return table;-->
-            <!--}-->
-            <!--else{-->
-                <!--$('#table_container').html('');-->
-            <!--}-->
-        <!--}-->
-    <!--});-->
 </script>

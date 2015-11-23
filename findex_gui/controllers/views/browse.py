@@ -16,24 +16,17 @@ class Browse():
 
     @data_strap
     def hosts(self, env):
-        data = {}
-        data['hosts'] = self.db.query(Resources).list()
+        data = {'hosts': self.db.query(Resources).list()}
 
         return jinja2_template('main/browse_hosts', env=env, data=data)
 
     @data_strap
     def browse(self, path, env):
-        env['load_dbtime'] = 0
-
-        browser = Browser(db=self.db, findex=self.findex)
+        env['time_pageload'] = datetime.now()
 
         try:
-            browser.parse_incoming_path(path)
-
-            start_dbtime = datetime.now()
+            browser = Browser(db=self.db, findex=self.findex, path=path)
             browser.fetch_files()
-            env['load_dbtime'] = (datetime.now() - start_dbtime).total_seconds()
-
             browser.prepare_files(env=env)
 
             data = {
@@ -43,14 +36,12 @@ class Browse():
                 'env': browser.data
             }
 
+            env['time_pageload'] = (datetime.now() - env['time_pageload']).total_seconds()
+
             return jinja2_template('main/browse_dir', env=env, data=data)
         except Exception as ex:
             print str(ex)
-            return jinja2_template('main/error', env=env, data={
-                'error': 'no files were found'
-            })
-
-        return ''
+            return jinja2_template('main/error', env=env, data={'error': 'no files were found'})
 
     @data_strap
     def goto(self, path, env):

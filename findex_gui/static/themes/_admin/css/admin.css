@@ -90,7 +90,7 @@ table#jsontable_crawlbots>tbody>tr>td{
     opacity:.1;
 }
 
-.menu_top>.menu_item>.menu_knopje{
+#navbar>.menu_item>.menu_knopje{
     float:left;
     height:22px;
     font-weight: 500;

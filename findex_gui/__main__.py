@@ -1,6 +1,6 @@
 #!/usr/bin/python
-from gevent import monkey
-monkey.patch_all()
+import gevent.monkey
+gevent.monkey.patch_all()
 
 import sys
 reload(sys)
@@ -22,6 +22,5 @@ if not cfg.items:
     app.routes_setup()
 else:
     app.main()
-
 
 app.bind()

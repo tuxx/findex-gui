@@ -202,6 +202,51 @@ menu #dropdown #feed .feed-slide { float: left; }
     width:100%;
     border-bottom: 1px solid rgb(13, 134, 187);
 }
+
+#navbar>.menu_item{
+    float:left;
+    height:46px;
+}
+
+#navbar>.menu_btn{
+    cursor:pointer;
+    margin-right:6px;
+}
+
+#navbar>.divider{
+    background:black;
+    height:26px;
+    margin-top:10px;
+    width:1px;
+    margin-left:10px;
+    margin-right:10px;
+    opacity:.1;
+}
+
+#navbar>.menu_item>.menu_knopje{
+    float:left;
+    height:22px;
+    font-weight: 500;
+    color: white;
+    margin-left:6px;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+#navbar>.menu_item>.disabled ,.disabled:hover{
+    color:white !important;
+    text-decoration:none;
+}
+
+#navbar>.menu_item>.db_counter{
+    float: left;
+    padding-top: 8px;
+    color: white !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 .nav-top-browse{
     position: fixed;
     top: 0px;

@@ -48,3 +48,9 @@ class Admin():
         env['section'] = ['Bots', bot['crawler_name']]
 
         return jinja2_template('_admin/templates/main/bot', env=env, data=data)
+
+    @data_strap
+    def amqps(self, env):
+        env['section'] = ['AMQP Resources']
+
+        return jinja2_template('_admin/templates/main/amqps', env=env)

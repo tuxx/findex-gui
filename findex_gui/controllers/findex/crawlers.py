@@ -58,6 +58,11 @@ class CrawlBots():
                     'status': status,
                     'message': message
                 }
+            else:
+                blob['status_jsonrpc'] = {
+                    'status': 'OFFLINE',
+                    'message': ''
+                }
 
             if bot.amqp:
                 check = self._fetch_amqp_status(bot)
@@ -72,6 +77,11 @@ class CrawlBots():
                 blob['status_amqp'] = {
                     'status': status,
                     'message': message
+                }
+            else:
+                blob['status_amqp'] = {
+                    'status': 'OFFLINE',
+                    'message': ''
                 }
 
         return blob

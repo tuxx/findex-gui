@@ -45,7 +45,14 @@ class Browser():
 
         files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path'])
         if not files:
-            raise BrowseException('No files found')
+            files = self.findex.get_files_objects(resource_id=resource.id, total_count=1)
+            if files:
+                # to-do: temp. solution; introduce dynamic paths sometime
+                from bottle import redirect
+                path = files[0].file_path[1:]
+                raise redirect('/browse/%s/%s' % (self.data['resource_name'], path),301)
+            else:
+                raise BrowseException('No files found')
 
         self.files = files
 

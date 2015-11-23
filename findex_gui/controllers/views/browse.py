@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from bottle import jinja2_template
+from bottle import jinja2_template, HTTPResponse
 
 from findex_gui.db.orm import Resources
 from findex_gui.controllers.views.browser import Browser
@@ -39,6 +39,8 @@ class Browse():
             env['time_pageload'] = (datetime.now() - env['time_pageload']).total_seconds()
 
             return jinja2_template('main/browse_dir', env=env, data=data)
+        except HTTPResponse as resp:
+            return resp
         except Exception as ex:
             print str(ex)
             return jinja2_template('main/error', env=env, data={'error': 'no files were found'})

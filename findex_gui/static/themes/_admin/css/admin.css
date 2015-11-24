@@ -1,0 +1,125 @@
+table#jsontable_crawlbots>tbody>tr>td.bot-ok{
+    background-color: #FBFBFB;
+    font-weight: bold;
+    color: green;
+}
+table#jsontable_crawlbots>tbody>tr>td.bot-warning{
+    font-weight: bold;
+    color: darkorange;
+    background-color: #FBFBFB;
+}
+table#jsontable_crawlbots>tbody>tr>td.bot-error{
+    font-weight: bold;
+    color: red;
+    background-color: #FBFBFB;
+}
+table#jsontable_crawlbots>tbody>tr>td>div.btn_crawlbot_error_infobox{
+    width:20px;
+    height:20px;
+    float:right;
+    background-image: url('/static/img/questionmark.gif');
+    background-repeat: no-repeat;
+    background-position-x:4px;
+    background-position-y:2px;
+    cursor: pointer;
+}
+table#jsontable_crawlbots>tbody>tr>td:first-child>div.icon_crawlbot{
+    width:26px;
+    height:26px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+div.icon_crawlbot#online{
+    background-image: url('/static/img/spider2.png');
+}
+div.icon_crawlbot#offline{
+    background-image: url('/static/img/spider.png');
+}
+table#jsontable_crawlbots>thead>tr>th{
+    font-size: 12px;
+    font-weight: bold;
+    padding: 8px;
+    margin: 8px;
+}
+table#jsontable_crawlbots>tbody>tr>td{
+    font-size:14px;
+}
+
+.header_top{
+    overflow:hidden;
+    height:140px;
+    width:100%;
+    background-color:#212121;
+}
+
+.header_top>span{
+    margin-left: 40px;
+    margin-top: 20px;
+    color: #E2E2E2;
+    font-size: 20px;
+    display: block;
+}
+
+.menu_top{
+    background-image: linear-gradient(to right, rgba(32, 90, 144, 0.75), rgba(78, 133, 165, 0.75));
+    font-size:16px;
+    z-index:1337;
+    border-bottom: 1px solid rgb(13, 134, 187);
+    width:100%;
+    height:46px;
+    float:left;
+    overflow:hidden;
+}
+
+.menu_top>.menu_item{
+    float:left;
+    height:46px;
+}
+
+.menu_top>.menu_btn{
+    cursor:pointer;
+    margin-right:6px;
+}
+
+.menu_top>.divider{
+    background:black;
+    height:26px;
+    margin-top:10px;
+    width:1px;
+    margin-left:10px;
+    margin-right:10px;
+    opacity:.1;
+}
+
+#navbar>.menu_item>.menu_knopje{
+    float:left;
+    height:22px;
+    font-weight: 500;
+    color: white;
+    margin-left:6px;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.menu_top>.menu_item>.db_counter{
+    float: left;
+    padding-top: 8px;
+    color: white !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.menu_top>.menu_item>.disabled ,.disabled:hover{
+    color:white !important;
+    text-decoration:none;
+}
+
+.container>#canvas>#sidebar{
+    border-right: 1px solid #EAEAEA;
+}
+
+h3{
+    margin-top:0px;
+    color: #4994CC;
+}

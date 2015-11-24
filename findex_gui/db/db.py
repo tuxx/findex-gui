@@ -5,12 +5,19 @@ import psycogreen.gevent
 psycogreen.gevent.patch_psycopg()
 
 import psycopg2
+import socket
 
 
 class Postgres():
     def test_connection(self, dbname, user, host, port, password):
         try:
-            with psycopg2.connect("dbname='%s' user='%s' host='%s' port='%s' password='%s'" % (
+
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
+            s.connect((host, port))
+            s.shutdown(2)
+
+            with psycopg2.connect("dbname='%s' user='%s' host='%s' port='%s' password='%s' connect_timeout=1" % (
                 dbname, user, host, port, password
             )) as conn:
                 cur = conn.cursor()
@@ -23,5 +30,10 @@ class Postgres():
                     """.strip()}
 
                 return {'result': True, 'message': 'Connection made.'}
+
+        except socket.timeout:
+            return {'result': False, 'message': 'Cannot connect to %s:%s. Is the database up? Firewall?' % (host, str(port))}
+        except socket.gaierror:
+            return {'result': False, 'message': 'Could not resolve hostname %s' % host}
         except Exception as ex:
             return {'result': False, 'message': str(ex)}

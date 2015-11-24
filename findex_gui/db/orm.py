@@ -126,6 +126,7 @@ class Crawlers(Base):
 
     jsonrpc = Column(sql.Boolean())
     amqp = Column(sql.Boolean())
+    amqp_name = Column(sql.String(128))
 
     heartbeat = Column(sql.TIMESTAMP())
 

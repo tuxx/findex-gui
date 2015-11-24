@@ -8,3 +8,4 @@ bottle-sqlalchemy
 psycogreen
 findex-common
 click
+pika

@@ -1,0 +1,154 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+{% include '_admin/templates/navigation/header.html' %}
+
+<style>
+tr>td:first-child { font-weight: bold; }
+</style>
+
+<div class="container" style="margin-top: 40px;">
+    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
+
+        <!-- sidebar -->
+        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
+            {% include '_admin/templates/navigation/sidebar.html' %}
+        </div>
+
+        <!-- main area -->
+        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
+
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-dashboard"></i> {{ data['bot']['crawler_name'] }}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <p>
+                                {{ data['bot']['crawler_name'] }} is a crawlbot. It can crawl FTP/HTTP/FS resources.
+                            </p>
+                            <p>
+                                Use this page to configure the bot and/or view information.
+                            </p>
+                            <p>
+                                The bot is currently {{ 'online' if data['bot']['status'] == 2 else 'offline' }}.
+                            </p>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-info"></i> General Info
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table class="table table-striped" style="margin-bottom: 0px;">
+                                <tbody>
+                                    <tr>
+                                        <td>Status</td>
+                                        <td>{{ 'Online' if data['bot']['status'] == 2 else 'Offline' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hostname</td>
+                                        <td>{{ data['bot']['hostname'] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Last Seen</td>
+                                        <td>{{ data['bot']['heartbeat_human']}} <small>({{ data['bot']['last_seen'] }})</small></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-connectdevelop"></i> AMQP Endpoint
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+
+                            {% if data['endpoints'] %}
+                                {% if not data['bot']['amqp_name'] %}
+                                    <div class="alert alert-warning">
+                                      <strong>Warning</strong>
+                                    </div>
+                                    <p>
+                                        No AMQP endpoint specified. Without one, the bot will not be functional. Pick an AMQP endpoint from the list:
+                                    </p>
+
+                                {% endif %}
+                                <form class="form-horizontal">
+                                    <fieldset>
+                                        <div class="form-group">
+
+                                            <label class="col-md-4 control-label" for="choice_endpoints">Endpoints</label>
+                                            <div class="col-md-8">
+                                                {% for i in range(0, data['endpoints'] | length) %}
+                                                {% set obj = data['endpoints'][i] %}
+                                                {% set checked = "checked=\"checked\"" if obj.name == data['bot']['amqp_name'] else "" %}
+
+                                                    <div class="radio">
+                                                        <label for="choice_endpoints-{{i}}">
+                                                            <input type="radio" name="choice_endpoints" id="{{ obj.name }}" value="{{i+1}}" {{ checked }}>
+                                                            {{ obj.name }} ({{ obj.host }}:{{ obj.port }})
+                                                        </label>
+                                                    </div>
+
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                  <strong>Warning</strong>
+                                </div>
+                                <p>
+                                    No AMQP endpoints configured. Please visit <a href="/admin/amqp">this page</a> and add an endpoint. After that, return to this page and assign an AMQP endpoint to this crawlbot.
+                                </p>
+                            {% endif %}
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function callback(data){
+        if(data.hasOwnProperty("bot/assign_amqp_endpoint")) {
+            data = data['bot/assign_amqp_endpoint'];
+
+            if(data['status'] == 'FAIL'){
+                alert(data['message']);
+            } else {
+                location.reload();
+            }
+        }
+    }
+
+    $("input[name=choice_endpoints]:radio").change(function () {
+        var id = $(this).attr('id');
+
+        var data = 'bot_id={{ data['bot']['id'] }}';
+        data += '&amqp_endpoint_name=' + id;
+
+        $.post("/api/bot/assign_amqp_endpoint", data, callback);
+    });
+
+
+});
+</script>
+
+{% endblock %}

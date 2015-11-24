@@ -3,49 +3,72 @@ from datetime import datetime
 from requests.auth import HTTPBasicAuth
 
 from findex_gui.db.orm import Crawlers
+from findex_gui.bin.time import TimeMagic
 from findex_common.exceptions import CrawlBotException
 from findex_common.utils import DataObjectManipulation
+from findex_gui.controllers.findex.amqp import Amqp
 
 
 class CrawlBots():
     def __init__(self, cfg, db):
         self.db = db
         self.cfg = cfg
+        self.time = TimeMagic()
 
         self.webclient_ua = 'Findex GUI'
-        self.endpoint_rabbitmq = 'http://%s/api/' % self.cfg['rabbitmq']['host']
         self.amqp_consumers = {}
 
+        self.amqp_endpoints = Amqp(self.db).get_endpoints()
+
+    def get_bot(self, bot_id):
+        bot = self.db.query(Crawlers).filter(Crawlers.id == bot_id).first()
+        if bot:
+            return self.format(bot)
+
     def list(self):
-        crawlbots = self.db.query(Crawlers).all()
+        bots = self.db.query(Crawlers).all()
         data = []
 
-        for bot in crawlbots:
-            blob = DataObjectManipulation(bot)
-            blob = blob.dictionize()
+        for bot in bots:
+            data.append(self.format(bot))
 
-            now = datetime.now()
-            if (now - bot.heartbeat).total_seconds() > 11:
-                blob['status'] = 0
+        return data
+
+    def format(self, bot):
+        blob = DataObjectManipulation(bot)
+        blob = blob.humanize(humandates=True)
+        blob = DataObjectManipulation(blob).dictionize()
+
+        blob['last_seen'] = self.time.ago_dt(bot.heartbeat)
+
+        now = datetime.now()
+        if (now - bot.heartbeat).total_seconds() > 11:
+            blob['status'] = 0  # no need to check other statuses when the heartbeat is too old.
+        else:
+            blob['status'] = 2
+
+            if bot.jsonrpc:
+                check = self._fetch_jsonrpc_status(bot)
+                if isinstance(check, CrawlBotException):
+                    blob['status'] = 1
+                    status = 'ERROR'
+                    message = check.message
+                else:
+                    status = 'OK'
+                    message = ''
+
+                blob['status_jsonrpc'] = {
+                    'status': status,
+                    'message': message
+                }
             else:
-                blob['status'] = 2
+                blob['status_jsonrpc'] = {
+                    'status': 'OFFLINE',
+                    'message': ''
+                }
 
-                if bot.jsonrpc:
-                    check = self._fetch_jsonrpc_status(bot)
-                    if isinstance(check, CrawlBotException):
-                        blob['status'] = 1
-                        status = 'ERROR'
-                        message = check.message
-                    else:
-                        status = 'OK'
-                        message = ''
-
-                    blob['status_jsonrpc'] = {
-                        'status': status,
-                        'message': message
-                    }
-
-                if bot.amqp:
+            if bot.amqp:
+                if bot.amqp_name:
                     check = self._fetch_amqp_status(bot)
                     if isinstance(check, CrawlBotException):
                         blob['status'] = 1
@@ -59,24 +82,43 @@ class CrawlBots():
                         'status': status,
                         'message': message
                     }
+                else:
+                    blob['status_amqp'] = {
+                        'status': 'ERROR',
+                        'message': 'No AMQP endpoint specified. Click crawlbot details for more information.'
+                    }
+            else:
+                blob['status_amqp'] = {
+                    'status': 'OFFLINE',
+                    'message': ''
+                }
 
-            data.append(blob)
-
-        return data
+        return blob
 
     def _fetch_amqp_status(self, bot):
         # ~$ curl -u user:pass "http://<HOST>/api/queues/<VHOST>/<QUEUE>" | python -m json.tool
 
+        endpoint = [z for z in self.amqp_endpoints if z.name == bot.amqp_name]
+        if not endpoint:
+            bot.amqp_name = ''
+            self.db.commit()
+            return CrawlBotException('The endpoint to which this bot was assigned to does not exist anymore. Please re-assign an AMQP endpoint.')
+        else:
+            endpoint = endpoint[0]
+
+        # to-do: support port too, for the web-api
+        endpoint_rabbitmq = 'http://%s/api/' % endpoint.host
+
         ses = requests.session()
         try:
             res = ses.get('%squeues/%s/crawl_queue' % (
-                self.endpoint_rabbitmq,
-                self.cfg['rabbitmq']['vhost']
+                endpoint_rabbitmq,
+                endpoint.virtual_host
             ), headers={
                 'User-Agent': self.webclient_ua
             }, auth=HTTPBasicAuth(
-                self.cfg['rabbitmq']['username'],
-                self.cfg['rabbitmq']['password'])
+                endpoint.username,
+                endpoint.password)
             , timeout=1)
 
             if res.status_code == 401:
@@ -107,9 +149,9 @@ class CrawlBots():
             return CrawlBotException(message='Specified AMQP consumer tag not found in RabittMQ queue. Looking for consumer tag: \'%s\'. Does the crawlbot actually have a connection to RabbitMQ and the right queue?' % uid)
 
         except requests.exceptions.Timeout:
-            return CrawlBotException(message='Could not connect to the RabbitMQ API. Is it reachable?<br>Address: %s' % self.endpoint_rabbitmq)
+            return CrawlBotException(message='Could not connect to the RabbitMQ API. Is it reachable?<br>Address: %s' % endpoint_rabbitmq)
         except requests.exceptions.ConnectionError:
-            return CrawlBotException(message='Could not connect to the RabbitMQ API. Is it reachable?<br>Address: %s' % self.endpoint_rabbitmq)
+            return CrawlBotException(message='Could not connect to the RabbitMQ API. Is it reachable?<br>Address: %s' % endpoint_rabbitmq)
         except Exception as ex:
             return CrawlBotException(message=str(ex))
 

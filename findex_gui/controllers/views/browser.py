@@ -9,13 +9,16 @@ from findex_common.exceptions import BrowseException
 
 
 class Browser():
-    def __init__(self, db, findex):
+    def __init__(self, db, findex, path):
+        self.path = path
         self.db = db
         self.findex = findex
 
         self.env = {}
         self.data = {}
         self.files = None
+
+        self.parse_incoming_path(self.path)
 
     def parse_incoming_path(self, path):
         self.data['isdir'] = path.endswith('/')
@@ -40,9 +43,16 @@ class Browser():
         self.data['resource_id'] = resource.id
         self.data['resource'] = resource
 
-        files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path_quoted'])
+        files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path'])
         if not files:
-            raise BrowseException('No files found')
+            files = self.findex.get_files_objects(resource_id=resource.id, total_count=1)
+            if files:
+                # to-do: temp. solution; introduce dynamic paths sometime
+                from bottle import redirect
+                path = files[0].file_path[1:]
+                raise redirect('/browse/%s/%s' % (self.data['resource_name'], path),301)
+            else:
+                raise BrowseException('No files found')
 
         self.files = files
 

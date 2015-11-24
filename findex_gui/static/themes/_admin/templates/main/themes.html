@@ -1,0 +1,126 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+{% include '_admin/templates/navigation/header.html' %}
+
+<style>
+    td{
+        line-height:1;
+    }
+    .progress {
+        margin-bottom: 0px;
+    }
+    thead>tr>th:first-child{
+        width:16px;
+    }
+    thead>tr>th:nth-child(2){
+        width:200px;
+    }
+    thead>tr>th:nth-child(3){
+        width:160px;
+    }
+    thead>tr>th:nth-child(3){
+        width:260px;
+    }
+    pre{
+        font-size:12px;
+    }
+    #content>p>img{
+        width: 80%;
+        margin: 0 auto;
+        display: block;
+    }
+</style>
+
+<div class="container" style="margin-top: 40px;">
+    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
+
+        <!-- sidebar -->
+        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
+            {% include '_admin/templates/navigation/sidebar.html' %}
+        </div>
+
+        <!-- main area -->
+        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
+            <h3>Themes</h3>
+            <p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="max-width: 200px;">
+                            <select class="form-control" id="selectbox_themes">
+                            </select>
+                        </div>
+                        <table class="table table-striped" id="table_theme">
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Preview</h5>
+                        <img style="border: 1px solid #C1C1C1;width:100%;" src="/static/themes/findex_official/preview.jpg"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+
+                    </div>
+                    <div class="col-md-6">
+                        <p style="font-size:14px;" id="theme_description_text"></p>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+    function json_themes(data){
+
+        var obj = data['themes/list'];
+        var list = obj['list'];
+        var active = obj['active'];
+
+        var options = {};
+        var active_in_list = -1;
+        for (var i = 0; i != list.length; i++) {
+            options[i+1] = list[i]['theme_name'];
+
+            if(active == list[i]['theme_name']){
+                active_in_list = i;
+            }
+        }
+
+        var active_theme = list[active_in_list];
+
+        $.each(options, function(key, value) {
+             $('#selectbox_themes')
+                 .append($("<option></option>")
+                 .attr("value",key)
+                 .text(value));
+        });
+
+        $('#selectbox_themes>option:eq('+active_in_list+')').prop('selected', true);
+
+        var theme_table_content = '';
+
+        for(var key in active_theme){
+            if(key == 'theme_description' || key == 'author_name'){
+                continue;
+            }
+            theme_table_content += '<tr><td>'+key+'</td><td>'+active_theme[key]+'</td></tr>';
+        }
+
+        $('#table_theme>tbody').html(theme_table_content);
+        $('#theme_description_text').html(active_theme['theme_description']);
+
+    }
+
+    $.getJSON("/api/themes/list", json_themes);
+});
+</script>
+
+{% endblock %}

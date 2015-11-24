@@ -1,132 +1,218 @@
-import json
-import urllib
-from sqlalchemy import and_
+import bottle, json
 from bottle import response, route, HTTPError
 
-from findex_gui.db.orm import Files, Resources
+from findex_gui.controllers.findex.amqp import AmqpEndpoint
 from findex_gui.bin.config import FindexGuiConfig
-from findex_gui.controllers.findex.auth import basic_auth
 from findex_gui.controllers.findex.crawlers import CrawlBots
-import findex_gui.controllers.findex.themes as themes
+from findex_gui.controllers.findex.amqp import Amqp
+from findex_gui.controllers.helpers import auth_strap, data_strap
+from findex_gui.controllers.views.searcher import Searcher
+from findex_gui.db.orm import Crawlers
 
 from findex_common.utils import ArgValidate
-from findex_common.bytes2human import bytes2human
 
 
-cfg = FindexGuiConfig()
-
-
-@route('/api/crawlbots/list', method='GET')
-def crawlbot_list(db):
-    auth = basic_auth()
-    if isinstance(auth, HTTPError):
-        return auth
-
-    crawlbots = CrawlBots(cfg, db)
-    data = crawlbots.list()
-
-    return {'crawlbots/list': data}
-
-@route('/api/themes/list', method='GET')
-def themes_list(db):
-    auth = basic_auth()
-    if isinstance(auth, HTTPError):
-        return auth
-
-    list = themes.DATA.get_themes()
-    active = themes.DATA.get_theme()
-
-    return {
-        'themes/list': {
-            'list': list,
-            'active': active
-        }
-    }
-
-
-@route('/api/search/')
-def search(db):
-    pass
-
-
-@route('/api/<name>', method='GET')
-def recipe_show( name="" ):
-    pass
-
-
-class Api():
-    def __init__(self, cfg, db):
+class FindexApi():
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.db = db
         self.arg_validate = ArgValidate()
 
-    def admin_crawlbots_list(self, method='GET'):
-        crawls = CrawlBots(self.cfg, self.db)
-        data = crawls.list()
+        self.routes()
 
-        return json.dumps(data)
+    def routes(self):
+        global route
 
-    def parse(self):
-        args = self.arg_validate.verify_args({'cmd': 'string'}, 'POST')
-        if isinstance(args, str):
-            return json.dumps({'del_task': 'ERR',
-                               'msg': 'arg parse error'})
+        @route('/api/<path:path>', method=['GET', 'POST'])
+        def dyn(path, db):
+            path = path.replace('/', '_')
 
-        response.content_type = 'application/json; charset=utf-8'
+            try:
+                if path.startswith('_'):
+                    raise Exception()
 
-        if args['cmd'] == 'menu_search_dropdown':
-            args = self.arg_validate.verify_args({'val': 'str', 'format': 'int'}, 'POST')
-            if isinstance(args, str):
-                print ':(1'
-                return {'menu_search_dropdown': 'ERR',
-                        'msg': args}
+                func = getattr(self, path)
+            except Exception as ex:
+                return {
+                    'nope': 'nope'
+                }
 
-            val = args['val'].lower()
-            val = val.replace('%', '')
+            return func(db)
 
-            # length validations
-            max_val_length = 22
-            min_val_length = 4
+    @auth_strap
+    def bot_list(self, db, env):
+        controller = CrawlBots(self.cfg, db)
+        data = controller.list()
 
-            if len(val) >= max_val_length:
-                val = val[:max_val_length]
-            elif len(val) < min_val_length:
-                return {'menu_search_dropdown': 'ERR',
-                        'msg': args}
+        return {'bot/list': data}
 
-            data = {}
-            for i in range(0, 5):
-                results = self.db.query(Files).filter(
-                    and_(Files.file_isdir == False, Files.searchable.like(val+'%'), Files.file_format == i)
-                ).limit(6).list()
+    @auth_strap
+    def bot_assign_amqp_endpoint(self, db, env):
+        args = ArgValidate().verify_args({
+            'bot_id': int,
+            'amqp_endpoint_name': str
+        }, 'POST')
+        if not isinstance(args, dict):
+            return {
+                'bot/assign_amqp_endpoint': {
+                    'status': 'FAIL',
+                    'message': str(args)
+                }
+            }
 
-                if not results:
-                    data[i] = []
+        bot = db.query(Crawlers).filter(Crawlers.id == args['bot_id']).first()
 
-                for result in results:
-                    host = self.db.query(Resources).filter_by(id=result.resource_id).first()
-                    if not host:
-                        continue
+        if not bot:
+            return {
+                'bot/assign_amqp_endpoint': {
+                    'status': 'FAIL',
+                    'message': 'no bot by that id'
+                }
+            }
 
-                    file_name = urllib.unquote_plus(result.file_name)
-                    file_path = urllib.unquote_plus(result.file_path)
-                    href = '/%s%s' % (host.address, file_path)
+        endpoint = Amqp(db).get_endpoint(args['amqp_endpoint_name'])
+        if not endpoint:
+            return {
+                'bot/assign_amqp_endpoint': {
+                    'status': 'FAIL',
+                    'message': 'no amqp endpoint by that id'
+                }
+            }
 
-                    d = {
-                        'file_name': file_name,
-                        'file_size': bytes2human(result.file_size),
-                        'host': host.address,
-                        'path': file_path,
-                        'href': href,
-                        'format': result.file_format
-                    }
+        bot.amqp_name = endpoint.name
+        db.commit()
 
-                    if not result.file_format in data:
-                        data[result.file_format] = [d]
-                    else:
-                        data[result.file_format].append(d)
+        return {
+            'bot/assign_amqp_endpoint': {
+                'status': 'OK'
+            }
+        }
 
-            return json.dumps({
-                'menu_search_dropdown': 'OK',
-                'search_val': val,
-                'data': data})
+    @auth_strap
+    def themes_list(self, db, env):
+        list = bottle.theme.get_themes()
+        active = bottle.theme.theme_active
+
+        return {
+            'themes/list': {
+                'list': list,
+                'active': active
+            }
+        }
+
+    @auth_strap
+    def amqp_list(self, db, env):
+        endpoints = Amqp(db).get_endpoints()
+        data = []
+
+        for endpoint in endpoints:
+            blob = dict(endpoint)
+            blob['password'] = '****'
+            data.append(blob)
+
+        return {
+            'amqp/list': data
+        }
+
+    def _amqp_test(self, db):
+        args = ArgValidate().verify_args({
+            'host': str,
+            'port': int,
+            'username': str,
+            'password': str,
+            'type': str,
+            'name': str,
+            'vhost': str
+        }, 'POST')
+
+        if not isinstance(args, dict):
+            return Exception(args)
+
+        # check for duplicates based on endpoint name
+        endpoint = Amqp(db).get_endpoint(args['name'])
+        if endpoint:
+            return Exception('Duplicate AMQP endpoint name')
+
+        endpoint = AmqpEndpoint(
+            name=args['name'],
+            username=args['username'],
+            password=args['password'],
+            host=args['host'],
+            port=args['port'],
+            virtual_host=args['vhost']
+        )
+
+        try_connect = endpoint.connect()
+        if isinstance(try_connect, Exception):
+            return Exception(try_connect)
+
+        endpoint.close()
+        return endpoint
+
+    @auth_strap
+    def amqp_test(self, db, env):
+        endpoint = self._amqp_test(db)
+        if isinstance(endpoint, Exception):
+            return {
+                'amqp/test': {
+                    'status': 'FAIL',
+                    'message': str(endpoint)
+                }
+            }
+
+        return {
+            'amqp/test': {
+                'status': 'OK'
+            }
+        }
+
+    @auth_strap
+    def amqp_add(self, db, env):
+        endpoint = self._amqp_test(db)
+        if isinstance(endpoint, Exception):
+            return {
+                'amqp/add': {
+                    'status': 'FAIL',
+                    'message': str(endpoint)
+                }
+            }
+
+        Amqp(db).set_endpoint(
+            endpoint=endpoint
+        )
+
+        return {
+            'amqp/add': {
+                'status': 'OK'
+            }
+        }
+
+    @auth_strap
+    def amqp_delete(self, db, env):
+        args = ArgValidate().verify_args({
+            'name': str
+        }, 'POST')
+        if not isinstance(args, dict):
+            return {
+                'amqp/delete': {
+                    'status': 'FAIL',
+                    'message': str(args)
+                }
+            }
+
+        Amqp(db).del_endpoint(args['name'])
+
+        # for each bot that was assigned this AMQP endpoint, remove it
+        bots = db.query(Crawlers).filter(Crawlers.amqp_name == args['name']).all()
+        for b in bots:
+            b.amqp_name = ''
+        db.commit()
+
+        return {
+            'amqp/delete': {
+                'status': 'OK'
+            }
+        }
+    def search(self, db):
+        params = bottle.request.params.dict
+
+        #data = Searcher(cfg=self.cfg, db=db, env={}).search(params)

@@ -73,11 +73,11 @@ $(document).ready(function() {
         }
     });
 
-    function json_bots(data){
+    function callback(data){
         crawlbots_table.clear();
         crawlbots = {};
 
-        data = data['bots/list'];
+        data = data['bot/list'];
 
         var online_counter = 0;
 
@@ -146,15 +146,15 @@ $(document).ready(function() {
     $('body').on('click', '.btn_bot_details', function(){
         // hacky ;/
         var id = $(this).parent().parent().attr('id');
-        window.location.href = '/admin/bots/' + id;
+        window.location.href = '/admin/bot/' + id;
     });
 
     setInterval(function(){
-        //$.getJSON( "/api/bots/list", json_bots);
+        //$.getJSON( "/api/bot/list", callback);
     }, 3000);
 
 
-    $.getJSON( "/api/bots/list", json_bots);
+    $.getJSON( "/api/bot/list", callback);
 });
 </script>
 

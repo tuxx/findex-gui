@@ -1,14 +1,11 @@
 from bottle import jinja2_template
 from findex_gui.controllers.helpers import data_strap
 
-from findex_common.utils import ArgValidate
-
 
 class ThemeControllers():
     def __init__(self, cfg, db):
         self.cfg = cfg
         self.db = db
-        self.arg_validate = ArgValidate()
 
     @data_strap
     def documentation(self, env):

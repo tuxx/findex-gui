@@ -1,0 +1,53 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+{% include '_admin/templates/navigation/header.html' %}
+
+<div class="container" style="margin-top: 40px;">
+    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
+
+        <!-- sidebar -->
+        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
+            {% include '_admin/templates/navigation/sidebar.html' %}
+        </div>
+
+        <!-- main area -->
+        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
+            <h3>Delete AMQP Endpoint</h3>
+            <p>
+                Dear sir, are you sure you want to delete AMQP endpoint <b>{{ data['endpoint'].name }}</b>?
+            </p>
+            <p>
+            <div class="btn-group">
+                <button id="back" type="button" class="btn btn-primary btn-sm">No, go back</button>
+                <button id="delete" type="button" class="btn btn-success btn-sm">Yep</button>
+            </div>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function callback(data){
+        data = data['amqp/delete'];
+
+        if(data['status'] == 'OK'){
+            window.location.href = '/admin/amqp/list';
+        } else {
+            alert(data['message']);
+        }
+    }
+
+    $('#back').click(function(){
+       window.history.back();
+    });
+
+    $('#delete').click(function(){
+        var data = 'name={{ data['endpoint'].name }}';
+        $.post("/api/amqp_delete", data, callback);
+    })
+});
+</script>
+
+{% endblock %}

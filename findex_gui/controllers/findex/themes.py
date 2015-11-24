@@ -39,42 +39,56 @@ class Theme():
 class Themes():
     def __init__(self):
         self.db = None
-        self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'themes')
-        self.themes = {}
 
-        self.active_theme = {}
+        self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'themes')
+        self.theme_data = {}
+        self.theme_default = 'findex_official'
+        self.theme_active = ''
 
         self.load()
 
     def setup_db(self, db):
         self.db = sessionmaker(bind=db.engine)()
+        self.load()
 
     def load(self):
-        import glob
+        if not self.db:
+            return
 
-        dirs = [os.path.join(self.theme_dir, o) for o in os.listdir(self.theme_dir) if os.path.isdir(os.path.join(self.theme_dir, o))]
+        dirs = [os.path.join(self.theme_dir, o) for o in os.listdir(self.theme_dir) if os.path.isdir(os.path.join(self.theme_dir, o)) and not o.startswith('_')]
 
         for d in dirs:
-            self.validate_dir(d)
+            theme = self.validate_theme(d)
 
-        active_theme = self.get_theme()
-        if not active_theme:
-            self.change_theme('findex_official')
-        else:
-            self.change_theme(active_theme.val)
+            if isinstance(theme, Theme):
+                self.add_theme(theme)
 
-    def validate_dir(self, dir):
+            active_theme = self.db.query(Options).filter(Options.key == 'theme_active').first()
+            if not active_theme:
+                self.db.add(Options('theme_active', self.theme_default))
+                self.db.commit()
+
+                active_theme = self.theme_default
+            else:
+                active_theme = active_theme.val
+
+            self.change_active_theme(active_theme)
+
+    def add_theme(self, theme):
+        self.theme_data[theme.name] = theme.options
+
+    def validate_theme(self, dir):
         try:
-            if dir in self.themes:
+            if dir in self.theme_data:
                 raise Exception('Duplicate theme. Is it already added?')
 
             path = '%s/theme.json' % dir
 
             options = ''.join(utils.file_read(path))
             blob = utils.is_json(options)
-
             theme = Theme(name=dir, data=blob)
-            self.themes[theme['theme_name']] = theme.options
+
+            return theme
 
         except IOError:
             raise Exception("Could not read \"%s%s\" - Themes file not found." % (self.theme_dir, path))
@@ -86,39 +100,23 @@ class Themes():
             raise Exception(str(ex))
 
     def get_theme(self):
-        if self.active_theme:
-            if (datetime.now() - self.active_theme['date']).total_seconds() <= 300:
-                return self.active_theme['name']
-
-        if self.db:
-            opt = self.db.query(Options).filter(Options.key == 'theme_active').first()
-            return opt.val
+        return self.theme_active
 
     def get_themes(self):
         data = []
-        for k, v in self.themes.iteritems():
+        for k, v in self.theme_data.iteritems():
             data.append(v)
 
         return data
 
-    def change_theme(self, name):
-        theme = self.get_theme()
+    def change_active_theme(self, theme_name):
+        self.theme_active = theme_name
+        self.bootstrap_theme(theme_name)
 
-        if not theme:
-            if self.db:
-                self.db.add(Options(key='theme_active', val=name))
-                self.db.commit()
-        elif theme.val != name:
-            theme.val = name
-
-            if self.db:
-                self.db.commit()
-
-        template_path = os.path.join(self.theme_dir, name, 'templates')
+    def bootstrap_theme(self, theme_name):
+        template_path = os.path.join(self.theme_dir, theme_name, 'templates')
         bottle.TEMPLATE_PATH = ['findex_gui/static/themes/', template_path]
 
         loader = jinja2.FileSystemLoader(template_path)
         jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
-        import_module('findex_gui.static.themes.%s.bin.views' % name)
-
-        self.active_theme = {'name': name, 'date': datetime.now()}
+        import_module('findex_gui.static.themes.%s.bin.views' % theme_name)

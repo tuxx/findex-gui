@@ -1,6 +1,7 @@
 table#jsontable_crawlbots>tbody>tr>td.bot-ok{
     background-color: #FBFBFB;
     font-weight: bold;
+    color: green;
 }
 table#jsontable_crawlbots>tbody>tr>td.bot-warning{
     font-weight: bold;

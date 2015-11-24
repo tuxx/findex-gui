@@ -1,7 +1,7 @@
 {
-    "theme_name": "findex_officiala",
+    "theme_name": "_admin",
     "theme_version": "0.1",
-    "theme_description": "official theme for the main site",
+    "theme_description": "official admin interface",
     "author": "Sander Ferdinand",
     "author_url": "http://cedsys.nl"
 }

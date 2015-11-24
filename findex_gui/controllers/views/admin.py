@@ -5,7 +5,7 @@ from findex_gui.db.orm import Resources
 from findex_gui.controllers.findex.findex import Findex
 from findex_gui.controllers.helpers import data_strap
 
-
+from findex_gui.controllers.findex.amqp import Amqp
 from findex_gui.controllers.findex.crawlers import CrawlBots
 
 
@@ -31,26 +31,64 @@ class Admin():
         return jinja2_template('_admin/templates/main/themes', env=env, data=data)
 
     @data_strap
-    def bots(self, env):
+    def bot_list(self, env):
         env['section'] = ['Bots']
         data = {}
 
-        return jinja2_template('_admin/templates/main/bots', env=env, data=data)
+        return jinja2_template('_admin/templates/main/bot_list', env=env, data=data)
 
     @data_strap
-    def bot(self, bot_id, env):
+    def bot_id(self, bot_id, env):
         data = {}
 
         crawl = CrawlBots(cfg=self.cfg, db=self.db)
         bot = crawl.get_bot(bot_id)
+        if not bot:
+            raise Exception("Bot not found")
 
         data['bot'] = bot
         env['section'] = ['Bots', bot['crawler_name']]
 
-        return jinja2_template('_admin/templates/main/bot', env=env, data=data)
+        data['endpoints'] = Amqp(self.db).get_endpoints()
+
+        return jinja2_template('_admin/templates/main/bot_id', env=env, data=data)
 
     @data_strap
-    def amqps(self, env):
-        env['section'] = ['AMQP Resources']
+    def amqp_list(self, env):
+        env['section'] = ['AMQP Endpoints']
 
-        return jinja2_template('_admin/templates/main/amqps', env=env)
+        return jinja2_template('_admin/templates/main/amqp_list', env=env)
+
+    @data_strap
+    def amqp_add(self, env):
+        env['section'] = ['AMQP Endpoints', 'Add']
+
+        return jinja2_template('_admin/templates/main/amqp_add', env=env)
+
+    @data_strap
+    def amqp_delete(self, amqp_name, env):
+        endpoint = Amqp(self.db).get_endpoint(name=amqp_name)
+        if not endpoint:
+            raise Exception("Endpoint not found")
+
+        env['section'] = ['AMQP Endpoints', 'Delete', amqp_name]
+        data = {
+            'endpoint': endpoint
+        }
+
+        return jinja2_template('_admin/templates/main/amqp_delete', env=env, data=data)
+
+    @data_strap
+    def amqp_id(self, amqp_name, env):
+        endpoint = Amqp(self.db).get_endpoint(name=amqp_name)
+        if not endpoint:
+            raise Exception('Endpoint not found')
+
+        env['section'] = ['AMQP Endpoints', amqp_name]
+
+        data = {
+            'endpoint': dict(endpoint)
+        }
+
+        return jinja2_template('_admin/templates/main/amqp_id', env=env, data=data)
+

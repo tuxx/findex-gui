@@ -6,6 +6,7 @@ from findex_gui.db.orm import Crawlers
 from findex_gui.bin.time import TimeMagic
 from findex_common.exceptions import CrawlBotException
 from findex_common.utils import DataObjectManipulation
+from findex_gui.controllers.findex.amqp import Amqp
 
 
 class CrawlBots():
@@ -17,10 +18,12 @@ class CrawlBots():
         self.webclient_ua = 'Findex GUI'
         self.amqp_consumers = {}
 
+        self.amqp_endpoints = Amqp(self.db).get_endpoints()
+
     def get_bot(self, bot_id):
         bot = self.db.query(Crawlers).filter(Crawlers.id == bot_id).first()
-
-        return self.format(bot)
+        if bot:
+            return self.format(bot)
 
     def list(self):
         bots = self.db.query(Crawlers).all()
@@ -65,19 +68,25 @@ class CrawlBots():
                 }
 
             if bot.amqp:
-                check = self._fetch_amqp_status(bot)
-                if isinstance(check, CrawlBotException):
-                    blob['status'] = 1
-                    status = 'ERROR'
-                    message = check.message
-                else:
-                    status = 'OK'
-                    message = ''
+                if bot.amqp_name:
+                    check = self._fetch_amqp_status(bot)
+                    if isinstance(check, CrawlBotException):
+                        blob['status'] = 1
+                        status = 'ERROR'
+                        message = check.message
+                    else:
+                        status = 'OK'
+                        message = ''
 
-                blob['status_amqp'] = {
-                    'status': status,
-                    'message': message
-                }
+                    blob['status_amqp'] = {
+                        'status': status,
+                        'message': message
+                    }
+                else:
+                    blob['status_amqp'] = {
+                        'status': 'ERROR',
+                        'message': 'No AMQP endpoint specified. Click crawlbot details for more information.'
+                    }
             else:
                 blob['status_amqp'] = {
                     'status': 'OFFLINE',
@@ -89,21 +98,27 @@ class CrawlBots():
     def _fetch_amqp_status(self, bot):
         # ~$ curl -u user:pass "http://<HOST>/api/queues/<VHOST>/<QUEUE>" | python -m json.tool
 
-        if not self.cfg['rabbitmq'] or not 'host' in self.cfg['rabbitmq']:
-            return CrawlBotException('RabbitMQ is not configured. Go to the administration area and fill in the AMQP connection details.')
+        endpoint = [z for z in self.amqp_endpoints if z.name == bot.amqp_name]
+        if not endpoint:
+            bot.amqp_name = ''
+            self.db.commit()
+            return CrawlBotException('The endpoint to which this bot was assigned to does not exist anymore. Please re-assign an AMQP endpoint.')
+        else:
+            endpoint = endpoint[0]
 
-        endpoint_rabbitmq = 'http://%s/api/' % self.cfg['rabbitmq']['host']
+        # to-do: support port too, for the web-api
+        endpoint_rabbitmq = 'http://%s/api/' % endpoint.host
 
         ses = requests.session()
         try:
             res = ses.get('%squeues/%s/crawl_queue' % (
                 endpoint_rabbitmq,
-                self.cfg['rabbitmq']['vhost']
+                endpoint.virtual_host
             ), headers={
                 'User-Agent': self.webclient_ua
             }, auth=HTTPBasicAuth(
-                self.cfg['rabbitmq']['username'],
-                self.cfg['rabbitmq']['password'])
+                endpoint.username,
+                endpoint.password)
             , timeout=1)
 
             if res.status_code == 401:

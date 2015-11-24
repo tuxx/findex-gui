@@ -1,7 +1,9 @@
 import bottle, os
 from bottle import HTTPError, route, app, request, redirect, response, error, jinja2_template, run, static_file
+from sqlalchemy.orm import sessionmaker
 
-from findex_gui.db.orm import Postgres
+from findex_common.utils import is_int
+from findex_gui.db.orm import Postgres, Options
 
 from findex_gui.controllers.views.home import Home
 from findex_gui.controllers.views.browse import Browse
@@ -102,14 +104,32 @@ class FindexApp():
 
             return func()
 
-        @route('/admin/bots/<path:path>')
+        @route('/admin/<path:path>')
         def admin_bot(path, db):
             auth = basic_auth()
             if isinstance(auth, HTTPError):
                 return auth
 
+            spl = path.split('/')
             controller = Admin(self.cfg, db)
-            return controller.bot(path)
+
+            if not spl[1]:
+                redirect('/admin/', 301)
+
+            if spl[0] == 'bot':
+                if is_int(spl[1]):
+                    return controller.bot_id(spl[1])
+                elif spl[1] == 'list':
+                    return controller.bot_list()
+            elif spl[0] == 'amqp':
+                if spl[1] == 'add':
+                    return controller.amqp_add()
+                elif spl[1] == 'list':
+                    return controller.amqp_list()
+                elif spl[1] and not len(spl) > 2:
+                    return controller.amqp_id(spl[1])
+                elif spl[2] == 'delete':
+                    return controller.amqp_delete(spl[1])
 
         @error(404)
         @error(405)
@@ -299,9 +319,17 @@ class FindexApp():
 
         self.api = None
 
+    def populate_db(self):
+        ses = sessionmaker(bind=self.db.engine)()
+
+        if not ses.query(Options).filter(Options.key == 'amqp_blob').first():
+            ses.add(Options('amqp_blob', '[]'))
+        ses.commit()
+
     def hook_db(self):
         self.db = Postgres(self.cfg, self.app)
         bottle.theme.setup_db(self.db)
+        self.populate_db()
         
     def bind(self):
         run(app=self.app,

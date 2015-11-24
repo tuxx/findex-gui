@@ -9,16 +9,17 @@ Findex is a platform for finding and indexing files over multiple protocols. The
 
 ### Project status
 Findex is still in development. Forking the project is not recommended as the documentation has not been written yet and essential parts of the code are still subject to change.
-  - `findex-gui` - functional and released
-  - `findex-crawl` - somewhat functional, but not released yet
-  - `findex-common` - functional and released
+  - `findex-gui` - functional
+  - `findex-crawl` - somewhat functional
+  - `findex-common` - functional
 
-As the platform is useless without the `findex-crawl` package, Please wait untill that comes out before trying to get this repository to run.
+The only thing that still needs to be added is the functionality to add crawl jobs (point your bots to a FTP/HTTP server).
+As this is obviously an important feature for an indexer, please wait before trying to get this to run.
 
 ### Findex Features
 
   - Crawl HTTP open directories (webdav)(BASIC/DIGEST)
-  - Crawl FTP/SMB servers
+  - Crawl FTP servers
   - Distributed crawling with RabbitMQ AMQP messaging
   - Bootstrap 3.1.1 file browser.
 
@@ -30,7 +31,7 @@ As the platform is useless without the `findex-crawl` package, Please wait until
   - Python >= **2.7.3**
   - Postgres >= **9.4**
   - RabbitMQ >= **3.5.4** (optional)
-  - `findex-common` >= **0.2.1**
+  - `findex-common` >= **0.2.3**
 
 ### Installation
 There is no documentation yet. However; if you want to install it anyway, follow these steps:
@@ -39,7 +40,7 @@ First fetch the required system packages.
 ```sh
 $ apt-get install python-virtualenv python-pip libpq-dev
 ```
-Install or upgrade the latest findex-common package (version 0.2.0 is latest).
+Install or upgrade the latest findex-common package (version 0.2.3 is latest).
 ```sh
 $ pip install findex-common
 or

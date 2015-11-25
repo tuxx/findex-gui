@@ -4,6 +4,20 @@
     {% include "_admin/templates/helpers/resources.html" %}
 </head>
 <body>
-    {% block content %} {% endblock %}
+    <div class="container-fluid">
+        <div class="row" id="canvas">
+
+            <!-- sidebar -->
+            <div class="col-md-2 sidebar">
+                {% include '_admin/templates/navigation/sidebar.html' %}
+            </div>
+
+            <!-- main area -->
+            <div id="content" class="col-md-offset-2" data-spy="scroll">
+                {% include '_admin/templates/navigation/header.html' %}
+                {% block content %} {% endblock %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

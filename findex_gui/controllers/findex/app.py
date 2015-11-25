@@ -130,6 +130,9 @@ class FindexApp():
                     return controller.amqp_id(spl[1])
                 elif spl[2] == 'delete':
                     return controller.amqp_delete(spl[1])
+            elif spl[0] == 'appearance':
+                if spl[1] == 'list':
+                    return controller.themes()
 
         @error(404)
         @error(405)

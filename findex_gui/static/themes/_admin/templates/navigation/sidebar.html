@@ -1,9 +1,90 @@
-<div>
-    <ul class="nav" id="sidebar-nav">
-        <li><a href="/admin/general">General</a></li>
-        <li><a href="/admin/themes">Appearance</a></li>
-        <li><a href="/admin/bot/list">Bots</a></li>
-        <li><a href="/admin/amqp/list">AMQP</a></li>
-        <li><a href="#">Tasks</a></li>
-    </ul>
-</div>
+<style>
+
+</style>
+<div class="clearfix">
+    <aside class="sidebar col-md-2">
+        <nav class="sidebar-nav">
+            <div id="header">
+                <span>admin</span>
+            </div>
+            <ul class="metismenu" id="sidebar-nav">
+                <li>
+                    <a href="#" aria-expanded="false">General <span class="fa arrow"></span></a>
+                    <ul aria-expanded="true" class="collapse">
+                        <li>
+                            <a href="/admin/general">
+                                <span class="sidebar-nav-item-icon fa fa-code-fork"></span>
+                                Settings
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/appearance/list">
+                                <span class="sidebar-nav-item-icon fa fa-star"></span>
+                                Appearance
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" aria-expanded="false">Network <span class="fa arrow"></span></a>
+                    <ul aria-expanded="false" class="collapse">
+                        <li><a href="/admin/bot/list">Crawl Bots</a></li>
+                        <li>
+                            <a href="/admin/amqp/list" aria-expanded="false">AMQP Endpoints <span class="glyphicon arrow"></span></a>
+                            <ul aria-expanded="false" class="collapse">
+                                <li class="indent"><a href="/admin/amqp/add">Add</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" aria-expanded="false">Logs <span class="glyphicon arrow"></span></a>
+                    <ul aria-expanded="false" class="collapse">
+                        <li><a href="#">Application Log</a></li>
+                        <li><a href="#">Crawlbots</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+            <script>
+                $(function () {
+                    // hacky menu is hacky
+                    var sidebar = $('#sidebar-nav').metisMenu({toggle: false});
+
+                    // collapse sidebar menu based on currently active menu item
+                    sidebar.children().each(function(){
+                        var section = $(this);
+
+                        section.find('ul>li>a').each(function(){
+                            var item = $(this);
+                            var href = $(item).attr('href');
+
+                            if(href.substring(0, 7) === '/admin/' && href == window.location.pathname) {
+                                item.addClass('sidebar_item_active');
+                                section.find('ul').eq(0).addClass('in');
+                                item.parent().addClass('active');
+
+                                if(item.parent().find('ul') && item.parent().attr('class') == 'active'){
+                                    item.parent().find('ul').eq(0).addClass('in');
+                                } else if(item.parent().attr('class') == 'indent active'){
+                                    item.parent().parent().addClass('in');
+                                }
+                            }
+                        });
+                    });
+
+                    // some clicks dont register? :D
+                    $('body').on('click', 'li>a', function(){
+
+                        if(!$(this).attr('class')){
+                            var id = $(this).attr('href');
+
+                            window.location.href = id;
+                        }
+                    });
+
+                });
+            </script>
+        </nav>
+        </aside>
+    </div>

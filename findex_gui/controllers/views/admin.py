@@ -28,7 +28,7 @@ class Admin():
         env['section'] = ['Themes']
         data = {}
 
-        return jinja2_template('_admin/templates/main/themes', env=env, data=data)
+        return jinja2_template('_admin/templates/main/themes_list', env=env, data=data)
 
     @data_strap
     def bot_list(self, env):

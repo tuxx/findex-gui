@@ -1,41 +1,28 @@
 {% extends "_admin/templates/helpers/base.html" %}
 {% block content %}
 
-{% include '_admin/templates/navigation/header.html' %}
+    <div id="content" class="col-xs-13 col-sm-12" data-spy="scroll" data-target="#sidebar-nav">
+        <h5 id="amqpendpoint_counter">0 online</h5>
 
-<div class="container" style="margin-top: 40px;">
-    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
-
-        <!-- sidebar -->
-        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
-            {% include '_admin/templates/navigation/sidebar.html' %}
-        </div>
-
-        <!-- main area -->
-        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
-            <h3>AMQP Endpoints</h3>
-            <h5 id="amqpendpoint_counter">0 online</h5>
-
-            <p>
-                <table id="jsontable_amqpendpoint" class="display table table-bordered table-striped" cellspacing="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th style="width: 80px;">Name</th>
-                            <th style="width: 150px;">Host</th>
-                            <th style="width: 80px;">Port</th>
-                            <th style="width: 80px;">User</th>
-                            <th style="width: 50px;">vhost</th>
-                            <th style="width: 50px !important;"></th>
-                        </tr>
-                    </thead>
-                </table>
-                <a href="/admin/amqp/add">
-                    <button style="float:right;" type="button" class="btn btn-success btn-sm">Add new endpoint</button>
-                </a>
-            </p>
-        </div>
+        <p>
+            <table id="jsontable_amqpendpoint" class="display table table-bordered table-striped" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Name</th>
+                        <th style="width: 150px;">Host</th>
+                        <th style="width: 80px;">Port</th>
+                        <th style="width: 80px;">User</th>
+                        <th style="width: 50px;">vhost</th>
+                        <th style="width: 50px !important;"></th>
+                    </tr>
+                </thead>
+            </table>
+            <a href="/admin/amqp/add">
+                <button style="float:right;" type="button" class="btn btn-success btn-sm">Add new endpoint</button>
+            </a>
+        </p>
     </div>
-</div>
+
 <script>
 $(document).ready(function() {
     var amqp_endpoints_table = $('#jsontable_amqpendpoint').DataTable({

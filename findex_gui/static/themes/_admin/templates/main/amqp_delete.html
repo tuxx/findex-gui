@@ -1,31 +1,18 @@
 {% extends "_admin/templates/helpers/base.html" %}
 {% block content %}
 
-{% include '_admin/templates/navigation/header.html' %}
-
-<div class="container" style="margin-top: 40px;">
-    <div class="row row-offcanvas row-offcanvas-left" id="canvas">
-
-        <!-- sidebar -->
-        <div class="col-xs-5 col-sm-2 sidebar-offcanvas" id="sidebar" role="navigation">
-            {% include '_admin/templates/navigation/sidebar.html' %}
+    <!-- main area -->
+    <div id="content" class="col-xs-13 col-sm-12" data-spy="scroll" data-target="#sidebar-nav">
+        <p>
+            Dear sir, are you sure you want to delete AMQP endpoint <b>{{ data['endpoint'].name }}</b>?
+        </p>
+        <p>
+        <div class="btn-group">
+            <button id="back" type="button" class="btn btn-warning btn-sm">No, go back</button>
+            <button id="delete" type="button" class="btn btn-success btn-sm">Yep</button>
         </div>
-
-        <!-- main area -->
-        <div id="content" class="col-xs-13 col-sm-10" data-spy="scroll" data-target="#sidebar-nav">
-            <h3>Delete AMQP Endpoint</h3>
-            <p>
-                Dear sir, are you sure you want to delete AMQP endpoint <b>{{ data['endpoint'].name }}</b>?
-            </p>
-            <p>
-            <div class="btn-group">
-                <button id="back" type="button" class="btn btn-primary btn-sm">No, go back</button>
-                <button id="delete" type="button" class="btn btn-success btn-sm">Yep</button>
-            </div>
-            </p>
-        </div>
+        </p>
     </div>
-</div>
 
 <script>
 $(document).ready(function() {

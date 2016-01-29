@@ -3,7 +3,7 @@ from bottle import jinja2_template
 
 from findex_gui.db.orm import Resources
 from findex_gui.controllers.findex.findex import Findex
-from findex_gui.controllers.helpers import data_strap
+from findex_gui.controllers.helpers import data_strap, auth_strap
 
 from findex_gui.controllers.findex.amqp import Amqp
 from findex_gui.controllers.findex.crawlers import CrawlBots
@@ -92,3 +92,14 @@ class Admin():
 
         return jinja2_template('_admin/templates/main/amqp_id', env=env, data=data)
 
+    @data_strap
+    def task_list(self, env):
+        env['section'] = ['Tasks']
+
+        return jinja2_template('_admin/templates/main/task_list', env=env)
+
+    @data_strap
+    def task_add(self, env):
+        env['section'] = ['Tasks', 'Add']
+
+        return jinja2_template('_admin/templates/main/task_add', env=env)

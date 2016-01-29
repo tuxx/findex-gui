@@ -17,7 +17,7 @@ class Searcher():
     def _key_check(self, keyword):
         if isinstance(keyword, dict):
             if not 'key' in keyword or not keyword['key']:
-                raise SearchException('Search query must contain 4 characters or more')
+                raise SearchException('Search query must contain 1 character or more')
 
             keyword = keyword['key'][0]
 
@@ -25,8 +25,8 @@ class Searcher():
         for b in block:
             keyword = keyword.replace(b, ' ')
 
-        if len(keyword) < 4:
-            raise SearchException('Search query must contain 4 characters or more')
+        if len(keyword) < 1:
+            raise SearchException('Search query must contain 1 character or more')
 
         return keyword
 

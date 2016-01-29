@@ -1,4 +1,4 @@
-from urllib import quote_plus, unquote_plus
+from urllib import quote_plus, unquote_plus, quote, unquote
 from datetime import datetime
 
 from findex_gui.db.orm import Files, Resources
@@ -30,7 +30,8 @@ class Browser():
         if not self.data['isdir']: self.data['file_name'] = path.split('/')[-1]
         if self.data['file_path'] != '/': self.data['file_path'] += '/'
 
-        self.data['file_path_quoted'] = quote_plus(self.data['file_path'])
+        self.data['file_path_quoted_plus'] = quote_plus(self.data['file_path'])
+        self.data['file_path_quoted'] = quote(self.data['file_path'])
 
     def fetch_files(self):
         resource = self.db.query(Resources).filter_by(
@@ -43,14 +44,17 @@ class Browser():
         self.data['resource_id'] = resource.id
         self.data['resource'] = resource
 
-        files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path'])
+        if self.data['resource'].protocol == 4:
+            files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path_quoted'])
+        else:
+            files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path'])
         if not files:
             files = self.findex.get_files_objects(resource_id=resource.id, total_count=1)
             if files:
                 # to-do: temp. solution; introduce dynamic paths sometime
                 from bottle import redirect
                 path = files[0].file_path[1:]
-                raise redirect('/browse/%s/%s' % (self.data['resource_name'], path),301)
+                raise redirect('/browse/%s/%s' % (self.data['resource_name'], path), 301)
             else:
                 raise BrowseException('No files found')
 
@@ -71,6 +75,12 @@ class Browser():
             )
             setattr(x, 'file_name_human', '..')
             self.files.insert(0, x)
+
+        for f in self.files:
+            if self.data['resource'].protocol == 4:
+                setattr(f, 'href', f.file_name)
+            else:
+                setattr(f, 'href', f.file_name_human)
 
         self.files = self.findex.set_icons(env=env, files=self.files)
 

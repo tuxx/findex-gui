@@ -149,6 +149,8 @@ class Resources(Base):
     file_count = Column(sql.Integer())
     protocol = Column(sql.Integer(), nullable=False)
 
+    basepath = Column(sql.VARCHAR(), nullable=True, default='')
+
     # regular indexes
     ix_address = Index('ix_address', address)
 
@@ -174,3 +176,20 @@ class Options(Base):
     def __init__(self, key, val):
         self.key = key
         self.val = val
+
+
+class Users(Base):
+    __tablename__ = 'users'
+
+    id = Column(sql.Integer, primary_key=True)
+
+    name = Column(sql.String())
+    password = Column(sql.String())
+    admin = Column(sql.Boolean())
+    last_login = Column(sql.DateTime())
+
+    def __init__(self, name, password, admin, last_login):
+        self.name = name
+        self.password = password
+        self.admin = admin
+        self.last_login = last_login

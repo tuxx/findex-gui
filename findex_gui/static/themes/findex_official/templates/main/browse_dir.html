@@ -137,7 +137,7 @@
                                 <tbody data-link="row" class="rowlink">
                                     {% for f in data['files'] %}
                                         {% if f.file_isdir %}
-                                            {% set href = f.file_name_human + '/' %}
+                                            {% set href = f.href %}
                                         {% else %}
                                             {% set href = '/goto/' + f.id|string %}
                                         {% endif %}

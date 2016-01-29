@@ -1,9 +1,10 @@
 import bottle, os
 from bottle import HTTPError, route, app, request, redirect, response, error, jinja2_template, run, static_file
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 
 from findex_common.utils import is_int
-from findex_gui.db.orm import Postgres, Options
+from findex_gui.db.orm import Postgres, Options, Users
 
 from findex_gui.controllers.views.home import Home
 from findex_gui.controllers.views.browse import Browse
@@ -104,6 +105,8 @@ class FindexApp():
 
             return func()
 
+        from findex_gui.controllers.helpers import auth_strap
+
         @route('/admin/<path:path>')
         def admin_bot(path, db):
             auth = basic_auth()
@@ -133,6 +136,11 @@ class FindexApp():
             elif spl[0] == 'appearance':
                 if spl[1] == 'list':
                     return controller.themes()
+            elif spl[0] == 'task':
+                if spl[1] == 'add':
+                    return controller.task_add()
+                elif spl[1] == 'list':
+                    return controller.task_list()
 
         @error(404)
         @error(405)

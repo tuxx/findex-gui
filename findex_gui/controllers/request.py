@@ -1,4 +1,4 @@
-from urllib import quote_plus
+from urllib import quote_plus, quote
 import math
 
 
@@ -21,7 +21,8 @@ class BrowseRequest():
         self.return_raw = self._return_raw()
         self.folder = None
 
-        self.file_path_quoted = quote_plus(self.file_path)
+        self.file_path_quoted_plus = quote_plus(self.file_path)
+        self.file_path_quoted = quote(self.file_path)
 
     def get_raw_output(self, format):
         if format == 'json':

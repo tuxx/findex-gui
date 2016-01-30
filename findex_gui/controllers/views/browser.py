@@ -8,6 +8,7 @@ from findex_common.bytes2human import bytes2human
 from findex_common.exceptions import BrowseException
 
 
+# to-do: rewrite
 class Browser():
     def __init__(self, db, findex, path):
         self.path = path
@@ -33,30 +34,26 @@ class Browser():
         self.data['file_path_quoted_plus'] = quote_plus(self.data['file_path'])
         self.data['file_path_quoted'] = quote(self.data['file_path'])
 
-    def fetch_files(self):
-        resource = self.db.query(Resources).filter_by(
-            name=self.data['resource_name']
-        ).first()
-
+        resource = self.db.query(Resources).filter_by(name=self.data['resource_name']).first()
         if not resource:
             raise BrowseException('No resource found')
 
         self.data['resource_id'] = resource.id
         self.data['resource'] = resource
+        self.data['basepath'] = self.data['resource'].basepath[:-1]
 
+    def fetch_files(self):
         if self.data['resource'].protocol == 4:
-            files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path_quoted'])
+            files = self.findex.get_files_objects(
+                resource_id=self.data['resource'].id,
+                file_path=self.data['basepath'] + self.data['file_path_quoted'])
         else:
-            files = self.findex.get_files_objects(resource_id=resource.id, file_path=self.data['file_path'])
+            files = self.findex.get_files_objects(
+                resource_id=self.data['resource'].id,
+                file_path=self.data['basepath'] + self.data['file_path'])
+
         if not files:
-            files = self.findex.get_files_objects(resource_id=resource.id, total_count=1)
-            if files:
-                # to-do: temp. solution; introduce dynamic paths sometime
-                from bottle import redirect
-                path = files[0].file_path[1:]
-                raise redirect('/browse/%s/%s' % (self.data['resource_name'], path), 301)
-            else:
-                raise BrowseException('No files found')
+            raise BrowseException('No files found')
 
         self.files = files
 
@@ -113,11 +110,7 @@ class Browser():
         #         lftp_extras = '-u %s,%s ' % (self.source.crawl_username, self.source.crawl_password)
 
         wget = 'wget %s-r -nH --no-parent \'%s\'' % (wget_extras, url + self.data['file_path'])
-
-        #if not isinstance(lftp_extras, Debug):
         lftp = 'lftp %s-e \'mirror\' \'%s\'' % (lftp_extras, url + self.data['file_path'])
-        #else:
-        #    lftp = lftp_extras.message
 
         return dict(wget=wget, lftp=lftp)
 

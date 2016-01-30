@@ -140,6 +140,7 @@ class Resources(Base):
     description = Column(sql.String())
 
     address = Column(INET())
+    host = Column(sql.String())
     display_url = Column(sql.String(), nullable=False)
 
     date_added = Column(sql.DateTime())
@@ -149,13 +150,14 @@ class Resources(Base):
     file_count = Column(sql.Integer())
     protocol = Column(sql.Integer(), nullable=False)
 
-    basepath = Column(sql.VARCHAR(), nullable=True, default='')
+    basepath = Column(sql.String(), nullable=True, default='')
 
     # regular indexes
     ix_address = Index('ix_address', address)
 
-    def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description):
+    def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
         self.address = address
+        self.hostname = hostname
         self.display_url = display_url
         self.date_added = date_added
         self.date_crawl_start = date_crawl_start

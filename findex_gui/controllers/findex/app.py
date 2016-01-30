@@ -335,6 +335,15 @@ class FindexApp():
 
         if not ses.query(Options).filter(Options.key == 'amqp_blob').first():
             ses.add(Options('amqp_blob', '[]'))
+
+        if not ses.query(Users).filter(Users.admin == True).first():
+            ses.add(Users(
+                name='admin',
+                password='$6$rounds=656000$nmkPGwJ6vUduFO.x$eN/TJazJ2CY8fhI8c72ll6puBQP.KNdeJY7iwLO4ipWFqlwYO9UgkpAI/42txq0BDdRzfXoIeNsAa.bCF15HY0',
+                admin=True,
+                last_login=datetime.now()
+            ))
+
         ses.commit()
 
     def hook_db(self):

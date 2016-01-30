@@ -16,7 +16,7 @@ class Browse():
 
     @data_strap
     def hosts(self, env):
-        data = {'hosts': self.db.query(Resources).list()}
+        data = {'hosts': self.db.query(Resources).all()}
 
         return jinja2_template('main/browse_hosts', env=env, data=data)
 

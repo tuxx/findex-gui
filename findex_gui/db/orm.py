@@ -152,6 +152,8 @@ class Resources(Base):
 
     basepath = Column(sql.String(), nullable=True, default='')
 
+    busy = Column(sql.Boolean, nullable=False, default=False)
+
     # regular indexes
     ix_address = Index('ix_address', address)
 

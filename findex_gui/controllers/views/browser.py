@@ -34,7 +34,7 @@ class Browser():
         self.data['file_path_quoted_plus'] = quote_plus(self.data['file_path'])
         self.data['file_path_quoted'] = quote(self.data['file_path'])
 
-        resource = self.db.query(Resources).filter_by(name=self.data['resource_name']).first()
+        resource = self.findex.get_resource_objects(name=self.data['resource_name'])
         if not resource:
             raise BrowseException('No resource found')
 

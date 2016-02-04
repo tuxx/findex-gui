@@ -52,7 +52,7 @@ class Findex(object):
 
         return files
 
-    def get_resource_objects(self, id=None):
+    def get_resource_objects(self, id=None, name=None, limit=None):
         query = self.db.query(Resources)
 
         if isinstance(id, (int, long)):
@@ -61,6 +61,16 @@ class Findex(object):
                 return cached
 
             query = query.filter(Resources.id == id)
+
+        if isinstance(name, (str, unicode)):
+            cached = self._get_cache('resources', name)
+            if cached:
+                return cached
+
+            query = query.filter(Resources.name == name)
+
+        if limit and isinstance(limit, (int, long)):
+            query = query.limit(limit)
 
         result = query.all()
         if len(result) == 1:

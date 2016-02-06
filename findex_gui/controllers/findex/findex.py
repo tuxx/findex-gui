@@ -1,5 +1,5 @@
 from importlib import import_module
-
+from urllib import quote
 from sqlalchemy import and_, asc, desc
 from sqlalchemy.dialects import mysql, postgresql
 
@@ -52,7 +52,7 @@ class Findex(object):
 
         return files
 
-    def get_resource_objects(self, id=None, name=None, limit=None):
+    def get_resources(self, id=None, name=None, address=None, port=None, limit=None):
         query = self.db.query(Resources)
 
         if isinstance(id, (int, long)):
@@ -62,30 +62,50 @@ class Findex(object):
 
             query = query.filter(Resources.id == id)
 
-        if isinstance(name, (str, unicode)):
-            cached = self._get_cache('resources', name)
+        if isinstance(address, (str, unicode)):
+            cached = self._get_cache('resources', address)
             if cached:
                 return cached
 
+            query = query.filter(Resources.address == address)
+
+        if isinstance(port, (int, long)):
+            query = query.filter(Resources.port == port)
+
+        if isinstance(name, (str, unicode)):
             query = query.filter(Resources.name == name)
 
         if limit and isinstance(limit, (int, long)):
             query = query.limit(limit)
 
-        result = query.all()
-        if len(result) == 1:
-            result = result[0]
+        results = query.all()
 
-        self._set_cache(result)
+        for result in results:
+            setattr(result, 'identifier', '%s:%s' % (result.address, int(result.port)))
 
-        return result
+        if len(results) == 1:
+            results = results[0]
 
-    def get_files_objects(self, id=None, resource_id=None, file_path=None, total_count=None, offset=None):
+        self._set_cache(results)
+        return results
+
+    def get_files(self, resource_id, id=None, file_name=None, file_path=None, total_count=None, offset=None):
         """
             total_count: number of results to fetch
             offset: the offset in db
         """
         query = self.db.query(Files)
+
+        resource = self.get_resources(id=resource_id)
+
+        if not file_path:
+            file_path = '/'
+
+        if resource.protocol in [4,5]:
+            file_path = quote(file_path)
+
+            if isinstance(file_name, (str, unicode)):
+                file_name = quote(file_name)
 
         if id:
             _and = and_()
@@ -99,6 +119,11 @@ class Findex(object):
         if isinstance(file_path, (str, unicode)):
             _and = and_()
             _and.append(Files.file_path == file_path)
+            query = query.filter(_and)
+
+        if isinstance(file_name, (str, unicode)):
+            _and = and_()
+            _and.append(Files.file_name == file_name)
             query = query.filter(_and)
 
         if isinstance(total_count, (long, int)):

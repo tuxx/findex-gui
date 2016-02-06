@@ -57,16 +57,8 @@ class FindexApp():
         
         @route('/browse/<path:path>', name='browse')
         def browse_dir(path, db):
-            if not request.url.endswith('/'):
-                redirect('%s/' % request.url)
-        
             controller = Browse(self.cfg, db)
             return controller.browse(path)
-        
-        @route('/goto/<path:path>')
-        def browse_goto(path, db):
-            controller = Browse(self.cfg, db)
-            return controller.goto(path)
         
         @route('/search')
         def search(db):
@@ -153,6 +145,11 @@ class FindexApp():
         def error404(error):
             print error
             return jinja2_template('main/error', env={'db_file_count': 0}, data={'error': 'Error - Something happened \:D/'})
+
+        # init task thread
+        from findex_gui.controllers.findex.tasks import TaskConsumer
+        t = TaskConsumer()
+        t.start()
 
     def routes_default(self):
         @route('/static/<filename:path>')

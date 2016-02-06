@@ -48,11 +48,15 @@
 
         <div class="container">
             <div class="row">
+                {% if data['env']['resource'].busy %}
+                    <div class="alert alert-info">Heads up! This server is currently being crawled and updated with files.</div>
+                {% endif %}
+
                 {% if data['files'] %}
 
                     <div id="file_main_browser" class="well">
                         <div class="input-group" id="quick_search_group">
-                            <input class="form-control" type="text" id="quick_search" placeholder="Search this dir... (recursively)">
+                            <input class="form-control" type="text" id="quick_search" placeholder="Search this dir... (recursively) # to-do: filter too">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button">
                                     <span class="glyphicon glyphicon-search"></span>
@@ -70,12 +74,12 @@
                                 <span>{{ data['folder.size_files_total'] }}</span>
                             </div>
                             <div class="actions">
+                                <button type="button" class="btn btn-default btn-sm"><b>Details</b></button>
                                 <div class="btn-group btn-group-sm">
                                     {% if data['action_fetches'] %}
                                         <button id="btn_action_fetch" type="button" class="btn btn-default"><b>Fetch</b></button>
                                     {% endif %}
                                     <button id="btn_action_raw" type="button" class="btn btn-default"><b>Raw</b></button>
-                                    <button id="btn_action_copy" type="button" class="btn btn-default"><b>Filter</b></button>
                                 </div>
                                 <button style="margin-left:10px;color:#900;" type="button" class="btn btn-default btn-sm"><b>Delete</b></button>
                             </div>
@@ -136,11 +140,7 @@
                                 </thead>
                                 <tbody data-link="row" class="rowlink">
                                     {% for f in data['files'] %}
-                                        {% if f.file_isdir %}
-                                            {% set href = f.href %}
-                                        {% else %}
-                                            {% set href = '/goto/' + f.id|string %}
-                                        {% endif %}
+                                        {% set href = f.href %}
 
                                         <tr class="clickable" data-id="{{f.id}}" data-href="{{href}}" rel="popover" title="">
                                             <td class="rowlink-skip">

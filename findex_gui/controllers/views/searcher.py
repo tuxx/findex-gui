@@ -196,7 +196,7 @@ class Searcher():
 
         # to-do: dont do this here
         for r in results['data']:
-            host = self.findex.get_resource_objects(r.resource_id)
+            host = self.findex.get_resources(r.resource_id)
             setattr(r, 'resource', host)
 
         results['data'] = self.findex.set_humanize(results['data'])

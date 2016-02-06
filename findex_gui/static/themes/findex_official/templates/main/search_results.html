@@ -221,7 +221,7 @@
                 {% if results %}
                     {% for f in results %}
                         <div id="{{f.id}}" class="sitem_container">
-                            <a id="link" href="/browse/{{f.resource.name}}/{{f.file_path_human[1:]}}#{{f.id}}" target="_self">
+                            <a id="link" href="/browse/{{f.resource.identifier}}/{{f.file_path_human[1:]}}#{{f.id}}" target="_self">
                                 <div class="sitem_info">
                                     <div class="thumb" style="background: url('{{f.img_icon}}');"></div>
 

@@ -57,16 +57,8 @@ class FindexApp():
         
         @route('/browse/<path:path>', name='browse')
         def browse_dir(path, db):
-            if not request.url.endswith('/'):
-                redirect('%s/' % request.url)
-        
             controller = Browse(self.cfg, db)
             return controller.browse(path)
-        
-        @route('/goto/<path:path>')
-        def browse_goto(path, db):
-            controller = Browse(self.cfg, db)
-            return controller.goto(path)
         
         @route('/search')
         def search(db):
@@ -153,6 +145,11 @@ class FindexApp():
         def error404(error):
             print error
             return jinja2_template('main/error', env={'db_file_count': 0}, data={'error': 'Error - Something happened \:D/'})
+
+        # init task thread
+        from findex_gui.controllers.findex.tasks import TaskConsumer
+        t = TaskConsumer()
+        t.start()
 
     def routes_default(self):
         @route('/static/<filename:path>')
@@ -335,6 +332,16 @@ class FindexApp():
 
         if not ses.query(Options).filter(Options.key == 'amqp_blob').first():
             ses.add(Options('amqp_blob', '[]'))
+
+        # to-do: remove
+        if not ses.query(Users).filter(Users.admin == True).first():
+            ses.add(Users(
+                name='admin',
+                password='$6$rounds=656000$nmkPGwJ6vUduFO.x$eN/TJazJ2CY8fhI8c72ll6puBQP.KNdeJY7iwLO4ipWFqlwYO9UgkpAI/42txq0BDdRzfXoIeNsAa.bCF15HY0', # admin
+                admin=True,
+                last_login=datetime.now()
+            ))
+
         ses.commit()
 
     def hook_db(self):

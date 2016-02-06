@@ -3,7 +3,7 @@ from datetime import datetime
 from bottle import jinja2_template, HTTPResponse
 
 from findex_gui.db.orm import Resources
-from findex_gui.controllers.views.browser import Browser
+from findex_gui.controllers.views.browserequest import BrowseRequest
 from findex_gui.controllers.findex.findex import Findex
 from findex_gui.controllers.helpers import data_strap
 
@@ -16,59 +16,45 @@ class Browse():
 
     @data_strap
     def hosts(self, env):
-        data = {'hosts': self.db.query(Resources).list()}
+        data = {'hosts': self.db.query(Resources).all()}
 
         return jinja2_template('main/browse_hosts', env=env, data=data)
 
     @data_strap
     def browse(self, path, env):
-        env['time_pageload'] = datetime.now()
-
         try:
-            browser = Browser(db=self.db, findex=self.findex, path=path)
-            browser.fetch_files()
-            browser.prepare_files(env=env)
+            browser = BrowseRequest(db=self.db, findex=self.findex)
+            browser.parse(path)
 
-            data = {
-                'files': browser.files,
-                'breadcrumbs': browser.breadcrumbs(),
-                'action_fetches': browser.generate_action_fetches(),
-                'env': browser.data
-            }
+            if not browser.data['isdir']:
+                files = browser.fetch_files(file_name=browser.data['file_name'])
+                files = browser.prepare_files(files=files, env=env)
 
-            env['time_pageload'] = (datetime.now() - env['time_pageload']).total_seconds()
+                data = {
+                    'file': files[0],
+                    'breadcrumbs': browser.breadcrumbs(),
+                    'data': browser.data
+                }
 
-            return jinja2_template('main/browse_dir', env=env, data=data)
+                return jinja2_template('main/browse_file', env=env, data=data)
+            else:
+                env['time_pageload'] = datetime.now()
+
+                files = browser.fetch_files()
+                files = browser.prepare_files(files=files, env=env)
+
+                data = {
+                    'files': files,
+                    'breadcrumbs': browser.breadcrumbs(),
+                    'action_fetches': browser.action_fetches(),
+                    'env': browser.data
+                }
+
+                env['time_pageload'] = (datetime.now() - env['time_pageload']).total_seconds()
+
+                return jinja2_template('main/browse_dir', env=env, data=data)
         except HTTPResponse as resp:
             return resp
         except Exception as ex:
             print str(ex)
             return jinja2_template('main/error', env=env, data={'error': 'no files were found'})
-
-    @data_strap
-    def goto(self, path, env):
-        try:
-            uid = int(path)
-
-            f = self.findex.get_files_objects(id=uid)
-
-            if not f:
-                raise Exception()
-
-            f = f[0]
-
-            h = self.db.query(Resources).filter_by(
-                id=f.resource_id
-            ).first()
-
-            if f and h:
-                data = {
-                    'file': f,
-                    'host': h
-                }
-            else:
-                raise Exception()
-
-            return jinja2_template('main/browse_goto', env=env, data=data)
-        except Exception as ex:
-            return 'error :( we could always stay here'

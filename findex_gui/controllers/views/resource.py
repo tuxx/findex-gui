@@ -13,7 +13,7 @@ class Resource():
     @data_strap
     def overview(self, env):
         data = {
-            "resources": self.findex.get_resource_objects()
+            "resources": self.findex.get_resources()
         }
 
         return jinja2_template('main/resources_overview', env=env, data=data)

@@ -139,23 +139,28 @@ class Resources(Base):
     name = Column(sql.String(), nullable=False)
     description = Column(sql.String())
 
-    address = Column(INET())
+    address = Column(sql.String(), nullable=False)
+    port = Column(sql.Integer(), nullable=False, default=0)
+
     display_url = Column(sql.String(), nullable=False)
 
     date_added = Column(sql.DateTime())
     date_crawl_start = Column(sql.DateTime())
     date_crawl_end = Column(sql.DateTime())
 
-    file_count = Column(sql.Integer())
+    file_count = Column(sql.Integer(), nullable=False, default=0)
     protocol = Column(sql.Integer(), nullable=False)
 
-    basepath = Column(sql.VARCHAR(), nullable=True, default='')
+    basepath = Column(sql.String(), nullable=True, default='')
+
+    busy = Column(sql.Boolean, nullable=False, default=False)
 
     # regular indexes
     ix_address = Index('ix_address', address)
 
-    def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description):
+    def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
         self.address = address
+        self.hostname = hostname
         self.display_url = display_url
         self.date_added = date_added
         self.date_crawl_start = date_crawl_start
@@ -193,3 +198,29 @@ class Users(Base):
         self.password = password
         self.admin = admin
         self.last_login = last_login
+
+
+class Tasks(Base):
+    __tablename__ = 'tasks'
+
+    id = Column(sql.Integer, primary_key=True)
+
+    task_name = Column(sql.String, nullable=False)
+    task_description = Column(sql.String, nullable=False)
+    task_method = Column(sql.Integer, nullable=False)
+    task_added = Column(sql.DateTime, nullable=False)
+    task_owner = Column(sql.Integer, nullable=False)
+    task_exec = Column(sql.String, nullable=False)
+
+    data = Column(sql.String, nullable=False)
+    resource_prefix = Column(sql.String)
+
+    def __init__(self, name, desc, method, added, data, resource_prefix, owner, task_exec):
+        self.task_name = name
+        self.task_description = desc
+        self.task_method = method
+        self.task_added = added
+        self.data = data
+        self.resource_prefix = resource_prefix
+        self.task_owner = owner
+        self.task_exec = task_exec

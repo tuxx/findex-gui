@@ -35,4 +35,4 @@ class Resourcer():
 
 
     def get_resources(self):
-        resources = self.findex.get_resource_objects()
+        resources = self.findex.get_resources()

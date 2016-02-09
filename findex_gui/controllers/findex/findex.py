@@ -13,6 +13,7 @@ import findex_gui.controllers.findex.themes as themes
 class Findex(object):
     def __init__(self, db):
         self.db = db
+        self.resource = None
         self._cache = {}
 
     def _get_cache(self, section, id):
@@ -41,6 +42,7 @@ class Findex(object):
 
             file_url = '%s%s' % (f.file_path_human, f.file_name_human)
             setattr(f, 'file_url', file_url)
+            setattr(f, 'url_direct', self.resource.display_url + file_url)
         return results
 
     def set_icons(self, env, files):
@@ -97,12 +99,12 @@ class Findex(object):
         """
         query = self.db.query(Files)
 
-        resource = self.get_resources(id=resource_id)
+        self.resource = self.get_resources(id=resource_id)
 
         if not file_path:
             file_path = '/'
 
-        if resource.protocol in [4,5]:
+        if self.resource.protocol in [4,5]:
             file_path = quote(file_path)
 
             if isinstance(file_name, (str, unicode)):

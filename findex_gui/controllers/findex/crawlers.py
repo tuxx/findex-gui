@@ -6,7 +6,7 @@ from findex_gui.db.orm import Crawlers
 from findex_gui.bin.time import TimeMagic
 from findex_common.exceptions import CrawlBotException
 from findex_common.utils import DataObjectManipulation
-from findex_gui.controllers.findex.amqp import Amqp
+from findex_gui.controllers.findex.amqp import AmqpController
 
 
 class CrawlBots():
@@ -18,7 +18,7 @@ class CrawlBots():
         self.webclient_ua = 'Findex GUI'
         self.amqp_consumers = {}
 
-        self.amqp_endpoints = Amqp(self.db).get_endpoints()
+        self.amqp_endpoints = AmqpController(self.db).all()
 
     def get_bot(self, bot_id):
         bot = self.db.query(Crawlers).filter(Crawlers.id == bot_id).first()

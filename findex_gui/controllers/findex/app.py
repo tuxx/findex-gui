@@ -6,7 +6,7 @@ from datetime import datetime
 from findex_common.utils import is_int
 from findex_gui.db.orm import Postgres, Options, Users
 
-from findex_gui.controllers.findex.tasks import TaskConsumer
+from findex_gui.controllers.findex.core.AppLoop import AppLoop
 from findex_gui.controllers.views.admin import Admin
 
 import findex_gui.controllers.findex.themes as themes
@@ -20,8 +20,11 @@ class FindexApp():
         self.cfg = cfg
         self.db = None
         self.api = None
+        self.apploop = None
 
+        # to-do: find a better way
         setattr(bottle, 'theme', themes.Themes())
+        setattr(bottle, 'loops', {})
 
         # init default web routes
         self.routes_default()
@@ -32,6 +35,10 @@ class FindexApp():
 
         # install SqlAlchemy bottle.py plugin
         self._hook_db()
+
+        # init internal app loop
+        self.apploop = AppLoop(self.db.engine)
+        self.apploop.start()
 
         # init API
         self.api = FindexApi(self.cfg)
@@ -109,10 +116,6 @@ class FindexApp():
         def error404(error):
             print error
             return jinja2_template('main/error', env={'db_file_count': 0}, data={'error': 'Error - Something happened \:D/'})
-
-        # init task thread
-        t = TaskConsumer()
-        t.start()
 
     def routes_default(self):
         @route('/static/<filename:path>')

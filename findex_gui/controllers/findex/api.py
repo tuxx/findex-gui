@@ -4,7 +4,7 @@ from bottle import response, route, HTTPError
 from findex_gui.controllers.findex.amqp import AmqpEndpoint
 from findex_gui.bin.config import FindexGuiConfig
 from findex_gui.controllers.findex.crawlers import CrawlBots
-from findex_gui.controllers.findex.amqp import Amqp
+from findex_gui.controllers.findex.amqp import AmqpController
 from findex_gui.controllers.helpers import auth_strap, data_strap
 from findex_gui.controllers.views.searcher import Searcher
 from findex_gui.db.orm import Crawlers
@@ -69,7 +69,7 @@ class FindexApi():
                 }
             }
 
-        endpoint = Amqp(db).get_endpoint(args['amqp_endpoint_name'])
+        endpoint = AmqpController(db).get(args['amqp_endpoint_name'])
         if not endpoint:
             return {
                 'bot/assign_amqp_endpoint': {
@@ -101,7 +101,7 @@ class FindexApi():
 
     @auth_strap
     def amqp_list(self, db, env):
-        endpoints = Amqp(db).get_endpoints()
+        endpoints = bottle.loops['amqp'].endpoints
         data = []
 
         for endpoint in endpoints:
@@ -128,7 +128,7 @@ class FindexApi():
             return Exception(args)
 
         # check for duplicates based on endpoint name
-        endpoint = Amqp(db).get_endpoint(args['name'])
+        endpoint = AmqpController(db).get(args['name'])
         if endpoint:
             return Exception('Duplicate AMQP endpoint name')
 
@@ -176,9 +176,7 @@ class FindexApi():
                 }
             }
 
-        Amqp(db).set_endpoint(
-            endpoint=endpoint
-        )
+        AmqpController(db).create(**dict(endpoint))
 
         return {
             'amqp/add': {
@@ -199,19 +197,14 @@ class FindexApi():
                 }
             }
 
-        Amqp(db).del_endpoint(args['name'])
-
-        # for each bot that was assigned this AMQP endpoint, remove it
-        bots = db.query(Crawlers).filter(Crawlers.amqp_name == args['name']).all()
-        for b in bots:
-            b.amqp_name = ''
-        db.commit()
+        AmqpController(db).delete(args['name'])
 
         return {
             'amqp/delete': {
                 'status': 'OK'
             }
         }
+
     def search(self, db):
         params = bottle.request.params.dict
 

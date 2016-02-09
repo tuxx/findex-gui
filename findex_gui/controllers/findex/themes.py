@@ -41,20 +41,26 @@ class ThemeController():
         self.db = db
         self.base = os.path.join(os.path.dirname(__file__), '..', '..', 'themes')
         self.data = {}
-        self.active = 'findex_official'
+        self.active = ''
 
     def loop(self):
         self.all()
 
         active_theme = self.db.query(Options).filter(Options.key == 'theme_active').first()
+        theme_name = 'findex_official'
         if not active_theme:
-            self.db.add(Options('theme_active', self.active))
+            self.db.add(Options('theme_active', theme_name))
             self.db.commit()
+        else:
+            theme_name = active_theme.val
 
-        self.set(self.active)
+        self.set(theme_name)
 
     def set(self, theme_name):
         if not theme_name in self.data:
+            return False
+
+        if theme_name == self.active and self.active != '':
             return False
 
         theme = self.db.query(Options).filter(Options.key == 'theme_active').first()
@@ -62,7 +68,7 @@ class ThemeController():
             self.db.add(Options('theme_active', theme_name))
             self.db.commit()
         else:
-            theme.name = theme_name
+            theme.val = theme_name
             self.db.commit()
 
         self.active = theme_name

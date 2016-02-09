@@ -99,6 +99,33 @@ class FindexApi():
             }
         }
 
+    def themes_switch(self, db):
+        args = ArgValidate().verify_args({
+            'name': str
+        }, 'POST')
+        if not isinstance(args, dict):
+            return {
+                'themes/switch': {
+                    'status': 'FAIL',
+                    'message': str(args)
+                }
+            }
+
+        res = bottle.loops['themes'].set(args['name'])
+        if not res:
+            return {
+                'themes/switch': {
+                    'status': 'FAIL',
+                    'message': 'no such theme %s or theme already active' % args['name']
+                }
+            }
+
+        return {
+            'themes/switch': {
+                'status': 'OK'
+            }
+        }
+
     @auth_strap
     def amqp_list(self, db, env):
         endpoints = bottle.loops['amqp'].endpoints

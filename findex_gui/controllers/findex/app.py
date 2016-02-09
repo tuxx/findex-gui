@@ -23,7 +23,7 @@ class FindexApp():
         self.apploop = None
 
         # to-do: find a better way
-        setattr(bottle, 'theme', themes.Themes())
+        setattr(bottle, 'theme', {})
         setattr(bottle, 'loops', {})
 
         # init default web routes
@@ -33,8 +33,8 @@ class FindexApp():
         # nuke existing web routes
         self._nuke()
 
-        # install SqlAlchemy bottle.py plugin
-        self._hook_db()
+        # init db
+        self.db = Postgres(self.cfg, self.app)
 
         # init internal app loop
         self.apploop = AppLoop(self.db.engine)
@@ -43,6 +43,7 @@ class FindexApp():
         # init API
         self.api = FindexApi(self.cfg)
 
+        # init core routes
         @route('/admin')
         def admin():
             auth = basic_auth()
@@ -291,28 +292,6 @@ class FindexApp():
 
         self.api = None
 
-    def populate_db(self):
-        ses = sessionmaker(bind=self.db.engine)()
-
-        if not ses.query(Options).filter(Options.key == 'amqp_blob').first():
-            ses.add(Options('amqp_blob', '[]'))
-
-        # to-do: remove
-        if not ses.query(Users).filter(Users.admin == True).first():
-            ses.add(Users(
-                name='admin',
-                password='$6$rounds=656000$nmkPGwJ6vUduFO.x$eN/TJazJ2CY8fhI8c72ll6puBQP.KNdeJY7iwLO4ipWFqlwYO9UgkpAI/42txq0BDdRzfXoIeNsAa.bCF15HY0', # admin
-                admin=True,
-                last_login=datetime.now()
-            ))
-
-        ses.commit()
-
-    def _hook_db(self):
-        self.db = Postgres(self.cfg, self.app)
-        bottle.theme.setup_db(self.db)
-        self.populate_db()
-        
     def bind(self):
         run(app=self.app,
             host=self.cfg['gui']['bind_host'] if self.cfg.items else '127.0.0.1',

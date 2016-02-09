@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from findex_gui.controllers.findex.amqp import AmqpController
 from findex_gui.controllers.findex.tasks import TaskController
+from findex_gui.controllers.findex.themes import ThemeController
 from findex_gui.db.orm import Options
 
 
@@ -15,7 +16,8 @@ class AppLoop():
         self._pool = ThreadPool(1)
 
         self._ifaces = {
-            'amqp': [AmqpController, 5]
+            'amqp': [AmqpController, 5],
+            'themes': [ThemeController, 5]
         }
 
     def start(self):

@@ -1,3 +1,4 @@
+import bottle
 from importlib import import_module
 from urllib import quote
 from sqlalchemy import and_, asc, desc

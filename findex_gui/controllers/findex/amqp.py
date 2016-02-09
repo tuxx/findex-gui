@@ -95,6 +95,7 @@ class AmqpController:
             data.append(amqp_endpoint)
 
         self.endpoints = data
+        return self.endpoints
 
     def create(self,  **kwargs):
         obj = Amqp(**kwargs)

@@ -36,50 +36,60 @@ class Theme():
             self.options[k] = v
 
 
-class Themes():
-    def __init__(self):
-        self.db = None
+class ThemeController():
+    def __init__(self, db):
+        self.db = db
+        self.base = os.path.join(os.path.dirname(__file__), '..', '..', 'themes')
+        self.data = {}
+        self.active = 'findex_official'
 
-        self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'themes')
-        self.theme_data = {}
-        self.theme_default = 'findex_official'
-        self.theme_active = ''
+    def loop(self):
+        self.all()
 
-        self.load()
+        active_theme = self.db.query(Options).filter(Options.key == 'theme_active').first()
+        if not active_theme:
+            self.db.add(Options('theme_active', self.active))
+            self.db.commit()
 
-    def setup_db(self, db):
-        self.db = sessionmaker(bind=db.engine)()
-        self.load()
+        self.set(self.active)
 
-    def load(self):
-        if not self.db:
-            return
+    def set(self, theme_name):
+        if not theme_name in self.data:
+            return False
 
-        dirs = [os.path.join(self.theme_dir, o) for o in os.listdir(self.theme_dir) if os.path.isdir(os.path.join(self.theme_dir, o)) and not o.startswith('_')]
+        theme = self.db.query(Options).filter(Options.key == 'theme_active').first()
+        if not theme:
+            self.db.add(Options('theme_active', theme_name))
+            self.db.commit()
+        else:
+            theme.name = theme_name
+            self.db.commit()
 
+        self.active = theme_name
+        self._bootstrap(theme_name)
+
+        self.all()
+        return True
+
+    def all(self):
+        dirs = [os.path.join(self.base, o) for o in os.listdir(self.base) if os.path.isdir(os.path.join(self.base, o)) and not o.startswith('_')]
+
+        data = []
         for d in dirs:
-            theme = self.validate_theme(d)
+            try:
+                theme = self._validate(d)
+            except:
+                continue
 
             if isinstance(theme, Theme):
-                self.add_theme(theme)
+                data.append(theme)
 
-            active_theme = self.db.query(Options).filter(Options.key == 'theme_active').first()
-            if not active_theme:
-                self.db.add(Options('theme_active', self.theme_default))
-                self.db.commit()
+        for d in data:
+            self.data[d.options['theme_name']] = d.options
 
-                active_theme = self.theme_default
-            else:
-                active_theme = active_theme.val
-
-            self.change_active_theme(active_theme)
-
-    def add_theme(self, theme):
-        self.theme_data[theme.name] = theme.options
-
-    def validate_theme(self, dir):
+    def _validate(self, dir):
         try:
-            if dir in self.theme_data:
+            if dir in self.data:
                 raise Exception('Duplicate theme. Is it already added?')
 
             path = '%s/theme.json' % dir
@@ -91,7 +101,7 @@ class Themes():
             return theme
 
         except IOError:
-            raise Exception("Could not read \"%s%s\" - Themes file not found." % (self.theme_dir, path))
+            raise Exception("Could not read \"%s%s\" - Themes file not found." % (self.base, path))
 
         except ValueError as ex:
             raise Exception("Could not parse \"%s\" - Contents not json: %s" % (path, str(ex)))
@@ -99,22 +109,8 @@ class Themes():
         except Exception as ex:
             raise Exception(str(ex))
 
-    def get_theme(self):
-        return self.theme_active
-
-    def get_themes(self):
-        data = []
-        for k, v in self.theme_data.iteritems():
-            data.append(v)
-
-        return data
-
-    def change_active_theme(self, theme_name):
-        self.theme_active = theme_name
-        self.bootstrap_theme(theme_name)
-
-    def bootstrap_theme(self, theme_name):
-        template_path = os.path.join(self.theme_dir, theme_name, 'templates')
+    def _bootstrap(self, theme_name):
+        template_path = os.path.join(self.base, theme_name, 'templates')
         bottle.TEMPLATE_PATH = ['findex_gui/themes/', template_path]
 
         loader = jinja2.FileSystemLoader(template_path)

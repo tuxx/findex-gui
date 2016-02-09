@@ -42,7 +42,10 @@ class Findex(object):
 
             file_url = '%s%s' % (f.file_path_human, f.file_name_human)
             setattr(f, 'file_url', file_url)
-            setattr(f, 'url_direct', self.resource.display_url + file_url)
+            if self.resource:
+                setattr(f, 'url_direct', self.resource.display_url + file_url)
+            else:
+                setattr(f, 'url_direct', f.resource.display_url + file_url)
         return results
 
     def set_icons(self, env, files):

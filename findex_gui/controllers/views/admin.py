@@ -103,3 +103,9 @@ class Admin():
         env['section'] = ['Tasks', 'Add']
 
         return jinja2_template('_admin/templates/main/task_add', env=env)
+
+    @data_strap
+    def hostgroup_list(self, env):
+        env['section'] = ['Hostgroup', 'List']
+
+        return jinja2_template('_admin/templates/main/hostgroup_list', env=env)

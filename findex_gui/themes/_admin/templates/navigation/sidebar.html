@@ -30,15 +30,25 @@
                     <ul aria-expanded="false" class="collapse">
                         <li><a href="/admin/bot/list">Crawl Bots</a></li>
                         <li>
-                            <a href="/admin/amqp/list" aria-expanded="false">AMQP Endpoints <span class="glyphicon arrow"></span></a>
+                            <a href="#" aria-expanded="false">AMQP <span class="glyphicon arrow"></span></a>
                             <ul aria-expanded="false" class="collapse">
+                                <li class="indent"><a href="/admin/amqp/list">Endpoints</a></li>
                                 <li class="indent"><a href="/admin/amqp/add">Add</a></li>
                             </ul>
                         </li>
                         <li>
-                            <a href="/admin/task/list" aria-expanded="false">Tasks <span class="glyphicon arrow"></span></a>
+                            <a href="#" aria-expanded="false">Crawls <span class="glyphicon arrow"></span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li class="indent"><a href="/admin/task/add">Add</a></li>
+                                <li class="indent">
+                                    <a href="/admin/task/list">Tasks</a>
+                                    <ul aria-expanded="false" class="collapse">
+                                        <li class="indent deep">
+                                            <a href="/admin/task/add">Add</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="indent"><a href="/admin/hostgroup/add">Host groups</a></li>
+                                <li class="indent"><a href="#">Hosts</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -78,6 +88,9 @@
                             }
                         });
                     });
+
+                    // do some more collapsing ;/
+                    $('.deep').each(function(){ if($(this).hasClass('active')){$(this).parent().removeClass('collapse').addClass('collapse in').parent().parent().removeClass('collapse').addClass('collapse in')}; })
 
                     // some clicks dont register? :D
                     $('body').on('click', 'li>a', function(){

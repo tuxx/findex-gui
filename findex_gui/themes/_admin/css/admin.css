@@ -259,5 +259,9 @@ a.sidebar_item_active{
 }
 
 li.indent>a{
-    padding-left: 40px !important;
+    padding-left: 60px !important;
+}
+
+li.deep>a{
+    padding-left:80px !important;
 }

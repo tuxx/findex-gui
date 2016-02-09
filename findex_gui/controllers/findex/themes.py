@@ -40,7 +40,7 @@ class Themes():
     def __init__(self):
         self.db = None
 
-        self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'themes')
+        self.theme_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'themes')
         self.theme_data = {}
         self.theme_default = 'findex_official'
         self.theme_active = ''
@@ -115,8 +115,8 @@ class Themes():
 
     def bootstrap_theme(self, theme_name):
         template_path = os.path.join(self.theme_dir, theme_name, 'templates')
-        bottle.TEMPLATE_PATH = ['findex_gui/static/themes/', template_path]
+        bottle.TEMPLATE_PATH = ['findex_gui/themes/', template_path]
 
         loader = jinja2.FileSystemLoader(template_path)
         jinja2.Environment(loader=loader, autoescape=True, trim_blocks=True, lstrip_blocks=True)
-        import_module('findex_gui.static.themes.%s.bin.views' % theme_name)
+        import_module('findex_gui.themes.%s.bin.views' % theme_name)

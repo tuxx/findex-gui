@@ -44,7 +44,7 @@ class Findex(object):
 
     def set_icons(self, env, files):
         try:
-            theme_icon_module = import_module('static.themes.%s.bin.icons' % env['theme_name'])
+            theme_icon_module = import_module('themes.%s.bin.icons' % env['theme_name'])
             return theme_icon_module.set_icons(env=env, files=files)
         except Exception as ex:
             for f in files:

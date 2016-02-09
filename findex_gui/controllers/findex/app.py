@@ -1,14 +1,12 @@
 import bottle, os
-from bottle import HTTPError, route, app, request, redirect, response, error, jinja2_template, run, static_file
+from bottle import HTTPError, route, app, request, redirect, response, error, jinja2_template, run, static_file, abort
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
 from findex_common.utils import is_int
 from findex_gui.db.orm import Postgres, Options, Users
 
-from findex_gui.controllers.views.home import Home
-from findex_gui.controllers.views.browse import Browse
-from findex_gui.controllers.views.search import Search
+from findex_gui.controllers.findex.tasks import TaskConsumer
 from findex_gui.controllers.views.admin import Admin
 
 import findex_gui.controllers.findex.themes as themes
@@ -30,45 +28,13 @@ class FindexApp():
 
     def main(self):
         # nuke existing web routes
-        self.nuke()
+        self._nuke()
 
         # install SqlAlchemy bottle.py plugin
-        self.hook_db()
+        self._hook_db()
 
-        # init API routes
+        # init API
         self.api = FindexApi(self.cfg)
-
-        # init web routes
-        @route('/')
-        def root(db):
-            print self.api
-            controller = Home(self.cfg, db)
-            return controller.root()
-
-        @route('/browse')
-        def browse(db):
-            controller = Browse(self.cfg, db)
-            return controller.hosts()
-        
-        @route('/browse/')
-        def browse_(db):
-            controller = Browse(self.cfg, db)
-            return controller.hosts()
-        
-        @route('/browse/<path:path>', name='browse')
-        def browse_dir(path, db):
-            controller = Browse(self.cfg, db)
-            return controller.browse(path)
-        
-        @route('/search')
-        def search(db):
-            controller = Search(self.cfg, db)
-            return controller.search()
-        
-        @route('/search/')
-        def search_(db):
-            controller = Search(self.cfg, db)
-            return controller.search()
 
         @route('/admin')
         def admin():
@@ -96,8 +62,6 @@ class FindexApp():
                 return redirect('/admin/general')
 
             return func()
-
-        from findex_gui.controllers.helpers import auth_strap
 
         @route('/admin/<path:path>')
         def admin_bot(path, db):
@@ -147,20 +111,27 @@ class FindexApp():
             return jinja2_template('main/error', env={'db_file_count': 0}, data={'error': 'Error - Something happened \:D/'})
 
         # init task thread
-        from findex_gui.controllers.findex.tasks import TaskConsumer
         t = TaskConsumer()
         t.start()
 
     def routes_default(self):
         @route('/static/<filename:path>')
         def server_static(filename):
-            if filename.endswith(('.py', '.pyc')):
-                return
+            if filename.endswith(('.py', '.pyc', '.cfg')):
+                return abort(403, "dat security")
 
-            return static_file(filename, root=os.path.join(os.path.dirname(__file__), 'static').replace('controllers/findex/', ''))
+            base = os.path.join(os.path.dirname(__file__), '..', '..')
+
+            if filename.startswith('themes/'):
+                if '/templates/' in filename:
+                    return abort(403, "dat security")
+
+                return static_file(filename, base)
+            else:
+                return static_file(filename, base + '/static')
 
         @route('/favicon.ico', method='GET')
-        def fav():
+        def favicon():
             return server_static('img/favicon.ico')
 
         @route('/robots.txt')
@@ -168,26 +139,16 @@ class FindexApp():
             response.content_type = 'text/plain'
             return "User-agent: *\nDisallow: /browse/\nDisallow: /search\nDisallow: /goto/"
 
-        @route('/terms')
-        def terms():
-            f = open(os.path.join(os.path.dirname(__file__), 'static', 'terms'))
-            response.set_header('content-type', 'text/plain')
-            return f.read()
-
-        @error(404)
-        @error(405)
-        @error(500)
-        @error(501)
-        @error(502)
-        @error(503)
-        @error(504)
-        @error(505)
-        def error404(error):
-            return str(error)
+        # to-do: terms
+        # @route('/terms')
+        # def terms():
+        #     f = open(os.path.join(os.path.dirname(__file__), 'static', 'terms'))
+        #     response.set_header('content-type', 'text/plain')
+        #     return f.read()
 
     def routes_setup(self):
         # remove existing web routes
-        self.nuke()
+        self._nuke()
 
         # init web routes
         @route('/')
@@ -318,7 +279,7 @@ class FindexApp():
                 }
             }
         
-    def nuke(self):
+    def _nuke(self):
         self.app.routes = []
         self.app.router.static['GET'] = {}
         self.app.dyna_regexes = {}
@@ -344,7 +305,7 @@ class FindexApp():
 
         ses.commit()
 
-    def hook_db(self):
+    def _hook_db(self):
         self.db = Postgres(self.cfg, self.app)
         bottle.theme.setup_db(self.db)
         self.populate_db()

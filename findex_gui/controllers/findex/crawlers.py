@@ -182,28 +182,3 @@ class CrawlBots():
             return CrawlBotException(message="Could not connect to the JSON-RPC API. Is it reachable?<br>Address %s" % endpoint)
         except Exception as ex:
             return CrawlBotException(message=str(ex))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

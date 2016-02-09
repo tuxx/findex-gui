@@ -1,3 +1,4 @@
+import bottle
 from importlib import import_module
 from urllib import quote
 from sqlalchemy import and_, asc, desc
@@ -12,6 +13,7 @@ import findex_gui.controllers.findex.themes as themes
 class Findex(object):
     def __init__(self, db):
         self.db = db
+        self.resource = None
         self._cache = {}
 
     def _get_cache(self, section, id):
@@ -40,11 +42,15 @@ class Findex(object):
 
             file_url = '%s%s' % (f.file_path_human, f.file_name_human)
             setattr(f, 'file_url', file_url)
+            if self.resource:
+                setattr(f, 'url_direct', self.resource.display_url + file_url)
+            else:
+                setattr(f, 'url_direct', f.resource.display_url + file_url)
         return results
 
     def set_icons(self, env, files):
         try:
-            theme_icon_module = import_module('static.themes.%s.bin.icons' % env['theme_name'])
+            theme_icon_module = import_module('themes.%s.bin.icons' % env['theme_name'])
             return theme_icon_module.set_icons(env=env, files=files)
         except Exception as ex:
             for f in files:
@@ -96,12 +102,12 @@ class Findex(object):
         """
         query = self.db.query(Files)
 
-        resource = self.get_resources(id=resource_id)
+        self.resource = self.get_resources(id=resource_id)
 
         if not file_path:
             file_path = '/'
 
-        if resource.protocol in [4,5]:
+        if self.resource.protocol in [4,5]:
             file_path = quote(file_path)
 
             if isinstance(file_name, (str, unicode)):

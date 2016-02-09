@@ -1,7 +1,7 @@
 import pika, sys, json
 from pika import exceptions, credentials, spec, BasicProperties
 
-from findex_gui.db.orm import Options
+from findex_gui.db.orm import Amqp
 
 
 class AmqpEndpoint():
@@ -67,104 +67,60 @@ class AmqpEndpoint():
         )
 
 
-class Amqp():
+class AmqpController:
     def __init__(self, db):
+        self.endpoints = []
         self.db = db
 
-    def _get_endpoints(self):
-        res = self.db.query(Options).filter(Options.key == 'amqp_blob').first()
-        if not res:
-            self.db.add(Options('amqp_blob', '[]'))
-            self.db.commit()
-            return self.db.query(Options).filter(Options.key == 'amqp_blob').first()
-        return res
+    def get(self, name):
+        res = [z for z in self.endpoints if z.name == name]
+        if res:
+            return res[0]
 
-    def _set_endpoint(self, val):
-        res = self.db.query(Options).filter(Options.key == 'amqp_blob').first()
-        res.val = val
-        self.db.commit()
-
-    def get_endpoint(self, name):
-        endpoints = self.get_endpoints()
-
-        for endpoint in endpoints:
-            if endpoint.name == name:
-                return endpoint
-
-    def get_endpoints(self):
-        res = self._get_endpoints()
-
-        if not res.val:
-            return []
-
-        try:
-            blob = json.loads(res.val)
-            data = []
-
-            for endpoint in blob:
-                amqp_endpoint = AmqpEndpoint(
-                    name=endpoint['name'],
-                    username=endpoint['username'],
-                    password=endpoint['password'],
-                    host=endpoint['host'],
-                    port=endpoint['port'],
-                    virtual_host=endpoint['virtual_host'],
-                    queue_name=endpoint['queue_name']
-                )
-
-                data.append(amqp_endpoint)
-
-            return data
-        except:
-            res.val = '[]'
-            self.db.commit()
-
-        return []
-
-    def set_endpoint(self, **kwargs):
-        if not 'endpoint' in kwargs:
-            endpoint = AmqpEndpoint(
-                name=kwargs['name'],
-                username=kwargs['username'],
-                password=kwargs['password'],
-                host=kwargs['host'],
-                port=kwargs['port'],
-                virtual_host=kwargs['vhost']
-            )
-        else:
-            endpoint = kwargs['endpoint']
-
-        # validation
-        try_connect = endpoint.connect()
-        if isinstance(try_connect, Exception):
-            return try_connect
-
-        # clear connection
-        endpoint.close()
-
-        data = dict(endpoint)
-        endpoints = self.get_endpoints()
-        endpoints_json = []
-
-        for endpoint in endpoints:
-            if data['name'] == endpoint.name:
-                return Exception("Duplicate endpoint name error")
-
-            endpoints_json.append(dict(endpoint))
-
-        endpoints_json.append(data)
-        blob = json.dumps(endpoints_json)
-
-        self._set_endpoint(blob)
-
-    def del_endpoint(self, name):
-        endpoints = self.get_endpoints()
+    def all(self):
+        res = self.db.query(Amqp).all()
 
         data = []
+        for amqp_obj in res:
+            amqp_endpoint = AmqpEndpoint(
+                name=amqp_obj.name,
+                username=amqp_obj.username,
+                password=amqp_obj.password,
+                host=amqp_obj.host,
+                port=amqp_obj.port,
+                virtual_host=amqp_obj.virtual_host,
+                queue_name=amqp_obj.queue_name
+            )
 
-        for d in endpoints:
-            if not d.name == name:
-                data.append(dict(d))
+            data.append(amqp_endpoint)
 
-        blob = json.dumps(data)
-        self._set_endpoint(blob)
+        self.endpoints = data
+        return self.endpoints
+
+    def create(self,  **kwargs):
+        obj = Amqp(**kwargs)
+        self.db.add(obj)
+        self.db.commit()
+
+        self.all()
+        return True
+
+    def delete(self, name):
+        obj = self.db.query(Amqp).filter_by(Amqp.name == name).first()
+        if not obj:
+            return False
+
+        self.db.delete(obj)
+        self.db.commit()
+
+        # for each bot that was assigned this AMQP endpoint, remove it
+        # bots = db.query(Crawlers).filter(Crawlers.amqp_name == args['name']).all()
+        # for b in bots:
+        #     b.amqp_name = ''
+        # db.commit()
+
+        self.all()
+        return True
+
+    def loop(self):
+        self.all()

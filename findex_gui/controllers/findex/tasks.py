@@ -5,18 +5,6 @@ from gevent.threadpool import ThreadPool
 from findex_gui.db.orm import Tasks
 
 
-class TaskConsumer():
-    def __init__(self):
-        self.pool = ThreadPool(1)
-
-    def start(self):
-        self.pool.spawn(self._loop)
-
-    def _loop(self):
-        while True:
-            sleep(5)
-
-
 class TaskController():
     def __init__(self, db):
         self.db = db

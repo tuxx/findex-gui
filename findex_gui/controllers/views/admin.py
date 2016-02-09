@@ -5,7 +5,7 @@ from findex_gui.db.orm import Resources
 from findex_gui.controllers.findex.findex import Findex
 from findex_gui.controllers.helpers import data_strap, auth_strap
 
-from findex_gui.controllers.findex.amqp import Amqp
+from findex_gui.controllers.findex.amqp import AmqpController
 from findex_gui.controllers.findex.crawlers import CrawlBots
 
 
@@ -49,7 +49,7 @@ class Admin():
         data['bot'] = bot
         env['section'] = ['Bots', bot['crawler_name']]
 
-        data['endpoints'] = Amqp(self.db).get_endpoints()
+        data['endpoints'] = AmqpController(self.db).all()
 
         return jinja2_template('_admin/templates/main/bot_id', env=env, data=data)
 
@@ -67,7 +67,7 @@ class Admin():
 
     @data_strap
     def amqp_delete(self, amqp_name, env):
-        endpoint = Amqp(self.db).get_endpoint(name=amqp_name)
+        endpoint = AmqpController(self.db).get(name=amqp_name)
         if not endpoint:
             raise Exception("Endpoint not found")
 
@@ -80,7 +80,7 @@ class Admin():
 
     @data_strap
     def amqp_id(self, amqp_name, env):
-        endpoint = Amqp(self.db).get_endpoint(name=amqp_name)
+        endpoint = AmqpController(self.db).get(name=amqp_name)
         if not endpoint:
             raise Exception('Endpoint not found')
 
@@ -103,3 +103,9 @@ class Admin():
         env['section'] = ['Tasks', 'Add']
 
         return jinja2_template('_admin/templates/main/task_add', env=env)
+
+    @data_strap
+    def hostgroup_list(self, env):
+        env['section'] = ['Hostgroup', 'List']
+
+        return jinja2_template('_admin/templates/main/hostgroup_list', env=env)

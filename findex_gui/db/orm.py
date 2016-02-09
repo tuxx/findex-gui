@@ -4,7 +4,11 @@ monkey.patch_all()
 import psycogreen.gevent
 psycogreen.gevent.patch_psycopg()
 
+import random
+import psycogreen
+import psycopg2
 
+from datetime import datetime
 import sqlalchemy as sql
 from sqlalchemy import or_
 import sqlalchemy.pool as pool
@@ -12,9 +16,6 @@ import bottle_sqlalchemy as sqlalchemy
 from sqlalchemy import create_engine, Column, Sequence, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import INET
-import random
-import psycogreen
-import psycopg2
 
 
 Base = declarative_base()
@@ -205,22 +206,48 @@ class Tasks(Base):
 
     id = Column(sql.Integer, primary_key=True)
 
-    task_name = Column(sql.String, nullable=False)
-    task_description = Column(sql.String, nullable=False)
-    task_method = Column(sql.Integer, nullable=False)
-    task_added = Column(sql.DateTime, nullable=False)
-    task_owner = Column(sql.Integer, nullable=False)
+    name = Column(sql.String, nullable=False)
+    description = Column(sql.String, nullable=False)
+    method = Column(sql.Integer, nullable=False)
+    added = Column(sql.DateTime, nullable=False)
+    owner = Column(sql.Integer, nullable=False)
     task_exec = Column(sql.String, nullable=False)
 
     data = Column(sql.String, nullable=False)
     resource_prefix = Column(sql.String)
 
     def __init__(self, name, desc, method, added, data, resource_prefix, owner, task_exec):
-        self.task_name = name
-        self.task_description = desc
-        self.task_method = method
-        self.task_added = added
+        self.name = name
+        self.description = desc
+        self.method = method
+        self.added = added
         self.data = data
         self.resource_prefix = resource_prefix
-        self.task_owner = owner
+        self.owner = owner
         self.task_exec = task_exec
+
+
+class Amqp(Base):
+    __tablename__ = 'amqp'
+
+    id = Column(sql.Integer, primary_key=True)
+
+    name = Column(sql.String, nullable=False)
+    host = Column(sql.String, nullable=False)
+    port = Column(sql.Integer, nullable=False)
+    added = Column(sql.DateTime, nullable=False)
+    username = Column(sql.String, nullable=False)
+    password = Column(sql.String, nullable=False)  # to-do: hash
+
+    queue_name = Column(sql.String, nullable=False)
+    virtual_host = Column(sql.String, nullable=False)
+
+    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.added = datetime.now()
+        self.username = username
+        self.password = password
+        self.queue_name = queue_name
+        self.virtual_host = virtual_host

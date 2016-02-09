@@ -14,7 +14,7 @@ def data_strap(f):
         SELECT reltuples::int FROM pg_class WHERE relname ='files'
         """).first()[0])
 
-        env['theme_name'] = bottle.theme.get_theme()
+        env['theme_name'] = bottle.loops['themes'].active
 
         if not isinstance(env, dict):
             return env
@@ -33,7 +33,7 @@ def auth_strap(f):
 
         auth = basic_auth()
         if isinstance(auth, HTTPError):
-            return lambda path: lul(path)
+            return lambda path: lul(path)  # to-do: wat
 
         env['authed'] = True
 

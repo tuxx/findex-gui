@@ -30,7 +30,7 @@ class Theme():
 
         for option in options:
             if not option in data:
-                raise ThemeException("Error parsing a needed option from theme \"%s\". Option \"%s\" not found in theme configuration file but should be present." % (self.name, option))
+                raise ThemeException("Theme error for \"%s\". Option \"%s\" not found in theme configuration file but should be present." % (self.name, option))
 
         for k, v in data.iteritems():
             self.options[k] = v

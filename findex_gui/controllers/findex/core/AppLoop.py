@@ -16,8 +16,8 @@ class AppLoop():
         self._pool = ThreadPool(1)
 
         self._ifaces = {
-            'amqp': [AmqpController, 5],
-            'themes': [ThemeController, 5]
+            'amqp': [AmqpController, 300],
+            'themes': [ThemeController, 300]
         }
 
     def start(self):

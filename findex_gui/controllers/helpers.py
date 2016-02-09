@@ -33,7 +33,7 @@ def auth_strap(f):
 
         auth = basic_auth()
         if isinstance(auth, HTTPError):
-            return lambda path: lul(path)
+            return lambda path: lul(path)  # to-do: wat
 
         env['authed'] = True
 

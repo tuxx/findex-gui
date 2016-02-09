@@ -99,6 +99,7 @@ class FindexApi():
             }
         }
 
+    @auth_strap
     def themes_switch(self, db):
         args = ArgValidate().verify_args({
             'name': str

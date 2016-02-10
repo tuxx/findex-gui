@@ -1,0 +1,161 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Appearance
+                <small>Change the look and feel</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> App</a></li>
+                <li><a href="#">Appearance</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <!-- left column -->
+                <div class="col-md-4">
+
+                    <div class="box box-widget widget-user-2 widget-theme-picker">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Theme picker</h3>
+                        </div>
+
+                        <style>
+                            .bg-theme{
+                                background-size:cover !important;
+                                background: white url('');
+                                min-height: 140px;
+                            }
+                            .widget-theme-desc{
+                                height:80px;
+                                overflow:hidden;
+                            }
+                            .widget-theme-name{
+                                color:white;
+                                margin-bottom: 4px;
+                            }
+                            .widget-theme-author{
+                                color:white;
+                                margin-top:0px;
+
+                            }
+                            .widget-theme-author>span, .widget-theme-name>span{
+                                background: rgba(0, 0, 0, 0.4);
+                                padding-left: 6px;
+                                padding-right: 6px;
+                            }
+                        </style>
+
+                        <!-- Add the bg color to the header using any of the bg-* classes -->
+                        <div class="widget-user-header bg-theme">
+                            <!-- /.widget-user-image -->
+                            <h3 class="widget-theme-name"><span>-</span></h3>
+                            <h5 class="widget-theme-author"><span>-</span></h5>
+                        </div>
+
+                        <div class="box-header with-border widget-theme-desc">
+                            <span>-</span>
+                        </div>
+
+                        <div class="box-footer no-padding">
+                            <ul class="nav nav-stacked" id="nav-themepicker">
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /.box -->
+                </div>
+            </div>
+            <!-- /.row -->
+
+        </section>
+        <!-- /.content -->
+    </div>
+
+    <script>
+        var themes = [];
+        var theme_active;
+
+        $(document).ready(function () {
+            function theme_nav_setimage(name){
+                $('.bg-theme').css('background', 'white url("/static/themes/'+name+'/img/preview.jpg")');
+
+                for(var i = 0; i != themes.length; i++){
+                    if(themes[i]['theme_name'] == name){
+                        $('.bg-theme>.widget-theme-name>span').html(themes[i]['theme_name']);
+                        $('.bg-theme>.widget-theme-author>span').html(themes[i]['author']);
+                        $('.widget-theme-picker>.widget-theme-desc>span').html(themes[i]['theme_description']);
+                    }
+                }
+
+            }
+
+            function theme_nav_additem(name){
+                var a = '';
+                if(theme_active['theme_name'] == name){
+                    a = ' <span class="pull-right badge bg-green">enabled</span>';
+                }
+
+                // rip pycharm syntax highlight
+                var html = `
+                    <li><a id="`+name+`" href="#">`+name+a+`</a></li>
+                `;
+                $('#nav-themepicker').append(html);
+            }
+
+            $('#nav-themepicker').mouseleave(function() {
+                if(theme_active){
+                    theme_nav_setimage(theme_active['theme_name']);
+                }
+            });
+
+            function callback_themes(data){
+                data = data['themes/list'];
+                theme_active = data['active'];
+                themes = [];
+
+                // nuke theme selection menu first
+                $('#nav-themepicker').empty();
+
+                // add items
+                for(var i = 0; i != data['list'].length; i++){
+                    var theme = data['list'][i];
+
+                    theme_nav_additem(theme['theme_name']);
+                    themes.push(theme);
+                }
+
+                theme_nav_setimage(theme_active['theme_name']);
+
+                $('#nav-themepicker').children("li").each(function() {
+                    $(this).mouseover(function() {
+
+                        var id = $(this).find('a').attr('id');
+                        theme_nav_setimage(id);
+                    });
+
+                    $(this).click(function() {
+                        var id = $(this).find('a').attr('id');
+
+                        if(theme_active['theme_name'] == id){
+                            return;
+                        }
+
+                        $.post( "/api/themes/switch", { name: id } ).done(function( data ) {
+                            console.log('done!');
+
+                            $.getJSON("/api/themes/list", callback_themes);
+                        });
+                    });
+                });
+            }
+
+            $.getJSON("/api/themes/list", callback_themes);
+        });
+    </script>
+
+{% endblock %}

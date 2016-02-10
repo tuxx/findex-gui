@@ -1,0 +1,331 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                AMQP
+                <small>Manage AMQP endpoints</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> AMQP</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3 class="box-title">Endpoints</h3>
+                            <small id="amqpendpoint_counter">0 online</small>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <table id="jsontable_amqpendpoint" class="display table table-bordered table-striped"
+                                   cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th style="width: 80px;">Name</th>
+                                    <th style="width: 150px;">Host</th>
+                                    <th style="width: 80px;">Port</th>
+                                    <th style="width: 80px;">User</th>
+                                    <th style="width: 50px;">vhost</th>
+                                    <th style="width: 50px !important;"></th>
+                                </tr>
+                                </thead>
+                            </table>
+
+                            <!-- Button trigger modal -->
+                            <button style="float:right;" type="button" class="btn btn-success btn-sm"
+                                    data-toggle="modal" data-target="#add_modal">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="add_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="lbl">Add AMQP endpoint</h4>
+                            </div>
+                            <div class="modal-body">
+                                <form class="form-horizontal">
+                                    <fieldset>
+
+                                        <!-- Form Name -->
+
+                                        <!-- Multiple Radios -->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_type">Broker</label>
+
+                                            <div class="col-md-7">
+                                                <div class="radio">
+                                                    <label for="amqp_type-0">
+                                                        <input class="amqp_type" type="radio" name="amqp_type"
+                                                               id="amqp_type-0" value="psql"
+                                                               checked="checked">
+                                                        RabbitMQ
+                                                    </label>
+                                                </div>
+                                                {#              <div class="radio">#}
+                                                {#                <label for="amqp_type-1">#}
+                                                {#                  <input class="amqp_type" type="radio" name="amqp_type" id="amqp_type-1" value="mysql">#}
+                                                {#                  ZeroMQ (not supported yet)#}
+                                                {#                </label>#}
+                                                {#                </div>#}
+                                            </div>
+                                        </div>
+
+                                        <!-- Text input-->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_name">Name</label>
+
+                                            <div class="col-md-7">
+                                                <input id="amqp_name" name="amqp_name" type="text"
+                                                       placeholder="Endpoint name"
+                                                       class="form-control input-md" required="">
+                                            </div>
+                                        </div>
+
+                                        <!-- Text input-->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_host">Host</label>
+
+                                            <div class="col-md-7">
+                                                <input id="amqp_host" name="amqp_host" type="text" placeholder="host"
+                                                       class="form-control input-md" required="">
+            <span class="help-block">
+             Domain or IP to RabbitMQ
+            </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Text input-->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_port">Port</label>
+
+                                            <div class="col-md-7">
+                                                <input id="amqp_port" name="amqp_port" type="text" placeholder="port"
+                                                       class="form-control input-md" required="">
+              <span class="help-block">
+                  The default port is 5672
+              </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Text input-->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_username">Username</label>
+
+                                            <div class="col-md-7">
+                                                <input id="amqp_username" name="amqp_username" type="text"
+                                                       placeholder="username"
+                                                       class="form-control input-md" required="">
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Text input-->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_pass">Password</label>
+
+                                            <div class="col-md-7">
+                                                <input id="amqp_pass" name="amqp_pass" type="password"
+                                                       placeholder="password"
+                                                       class="form-control input-md" required="">
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Text input-->
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label" for="amqp_vhost">virtual host</label>
+
+                                            <div class="col-md-7">
+                                                <input id="amqp_vhost" name="amqp_vhost" type="text" placeholder="vhost"
+                                                       class="form-control input-md" required="">
+              <span class="help-block">
+                  A virtual host is something you made when you were configuring RabbitMQ. If you followed the Findex 'RabbitMQ' installation tutorial, the vhost would be 'indexer'.
+              </span>
+                                            </div>
+                                        </div>
+
+                                        <center>
+
+                                            <div class="col-md-12" id="msgbox">
+                                                <div class="alert" style="display:none;margin-top:20px;padding: 4px;"
+                                                     id="div_amqp_testconn">
+                                                    <span id="txt_amqp_testconn"></span>
+                                                </div>
+                                            </div>
+
+                                        </center>
+
+                                    </fieldset>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                    <div class="btn-group" style="display:table;float: right;margin-right:10px;">
+                                        <button type="button" class="btn btn-sm" data-dismiss="modal">Close Window</button>
+                                        <button id="btn_amqp_testconn" type="button"
+                                                class="btn btn-info btn-sm">Test Connection
+                                        </button>
+                                        <button id="btn_amqp_add" type="button" class="btn btn-success btn-sm">Add Endpoint
+                                        </button>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('body').on('click', '#btn_amqp_testconn', function(){
+                var amqp_type = $('input[name=amqp_type]:checked').val();
+                var amqp_host = $('#amqp_host').val();
+                var amqp_port = $('#amqp_port').val();
+                var amqp_username = $('#amqp_username').val();
+                var amqp_pass = $('#amqp_pass').val();
+                var amqp_name = $('#amqp_name').val();
+                var amqp_vhost = $('#amqp_vhost').val();
+
+                var data = "type=" + amqp_type;
+                data += "&host=" + amqp_host;
+                data += "&port=" + amqp_port;
+                data += "&username=" + amqp_username;
+                data += "&password=" + amqp_pass;
+                data += "&name=" + amqp_name;
+                data += "&vhost=" + amqp_vhost;
+
+                $('#txt_amqp_testconn').html('');
+                $.post("/api/amqp_test", data, callback_test);
+            });
+
+            $('body').on('click', '#btn_amqp_add', function(){
+                var amqp_type = $('input[name=amqp_type]:checked').val();
+                var amqp_host = $('#amqp_host').val();
+                var amqp_port = $('#amqp_port').val();
+                var amqp_username = $('#amqp_username').val();
+                var amqp_pass = $('#amqp_pass').val();
+                var amqp_name = $('#amqp_name').val();
+                var amqp_vhost = $('#amqp_vhost').val();
+
+                var data = "type=" + amqp_type;
+                data += "&host=" + amqp_host;
+                data += "&port=" + amqp_port;
+                data += "&username=" + amqp_username;
+                data += "&password=" + amqp_pass;
+                data += "&name=" + amqp_name;
+                data += "&vhost=" + amqp_vhost;
+
+                $.post("/api/amqp_add", data, callback_add);
+            });
+
+{#            $('body').on('click', '.btn_amqp_details', function(){#}
+{#                var id = $(this).parent().parent().parent().attr('id');#}
+{#                window.location.href = '/admin/amqp/' + id;#}
+{#            });#}
+
+            $('body').on('click', '.btn_amqp_delete', function(){
+                var name = $(this).parent().parent().parent().attr('id');
+
+                var data = 'name='+name;
+
+                $.post("/api/amqp_delete", data, function(data){
+                    if(data['amqp/delete']['status'] == 'OK'){
+                        $.getJSON("/api/amqp/list", callback_list);
+                    } else {
+                        alert('failed to remove amqp endpoint: ' + data['amqp/delete']['message'])
+                    }
+                });
+            });
+
+            var amqp_endpoints_table = $('#jsontable_amqpendpoint').DataTable({
+                "bFilter": false,
+                "bPaginate": false,
+                "sDom": '<"top">rt<"bottom"flp><"clear">',
+                "createdRow": function (row, data, index) {
+                    row.id = data[0];
+                },
+                "columnDefs": [{
+                    "targets": -1,
+                    "data": null,
+                    "defaultContent": "<div class='btn-group' style='display:flex;'><button type='button' class='btn btn-default btn-xs btn_amqp_details'>Details</button><button type='button' class='btn btn-error btn-xs btn_amqp_delete'>Delete</button></div>"
+                }],
+                "fnDrawCallback": function (oSettings) {
+                    //console.log('table drawn');
+                }
+            });
+
+            function callback_add(data){
+                data = data['amqp/add'];
+
+                $('#div_amqp_testconn').removeClass();
+                $('#div_amqp_testconn').addClass('alert');
+                $('#div_amqp_testconn').css('display', 'block');
+
+                if (data['status'] == 'FAIL') {
+                    $('#div_amqp_testconn').addClass('alert-warning');
+                    $('#txt_amqp_testconn').html('Failed adding: ' + data['message']);
+                } else {
+                    $('#add_modal').modal('hide');
+                    $.getJSON("/api/amqp/list", callback_list);
+                }
+            }
+
+            function callback_test(data){
+                data = data['amqp/test'];
+
+                $('#div_amqp_testconn').removeClass();
+                $('#div_amqp_testconn').addClass('alert');
+                $('#div_amqp_testconn').css('display', 'block');
+
+                if (data['status'] == 'FAIL') {
+                    $('#div_amqp_testconn').addClass('alert-warning');
+                    $('#txt_amqp_testconn').html('Failed: ' + data['message']);
+                } else {
+                    $('#div_amqp_testconn').addClass('alert-success');
+                    $('#txt_amqp_testconn').html('OK: AMQP endpoint reachable');
+                }
+            }
+
+            function callback_list(data) {
+                amqp_endpoints_table.clear();
+
+                data = data['amqp/list'];
+
+                var counter_text = '(' + data.length + ')';
+                $('#amqpendpoint_counter').text(counter_text);
+
+                for (var i = 0; i < data.length; i++) {
+                    var obj = data[i];
+
+                    amqp_endpoints_table.row.add(
+                            [obj['name'], obj['host'], obj['port'], obj['username'], obj['virtual_host']]
+                    ).draw(false);
+
+                }
+            }
+
+            setInterval(function () {
+                $.getJSON("/api/amqp/list", callback_list);
+            }, 5000);
+
+            $.getJSON("/api/amqp/list", callback_list);
+        });
+    </script>
+
+{% endblock %}

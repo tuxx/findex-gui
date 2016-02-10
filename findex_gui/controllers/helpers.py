@@ -33,7 +33,9 @@ def auth_strap(f):
 
         auth = basic_auth()
         if isinstance(auth, HTTPError):
-            return lambda path: lul(path)  # to-do: wat
+            from bottle import abort
+            return abort(403, "dat security")
+            #return lambda path: lul(path)  # to-do: wat
 
         env['authed'] = True
 

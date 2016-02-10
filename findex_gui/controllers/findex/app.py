@@ -1,5 +1,5 @@
 import bottle, os
-from bottle import HTTPError, route, app, request, redirect, response, error, jinja2_template, run, static_file, abort
+from bottle import HTTPError, route, app, request, redirect, response, error, jinja2_template, run, static_file, abort, hook
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
@@ -42,6 +42,16 @@ class FindexApp():
 
         # init API
         self.api = FindexApi(self.cfg)
+
+        @hook('after_request')
+        def enable_cors():
+            """
+            You need to add some headers to each request.
+            Don't use the wildcard '*' for Access-Control-Allow-Origin in production.
+            """
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
 
         # init core routes
         @route('/admin')
@@ -99,7 +109,7 @@ class FindexApp():
                     return controller.amqp_delete(spl[1])
             elif spl[0] == 'appearance':
                 if spl[1] == 'list':
-                    return controller.themes()
+                    return controller.appearance()
             elif spl[0] == 'task':
                 if spl[1] == 'add':
                     return controller.task_add()
@@ -115,8 +125,8 @@ class FindexApp():
         @error(504)
         @error(505)
         def error404(error):
-            print error
-            return jinja2_template('main/error', env={'db_file_count': 0}, data={'error': 'Error - Something happened \:D/'})
+            print 'ERROR:' + str(error)
+            return
 
     def routes_default(self):
         @route('/static/<filename:path>')
@@ -136,7 +146,7 @@ class FindexApp():
 
         @route('/favicon.ico', method='GET')
         def favicon():
-            return server_static('img/favicon.ico')
+            return ''
 
         @route('/robots.txt')
         def beepbeep():

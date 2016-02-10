@@ -1,12 +1,13 @@
 import jinja2
 from datetime import datetime
-from urllib import quote_plus
+from urllib import unquote, quote_plus
 
 from findex_gui.db.orm import Files, Resources
 from findex_common.exceptions import SearchException
 from findex_gui.controllers.findex.findex import Findex
 
 
+# to-do: rewrite/refactor
 class Searcher():
     def __init__(self, cfg, db, env):
         self.cfg = cfg
@@ -17,7 +18,8 @@ class Searcher():
     def _key_check(self, keyword):
         if isinstance(keyword, dict):
             if not 'key' in keyword or not keyword['key']:
-                raise SearchException('Search query must contain 1 character or more')
+                keyword['key'] = ['']
+                #raise SearchException('Search query must contain 1 character or more')
 
             keyword = keyword['key'][0]
 
@@ -25,8 +27,8 @@ class Searcher():
         for b in block:
             keyword = keyword.replace(b, ' ')
 
-        if len(keyword) < 1:
-            raise SearchException('Search query must contain 1 character or more')
+        # if len(keyword) < 1:
+        #     raise SearchException('Search query must contain 1 character or more')
 
         return keyword
 
@@ -67,7 +69,7 @@ class Searcher():
                 sdata['protocols'] = protocols_ids
 
         else:
-            sdata['protocols'] = [0, 1, 2]
+            sdata['protocols'] = [0, 1, 2, 3, 4, 5]
 
         if 'hosts' in vars:
             dhosts = vars['hosts']
@@ -76,7 +78,16 @@ class Searcher():
                 if not dhosts[0] == '*':
                     host_ids = []
                     for host in dhosts:
-                        host_results = self.db.query(Resources).filter(Resources.address==host).filter(Resources.protocol.in_(sdata['protocols'])).all()
+                        host_query = self.db.query(Resources)
+                        if ':' in host:
+                            host, port = host.split(':', 1)
+                            port = int(port)
+
+                            host_query = host_query.filter(Resources.address == host)
+                            host_query = host_query.filter(Resources.port == port)
+
+                        host_query = host_query.filter(Resources.protocol.in_(sdata['protocols']))
+                        host_results = host_query.all()
 
                         for host_result in host_results:
                             host_ids.append(host_result.id)
@@ -169,11 +180,11 @@ class Searcher():
         if 'path' in vars:
             path = vars['path']
 
-            if isinstance(path, list):
+            if isinstance(path, list) and len(path) > 0:
                 path = path[0]
 
                 if len(path) > 3:
-                    path = quote_plus(path)
+                    path = unquote(path)
                     q = q.filter(Files.file_path.like(path+'%'))
                     filtered = True
 

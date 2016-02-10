@@ -89,18 +89,20 @@ class FindexApi():
 
     @auth_strap
     def themes_list(self, db, env):
-        list = bottle.theme.get_themes()
-        active = bottle.theme.theme_active
+        active = bottle.loops['themes'].active
+        data = [v for k,v in bottle.loops['themes'].data.iteritems() if not v['theme_name'] == active]
+        active = bottle.loops['themes'].data[active]
+        data.insert(0, active)
 
         return {
             'themes/list': {
-                'list': list,
+                'list': data,
                 'active': active
             }
         }
 
     @auth_strap
-    def themes_switch(self, db):
+    def themes_switch(self, db, env):
         args = ArgValidate().verify_args({
             'name': str
         }, 'POST')
@@ -204,7 +206,7 @@ class FindexApi():
                 }
             }
 
-        AmqpController(db).create(**dict(endpoint))
+        bottle.loops['amqp'].create(**dict(endpoint))
 
         return {
             'amqp/add': {
@@ -225,7 +227,7 @@ class FindexApi():
                 }
             }
 
-        AmqpController(db).delete(args['name'])
+        bottle.loops['amqp'].delete(args['name'])
 
         return {
             'amqp/delete': {

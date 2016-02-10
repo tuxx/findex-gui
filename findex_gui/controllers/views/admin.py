@@ -18,24 +18,15 @@ class Admin():
 
     @data_strap
     def general(self, env):
-        env['section'] = ['General']
-        data = {}
-
-        return jinja2_template('_admin/templates/main/general', env=env, data=data)
+        return jinja2_template('_admin/templates/main/home', env=env, data={})
 
     @data_strap
-    def themes(self, env):
-        env['section'] = ['Themes']
-        data = {}
-
-        return jinja2_template('_admin/templates/main/themes_list', env=env, data=data)
+    def appearance(self, env):
+        return jinja2_template('_admin/templates/main/themes', env=env, data={})
 
     @data_strap
     def bot_list(self, env):
-        env['section'] = ['Bots']
-        data = {}
-
-        return jinja2_template('_admin/templates/main/bot_list', env=env, data=data)
+        return jinja2_template('_admin/templates/main/bot', env=env, data={})
 
     @data_strap
     def bot_id(self, bot_id, env):
@@ -55,32 +46,12 @@ class Admin():
 
     @data_strap
     def amqp_list(self, env):
-        env['section'] = ['AMQP Endpoints']
-
-        return jinja2_template('_admin/templates/main/amqp_list', env=env)
-
-    @data_strap
-    def amqp_add(self, env):
-        env['section'] = ['AMQP Endpoints', 'Add']
-
-        return jinja2_template('_admin/templates/main/amqp_add', env=env)
-
-    @data_strap
-    def amqp_delete(self, amqp_name, env):
-        endpoint = AmqpController(self.db).get(name=amqp_name)
-        if not endpoint:
-            raise Exception("Endpoint not found")
-
-        env['section'] = ['AMQP Endpoints', 'Delete', amqp_name]
-        data = {
-            'endpoint': endpoint
-        }
-
-        return jinja2_template('_admin/templates/main/amqp_delete', env=env, data=data)
+        return jinja2_template('_admin/templates/main/amqp', env=env)
 
     @data_strap
     def amqp_id(self, amqp_name, env):
         endpoint = AmqpController(self.db).get(name=amqp_name)
+
         if not endpoint:
             raise Exception('Endpoint not found')
 
@@ -94,18 +65,12 @@ class Admin():
 
     @data_strap
     def task_list(self, env):
-        env['section'] = ['Tasks']
-
         return jinja2_template('_admin/templates/main/task_list', env=env)
 
     @data_strap
     def task_add(self, env):
-        env['section'] = ['Tasks', 'Add']
-
         return jinja2_template('_admin/templates/main/task_add', env=env)
 
     @data_strap
     def hostgroup_list(self, env):
-        env['section'] = ['Hostgroup', 'List']
-
         return jinja2_template('_admin/templates/main/hostgroup_list', env=env)

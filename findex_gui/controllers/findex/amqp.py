@@ -32,7 +32,8 @@ class AmqpEndpoint():
             host=self.host,
             port=self.port,
             virtual_host=self.virtual_host,
-            credentials=creds
+            credentials=creds,
+            socket_timeout=2
         )
 
         try:
@@ -106,7 +107,7 @@ class AmqpController:
         return True
 
     def delete(self, name):
-        obj = self.db.query(Amqp).filter_by(Amqp.name == name).first()
+        obj = self.db.query(Amqp).filter(Amqp.name == name).first()
         if not obj:
             return False
 

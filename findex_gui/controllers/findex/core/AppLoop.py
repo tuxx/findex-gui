@@ -13,23 +13,24 @@ from findex_gui.db.orm import Options
 class AppLoop():
     def __init__(self, engine):
         self.engine = engine
-        self._pool = ThreadPool(1)
 
         self._ifaces = {
             'amqp': [AmqpController, 300],
             'themes': [ThemeController, 300]
         }
 
+        self._pool = ThreadPool(len(self._ifaces.keys())+1)
+        self._pools = []
+
     def start(self):
         ses = sessionmaker(bind=self.engine)()
 
         for k, v in self._ifaces.iteritems():
             bottle.loops[k] = v[0](ses)
-
-            self._pool.spawn(self._loop, k, v[1])
+            sleep(1)
+            self._pools.append(self._pool.spawn(self._loop, k, v[1]))
 
     def _loop(self, name, interval):
         while True:
             bottle.loops[name].loop()
-
             sleep(interval)

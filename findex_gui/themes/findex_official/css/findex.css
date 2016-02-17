@@ -475,7 +475,7 @@ div.bg_container{
     background: #bcd3e6 url('/static/themes/findex_official/img/bg_blue2.jpg') no-repeat center center fixed;
 }
 #bg_container_browse{
-    background: #bcd3e6 url('/static/themes/findex_official/img/bg_blue2.jpg') no-repeat center center fixed;
+    background-color: #f5f5f5;
     background-size: cover;
 }
 #bg_container_search{
@@ -712,6 +712,7 @@ div#file_main_browser{
     padding:0px;
     padding-top:12px;
     padding-bottom:12px;
+    background: white;
 }
 div#file_main_browser>div.action_more{
     border-bottom: 1px solid #e3e3e3;

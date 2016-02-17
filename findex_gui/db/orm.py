@@ -149,12 +149,12 @@ class Resources(Base):
     date_crawl_start = Column(sql.DateTime())
     date_crawl_end = Column(sql.DateTime())
 
-    file_count = Column(sql.Integer(), nullable=False, default=0)
+    file_count = Column(sql.Integer(), nullable=True, default=0)
     protocol = Column(sql.Integer(), nullable=False)
 
     basepath = Column(sql.String(), nullable=True, default='')
 
-    busy = Column(sql.Boolean, nullable=False, default=False)
+    busy = Column(sql.Boolean, nullable=True, default=False)
 
     # regular indexes
     ix_address = Index('ix_address', address)

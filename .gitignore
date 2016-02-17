@@ -1,6 +1,5 @@
 config
 *.cfg
-config.py
 old/*
 .idea/*
 *.pyc

@@ -25,6 +25,9 @@ class FindexApi():
 
         @route('/api/<path:path>', method=['GET', 'POST'])
         def dyn(path, db):
+            if not self.cfg['admin']['enabled']:
+                return ':)'
+
             path = path.replace('/', '_')
 
             try:

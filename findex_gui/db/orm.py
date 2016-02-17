@@ -227,6 +227,71 @@ class Tasks(Base):
         self.task_exec = task_exec
 
 
+class Hostgroups(Base):
+    __tablename__ = 'hostgroups'
+
+    id = Column(sql.Integer, primary_key=True)
+
+    name = Column(sql.String, nullable=False)
+    host = Column(sql.String, nullable=False)
+    port = Column(sql.Integer, nullable=False)
+    added = Column(sql.DateTime, nullable=False)
+    username = Column(sql.String, nullable=False)
+    password = Column(sql.String, nullable=False)
+
+    queue_name = Column(sql.String, nullable=False)
+    virtual_host = Column(sql.String, nullable=False)
+
+    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.added = datetime.now()
+        self.username = username
+        self.password = password
+        self.queue_name = queue_name
+        self.virtual_host = virtual_host
+
+
+class Targets(Base):
+    __tablename__ = 'targets'
+
+    id = Column(sql.Integer, primary_key=True)
+
+    name = Column(sql.String, nullable=False)
+    address = Column(sql.String, nullable=False)
+    port = Column(sql.Integer, nullable=False)
+
+    protocol = Column(sql.Integer, nullable=False)
+    type = Column(sql.Integer, nullable=False)  # 0: single host   1: multiple hosts   2: range
+
+    added = Column(sql.DateTime, nullable=False)
+
+    auth_username = Column(sql.String)
+    auth_password = Column(sql.String)
+
+    amqp_id = Column(sql.Integer, nullable=False)
+
+    basepath = Column(sql.String)
+    display_url = Column(sql.String)
+    user_agent = Column(sql.String)
+    recursive_sizes = Column(sql.Boolean, nullable=False, default=False)
+
+    def __init__(self, name, address, port, protocol, auth_username, auth_password, amqp_id, basepath, display_url, user_agent, recursive_sizes):
+        self.name = name
+        self.address = address
+        self.port = port
+        self.protocol = protocol
+        self.added = datetime.now()
+        self.auth_username = auth_username
+        self.auth_password = auth_password
+        self.amqp_id = amqp_id
+        self.basepath = basepath
+        self.display_url = display_url
+        self.user_agent = user_agent
+        self.recursive_sizes = recursive_sizes
+
+
 class Amqp(Base):
     __tablename__ = 'amqp'
 

@@ -15,7 +15,6 @@ class Admin():
         self.db = db
         self.findex = Findex(db=self.db)
 
-
     @data_strap
     def general(self, env):
         return jinja2_template('_admin/templates/main/home', env=env, data={})
@@ -23,6 +22,10 @@ class Admin():
     @data_strap
     def appearance(self, env):
         return jinja2_template('_admin/templates/main/themes', env=env, data={})
+
+    @data_strap
+    def targets(self, env):
+        return jinja2_template('_admin/templates/main/targets', env=env, data={})
 
     @data_strap
     def bot_list(self, env):

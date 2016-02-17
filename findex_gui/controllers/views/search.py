@@ -39,6 +39,7 @@ class Search():
             except SearchException as ex:
                 return jinja2_template('main/search', env=env, message=str(ex))
             except Exception as ex:
+                print str(ex)
                 return jinja2_template('main/search', env=env, message='Something went wrong \:D/')
 
         return jinja2_template('main/search', env=env, message='')

@@ -5,7 +5,8 @@ from findex_gui.db.orm import Amqp
 
 
 class AmqpEndpoint():
-    def __init__(self, name, username, password, host, port=5672, virtual_host="indexer", queue_name="crawl_queue"):
+    def __init__(self, id, name, username, password, host, port=5672, virtual_host="indexer", queue_name="crawl_queue"):
+        self.id = id
         self.name = name
         self.username = username
         self.password = password
@@ -18,7 +19,7 @@ class AmqpEndpoint():
         self.channel = None
 
     def __iter__(self):
-        for key in ['name', 'username', 'password', 'host', 'port', 'virtual_host', 'queue_name']:
+        for key in ['name', 'username', 'password', 'host', 'port', 'virtual_host', 'queue_name', 'id']:
             yield (key, getattr(self, key))
 
     def connect(self):
@@ -90,7 +91,8 @@ class AmqpController:
                 host=amqp_obj.host,
                 port=amqp_obj.port,
                 virtual_host=amqp_obj.virtual_host,
-                queue_name=amqp_obj.queue_name
+                queue_name=amqp_obj.queue_name,
+                id=amqp_obj.id
             )
 
             data.append(amqp_endpoint)

@@ -188,13 +188,15 @@ class Searcher():
                     q = q.filter(Files.file_path.like(path+'%'))
                     filtered = True
 
-        if 'host' in vars:
-            host = vars['host']
-
-            if isinstance(host, list):
-                host = int(host[0])
-                q = q.filter(Files.resource_id == host)
-                filtered = True
+        # if 'host' in vars:
+        #     host = vars['host']
+        #
+        #     if isinstance(host, list):
+        #         spl = host[0].split(':', 1)
+        #         host = spl[0]
+        #         port = int(spl[1])
+        #         q = q.filter(Files.resource_id == host)
+        #         filtered = True
 
         q = q.filter(Files.searchable.like('%'+val+'%')).limit(600)
 

@@ -64,10 +64,16 @@ class FindexApp():
 
         @route('/admin/')
         def adminx():
+            if not self.cfg['admin', 'enabled']:
+                return ':)'
+
             return admin()
 
         @route('/admin/<name>')
         def admin_dyn(db, name):
+            if not self.cfg['admin', 'enabled']:
+                return ':)'
+
             auth = basic_auth()
             if isinstance(auth, HTTPError):
                 return auth
@@ -83,6 +89,9 @@ class FindexApp():
 
         @route('/admin/<path:path>')
         def admin_bot(path, db):
+            if not self.cfg['admin', 'enabled']:
+                return ':)'
+
             auth = basic_auth()
             if isinstance(auth, HTTPError):
                 return auth

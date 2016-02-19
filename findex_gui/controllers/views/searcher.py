@@ -18,8 +18,8 @@ class Searcher():
     def _key_check(self, keyword):
         if isinstance(keyword, dict):
             if not 'key' in keyword or not keyword['key']:
-                keyword['key'] = ['']
-                #raise SearchException('Search query must contain 1 character or more')
+                #keyword['key'] = ['']
+                raise SearchException('Search query must contain 4 character or more')
 
             keyword = keyword['key'][0]
 
@@ -27,8 +27,8 @@ class Searcher():
         for b in block:
             keyword = keyword.replace(b, ' ')
 
-        # if len(keyword) < 1:
-        #     raise SearchException('Search query must contain 1 character or more')
+        if len(keyword) <= 3:
+            raise SearchException('Search query must contain 4 character or more')
 
         return keyword
 
@@ -198,7 +198,7 @@ class Searcher():
         #         q = q.filter(Files.resource_id == host)
         #         filtered = True
 
-        q = q.filter(Files.searchable.like('%'+val+'%')).limit(600)
+        q = q.filter(Files.searchable.like('%'+val+'%')).limit(300)
 
         results = {}
         results['data'] = q.all()

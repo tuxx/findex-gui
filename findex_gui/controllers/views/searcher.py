@@ -1,4 +1,5 @@
 import jinja2
+import bottle
 from datetime import datetime
 from urllib import unquote, quote_plus
 
@@ -37,7 +38,6 @@ class Searcher():
         val = val.lower()
 
         filtered = False
-        start_dbtime = datetime.now()
 
         # to-do: move this to API (or make api.py use this class)
         q = self.db.query(Files)
@@ -202,14 +202,17 @@ class Searcher():
 
         results = {}
         results['data'] = q.all()
-        results['load_dbtime'] = (datetime.now() - start_dbtime).total_seconds()
 
         if sort:
             results['data'] = sorted(results['data'], key=lambda k: k.file_size, reverse=True)
 
         # to-do: dont do this here
         for r in results['data']:
-            host = self.findex.get_resources(r.resource_id)
+            host = bottle.loops['cache'][r.resource_id]
+
+            if not host:
+                host = self.findex.get_resources(r.resource_id)
+
             setattr(r, 'resource', host)
 
         results['data'] = self.findex.set_humanize(results['data'])

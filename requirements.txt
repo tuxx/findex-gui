@@ -1,0 +1,12 @@
+gevent
+flask
+flask-wtf
+flask-sqlalchemy
+flask-auth==0.85
+flask-restful
+sqlalchemy
+jinja2
+psycopg2
+sqlalchemy-utils
+ipaddr
+furl

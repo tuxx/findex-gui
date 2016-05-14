@@ -1,0 +1,329 @@
+/*!
+ * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
+ * Code licensed under the Apache License v2.0.
+ * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+/* General */
+
+a{
+	color: #3572b0;
+}
+
+hr{
+    border-top: 1px solid #DDD;
+}
+
+.col-center {
+   float: none;
+   margin-right: auto;
+   margin-left: auto;
+}
+
+.btn-default{
+	box-sizing: border-box;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 3.01px;
+    color: #333;
+    cursor: pointer;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 14px;
+    font-variant: normal;
+    font-weight: 400;
+    height: 2.14285714em;
+    line-height: 1.42857143;
+    margin: 0;
+    padding: 4px 10px;
+    text-decoration: none;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.open>.dropdown-menu>.fetch_container{
+	color:black;
+	width:400px !important;
+	padding:10px;
+	padding-left:20px;
+	padding-right:20px;
+}
+.open>.dropdown-menu>.fetch_container>textarea{
+	width: 100%;
+	resize: none;
+	border-radius:4px;
+	font-size:12px;
+	margin-bottom:6px;
+	border: 1px solid #ccc;
+}
+
+#wrapper {
+    padding-left: 0;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    margin-top: 40px;
+}
+
+#wrapper.toggled {
+    padding-left: 250px;
+}
+
+#sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    left: 250px;
+    width: 0;
+    height: 100%;
+    margin-left: -250px;
+    overflow-y: auto;
+	background: #f5f5f5;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+	border-right: 1px solid #ccc;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    width: 250px;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    position: absolute;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    position: absolute;
+    margin-right: -250px;
+}
+
+/* Sidebar Styles */
+
+.sidebar-nav {
+    top: 0;
+    width: 250px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-nav li {
+    text-indent: 20px;
+    line-height: 34px;
+}
+
+.sidebar-nav li a {
+    display: block;
+    text-decoration: none;
+    color: #337ab7;
+}
+
+.sidebar-nav li a:hover {
+    text-decoration: none;
+    color: #3572b0;
+    background: #e6e6e6;
+}
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus {
+    text-decoration: none;
+}
+
+.sidebar-nav > .sidebar-brand {
+    height: 65px;
+    font-size: 18px;
+    line-height: 60px;
+}
+
+.sidebar-nav > .sidebar-brand a {
+    color: black;
+}
+
+.sidebar-nav > .sidebar-brand a:hover {
+    text-decoration:underline;
+    background: none;
+	color: black;
+}
+
+@media(min-width:768px) {
+    #wrapper {
+        padding-left: 0px;
+    }
+
+    #wrapper.toggled {
+        padding-left: 0;
+    }
+
+    #sidebar-wrapper {
+        width: 250px;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        width: 0;
+    }
+
+    #page-content-wrapper {
+        position: relative;
+    }
+
+    #wrapper.toggled #page-content-wrapper {
+        position: relative;
+        margin-right: 0;
+    }
+}
+
+/* navbar */
+@media (min-width: 1200px) {
+	.container {
+		width: 100% !important;
+	}
+}
+
+@media (min-width: 992px){
+	.container {
+		width: 100% !important;
+	}
+}
+
+.navbar-default {
+	background-color: #205081;
+	border-color: #2e3D54;
+}
+.navbar-nav > li > a, .navbar-brand {
+    padding-top:11px !important;
+    padding-bottom:0 !important;
+    height: 40px;
+	font-family: "Arial";
+	color: white;
+}
+
+.navbar-default .navbar-nav>li>a {
+    color: white;
+}
+
+.navbar {min-height:40px !important;}
+
+.navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
+    color: white;
+    background-color: #3572b0;
+}
+
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover {
+    color: white;
+    background-color: #337ab7;
+}
+
+.navbar-brand{
+    padding: 0px;
+    padding-top: 0px !important;
+    background: url('http://i.imgur.com/h83XZCE.png');
+    height: 40px;
+    width: 68px;
+    background-repeat: no-repeat;
+    background-position-y: -2px;
+    margin-left: 6px !important;
+}
+
+ul.navbar-nav .file_counter{
+	color: white;
+    margin-top: 14px;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+.navbar-fixed-top>.container>div.message{
+	position: fixed;
+    top: 40px;
+    left: 0px;
+    width: 100%;
+    background: #fffdf6;
+    border: 1px solid #ffeaae;
+    padding-left: 20px;
+    line-height: 20px;
+}
+
+.sidebar-nav>.header{
+	line-height:normal;
+}
+.sidebar-nav>.header>.cont>.icon>img{
+	max-height:70px; border-radius: 70px;
+}
+.sidebar-nav>.header>.cont>.icon{
+	float:left;width:100px;height:80px;
+}
+.sidebar-nav>.header>.cont>.description{
+	font-size:14px; float:left;width:100px;height:80px;text-indent:0px;padding-top:20px;
+}
+.sidebar-nav>.header>.cont{
+	width:220px;overflow:hidden;margin-top:12px;
+}
+.sidebar-nav>li>a>span{
+	margin-right: 10px;
+}
+
+.sidebar-nav .fa{
+	color: #696969;
+	font-size:18px;
+	text-indent:0px;
+}
+
+.sidebar-nav .fa>span{
+	color:#337ab7;
+	font-size:14px;
+	margin-left:16px;
+	font-family: 'Open Sans', sans-serif;
+}
+
+#sidebar-wrapper>hr{
+    margin-left: 14px;
+    margin-right: 14px;
+    border-top: 1px solid #D6D6D6;
+}
+
+.xo{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+	padding-top:10px;
+	padding-bottom:10px;
+}
+
+.xo>li{
+	padding: 0 10px 0 0;
+	float:left;
+}
+.xo>li::before{
+	content: "/";
+	padding-right:4px;
+}
+
+/* browser table */
+table.browser{
+    margin-top:20px;
+}
+
+table.browser>tbody>tr>td>i.fa{
+	margin-right:6px;
+	font-size:16px;
+    color: #999999;
+}
+
+table.browser>thead>tr>th {
+    vertical-align: bottom;
+    border-bottom: 1px solid #ddd;
+}
+
+.clickable:hover{
+    background: #f5f5f5;
+}
+
+table.browser>thead>tr{
+    color: #707070;
+    font-size: 13px;
+}

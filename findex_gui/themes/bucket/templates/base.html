@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% include "bucket/templates/helpers/resources.html" %}
+</head>
+<body>
+    <div id="wrapper">
+        {% include "bucket/templates/navigation/top.html" %}
+
+        {% for message in messages %}
+            <div class="alert alert-warning">
+              <strong>Warning!</strong> {{ message }}
+            </div>
+        {% endfor %}
+
+        {% block content %} {% endblock %}
+    </div>
+
+    <script>
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
+    </script>
+</body>
+</html>

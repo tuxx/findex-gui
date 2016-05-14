@@ -1,0 +1,159 @@
+{% extends "bucket/templates/base.html" %}
+{% block content %}
+<style>
+@media(min-width:768px) {
+    #wrapper {
+        padding-left: 250px;
+    }
+}
+</style>
+<!-- Sidebar -->
+<div id="sidebar-wrapper">
+    <ul class="sidebar-nav">
+        <li class="header">
+            <div class="cont">
+                <div class="icon">
+                    <img height="70px" src="http://i.imgur.com/WDGLU74.png"/>
+                </div>
+                <div class="description">
+                    <b style="color: #5D5D5D">{{ resource.name }}</b>
+
+                    <p style="font-size:12px;color: #969696">0 files</p>
+                </div>
+            </div>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fa fa-line-chart">
+                    <span>Overview</span>
+                </i>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fa fa-file-text-o">
+                    <span>Files</span>
+                </i>
+            </a>
+        </li>
+        <li>
+            <a href="#">
+                <i class="fa fa-download">
+                    <span>Downloads</span>
+                </i>
+            </a>
+        </li>
+    </ul>
+    <hr>
+</div>
+<!-- /#sidebar-wrapper -->
+
+<!-- Page Content -->
+<div id="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <ol class="xo">
+                    {% for i in range(0, breadcrumbs | length) %}
+                        {% set crumb = breadcrumbs[i] %}
+                        {% set href = ('../'*(breadcrumbs | length - i-1))[:-1] %}
+
+                        {% if i+1 == breadcrumbs | length %}
+                            {% set active = True %}
+                        {% else %}
+                            {% set active = False %}
+                        {% endif %}
+
+                        <li>
+                            <a class="{{"active" if active else "unactive"}}" href="{{href if not active else "."}}/">{{crumb}}</a>
+                        </li>
+                    {% endfor %}
+                </ol>
+
+                <h3>Files</h3>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default">Raw</button>
+                    <button type="button" class="btn btn-default">JSON</button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Fetch
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <div class="fetch_container">
+                            <p style="margin-bottom:20px;">
+                                Copy/paste to recursively download this directory.
+                            </p>
+                            <h4>wget</h4>
+                            <textarea>wget</textarea>
+                            <h4>lftp</h4>
+                            <textarea>lftp</textarea>
+                        </div>
+                    </ul>
+                </div>
+
+                {% if files %}
+
+                    <table class="browser table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th style="width:80px;">Size</th>
+                                <th style="width:80px;">Perm</th>
+                                <th style="width:110px;">Modified</th>
+                                <th style="width:80px;">Direct</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in files %}
+                                {% if f.file_isdir %}
+                                    {% if f.file_name == ".." %}
+                                        {% set icon = "fa-level-up" %}
+                                        {% set href = ".." %}
+                                    {% else %}
+                                        {% set icon = "fa-folder" %}
+                                        {% set href = f.file_name + "/" %}
+                                    {% endif %}
+                                {% else %}
+                                    {% set icon = "fa-file-text-o" %}
+                                    {% set href = f.file_name %}
+                                {% endif %}
+
+                                <tr class="clickable" data-id="{{f.id}}" data-href="{{href}}" rel="popover" title="">
+                                    <td><i class="fa {{ icon }}"></i>
+                                        <a href="{{ href }}">{{f.file_name}}</a>
+                                    </td>
+
+                                    <td><b>{{f.file_size_human}}</b></td>
+                                    <td>-</td>
+                                    <td>{{f.file_modified_human}}</td>
+                                    <td>
+                                        {% if not f.file_isdir %}
+                                            <a href="{{ f.path_direct }}">Link</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                {% else %}
+                    no files
+                {% endif %}
+            </div>
+
+            <div class="col-lg-12">
+                <h1>Simple Sidebar</h1>
+
+                <p>This template has a responsive menu toggling system. The menu will appear collapsed on smaller
+                    screens, and will appear non-collapsed on larger screens. When toggled using the button below, the
+                    menu will appear/disappear. On small screens, the page content will be pushed off canvas.</p>
+
+                <p>Make sure to keep all page content within the <code>#page-content-wrapper</code>.</p>
+                <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

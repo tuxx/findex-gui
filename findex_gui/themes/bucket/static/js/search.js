@@ -25,19 +25,37 @@ class bucket_search extends Search {
             context._loading = true;
         }
 
-        let sel = context.selectors['search_results'];
+        let sel_results_container = context.selectors['search_results'];
 
-        // set global `search_results` variable
-        search_results = data;
+        // Below clauses will update global var `search_results` based on different scenarios
+        if(Object.keys(search_results).length == 0 && search_results.constructor === Object){
+            search_results = jQuery.extend(true, {}, data);
+        } else if(data['params']['key'] != search_results['params']['key']){
+            // results came in with a new key
+            search_results = jQuery.extend(true, {}, data);
+            $(sel_results_container).html('');
+        } else if(search_results['results'].length > 0 && data['results'].length == 0) {
+            // hit end of search
+            $(sel_results_container).append(`<span id="no_more_results">no more results</span>`);
+            no_more_search_results = true;
+
+            context.toggle_loading(context);
+            return;
+        } else  {
+            // new additions due to page scroll - need to update the table
+            let old_results = search_results['results'];
+            search_results = jQuery.extend(true, {}, data);
+            search_results['results'] = search_results['results'].concat(old_results);
+        }
 
         // assign html
-        bucket_search._set_result_html(data, context);
+        bucket_search.set_result_html(data, context);
 
         // assign icons
         bucket_search.set_result_icons(context.icons);
 
         // highlight search results
-        $(sel).highlight(context.key, { className: 'important' });
+        $(sel_results_container).highlight(context.key, { className: 'important' });
 
         // update title header
         $('#search_col h3#search_header').text(`Results for "${data['params']['key']}"`);
@@ -46,23 +64,18 @@ class bucket_search extends Search {
         context.toggle_loading(context);
     }
 
-    static _set_result_html(data, context){
-        let sel = context.selectors['search_results'];
-        $(sel).html('');
+    static set_result_html(data, context){
+        let sel_results_container = context.selectors['search_results'];
 
-        if(data['results'].length == 0){
-            $(sel).html('no results.');
-            no_more_search_results = true;
-            return;
-        } else {
-            no_more_search_results = false;
+        if(data['params']['page'] == 0){
+            $(sel_results_container).html('');
         }
 
         if(search_display_view == 'fancy') {
             $.each(data['results'], function(index, obj) {
                 let result = obj;
 
-                $(sel).append(`
+                $(sel_results_container).append(`
                     <li class="iterable-item">
                         <article class="summary">
                             <a class="avatar-link" href="/"> <span class="avatar avatar-medium">
@@ -92,24 +105,32 @@ class bucket_search extends Search {
         } else if(search_display_view == 'table'){
             let buffer = '';
 
-            buffer += `
-                <div class="table-responsive">
-                <table class="results_table table">
-                    <thead>
-                    <tr>
-                        <th id="name">File <i class="fa fa-sort" aria-hidden="true"></i></th>
-                        <th id="path">Path <i class="fa fa-sort" aria-hidden="true"></i></th>
-                        <th id="size">Size <i class="fa fa-sort" aria-hidden="true"></i></th>
-                        <th id="modified">Modified <i class="fa fa-sort" aria-hidden="true"></i></th>
-                        <th id="address">Server</i></th>
-                        <th id="direct">Direct</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let sel_table_body = $(sel_results_container).find('table.results_table tbody');
+            if(!sel_table_body.length){
+                $(sel_results_container).append(`
+                    <div class="table-responsive">
+                        <table class="results_table table">
+                            <thead>
+                            <tr>
+                                <th id="name">File <i class="fa fa-sort" aria-hidden="true"></i></th>
+                                <th id="path">Path <i class="fa fa-sort" aria-hidden="true"></i></th>
+                                <th style="min-width: 64px;" id="size">Size <i class="fa fa-sort" aria-hidden="true"></i></th>
+                                <th id="modified">Modified <i class="fa fa-sort" aria-hidden="true"></i></th>
+                                <th id="address">Server</i></th>
+                                <th id="direct">Direct</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                `);
+
+                sel_table_body = $(sel_results_container).find('table.results_table tbody')
+            }
 
             let file_max_length = 60;
-            let path_max_length = 44;
+            let path_max_length = 40;
 
             $.each(data['results'], function(index, obj) {
                 let result = obj;
@@ -117,7 +138,6 @@ class bucket_search extends Search {
                 let file_name = result['file_name'];
                 let file_path = result['file_path'];
                 let file_modified_human = result['file_modified_human'];
-
 
                 if(result['file_name'].length > file_max_length){
                     file_name = file_name.substr(0, file_max_length) + '...';
@@ -152,13 +172,7 @@ class bucket_search extends Search {
                 </tr>`;
             });
 
-            buffer += `
-                    </tbody>
-                </table>
-                </div>
-            `;
-
-            $(sel).append(buffer);
+            $(sel_table_body).append(buffer);
         } else {
             return 'neither fancy or table display? :(';
         }

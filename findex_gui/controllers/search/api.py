@@ -35,7 +35,7 @@ class SearchAPI(Resource):
 
         self.reqparse.add_argument('lazy_search', type=bool, location='json',
                                    help='Set to true for better search performance but less accuracy. Most suited ' +
-                                   'for fancy auto completion on the front-end.')
+                                   'for auto completion on the front-end.')
 
         self.reqparse.add_argument('autocomplete', type=bool, location='json',
                                    help='this is the same as setting `lazy_search` to true and `per_page` to 5')

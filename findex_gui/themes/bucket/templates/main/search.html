@@ -337,15 +337,24 @@
                 session_set('search_display_view', name);
                 search_display_view = name;
 
+                // empty HTML search results
+                $('ol#search_results').html('');
+
                 // redraw search results
-                search_controller.parse_results(search_results, search_controller);
+                bucket_search.set_result_html(search_results, search_controller);
+
+                // assign icons
+                bucket_search.set_result_icons(search_controller.icons);
+
+                // highlight search results
+                $(search_controller.selectors['search_results']).highlight(search_controller.key, { className: 'important' });
             });
 
             // Detect end of page scroll
             $(window).scroll(function() {
                if($(window).scrollTop() + $(window).height() == $(document).height()) {
                     if(!no_more_search_results && Object.keys(search_results).length !== 0 && search_results.constructor === Object && search_results['results'].length > 0){
-                        console.log('yee');
+                        search_controller.search(search_results['results'].length);
                     }
                }
             });

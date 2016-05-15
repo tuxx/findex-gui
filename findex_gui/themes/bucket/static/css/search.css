@@ -273,6 +273,14 @@ ol#search_results .important{
     font-weight: bold;
 }
 
+ol#search_results>span#no_more_results{
+    padding-bottom: 20px;
+    display: block;
+    font-size: 14px;
+    text-align: center;
+    color: #ADADAD;
+}
+
 
 table.results_table>tbody>tr>td>i.fa {
     margin-right: 6px;
@@ -337,7 +345,7 @@ table.results_table>tbody>tr>td#address, table.results_table>tbody>tr>td#modifie
     }
 }
 
-@media (min-width: 1250px) {
+@media (min-width: 1320px) {
     table.results_table>thead>tr>th#address, table.results_table>tbody>tr>td#address{
         display: table-cell;
     }

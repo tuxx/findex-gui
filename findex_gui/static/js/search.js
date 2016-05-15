@@ -9,11 +9,16 @@ class Search {
      * Calling this method will gather the filters and do a search query
      * @return
      */
-    search(){
+    search(page){
+        if (page == null){
+            page = 0;
+        }
+
         let params = this._gather_params('params');
 
         params['autocomplete'] = this.autocomplete;
         params['per_page'] = this.per_page;
+        params['page'] = page;
         params['key'] = this.get_key();
 
         if(params['key'] == '') return;

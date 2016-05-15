@@ -305,9 +305,11 @@ table.results_table>thead>tr>th {
     vertical-align: inherit;
 }
 
+/* hide the sort icons for now */
 table.results_table>thead>tr>th>i.fa{
     font-size: 11px;
     margin-left: 2px;
+    display: none;
 }
 
 table.results_table>tbody>tr>td:first-child{

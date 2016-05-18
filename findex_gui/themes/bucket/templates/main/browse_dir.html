@@ -1,5 +1,6 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
+<link href="/static/themes/bucket/static/css/browse.css" rel="stylesheet">
 <style>
 @media(min-width:768px) {
     #wrapper {
@@ -18,33 +19,42 @@
                 <div class="description">
                     <b style="color: #5D5D5D">{{ resource.name }}</b>
 
-                    <p style="font-size:12px;color: #969696">0 files</p>
+                    <p style="font-size:12px;color: #969696">{{ resource.file_count }} files</p>
                 </div>
             </div>
         </li>
         <li>
             <a href="#">
-                <i class="fa fa-line-chart">
-                    <span>Overview</span>
-                </i>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="fa fa-file-text-o">
-                    <span>Files</span>
-                </i>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="fa fa-download">
-                    <span>Downloads</span>
+                <i class="fa fa-info-circle">
+                    <span>Information</span>
                 </i>
             </a>
         </li>
     </ul>
+
     <hr>
+
+    {% if file_distribution %}
+        <div class="file_distribution_container">
+            {% for key, val in file_distribution.iteritems() %}
+                <div class="skillbar clearfix " data-percent="{{ val }}%">
+                    <div class="skillbar-title"><span>{{ key }}</span></div>
+                    <div class="skillbar-bar"></div>
+                    <div class="skill-bar-percent">{{ val }}%</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <script>
+        $(document).ready(function(){
+            $('.skillbar').each(function(){
+                $(this).find('.skillbar-bar').css({
+                    width:$(this).attr('data-percent')
+                });
+            });
+        });
+    </script>
 </div>
 <!-- /#sidebar-wrapper -->
 

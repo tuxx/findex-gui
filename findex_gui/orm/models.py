@@ -192,7 +192,7 @@ class ResourceMeta(base):
 
     web_user_agent = Column(String)
     recursive_sizes = Column(Boolean, nullable=False, default=False)
-
+    file_distribution = Column(JSONType)
 
 # class Targets(base):
 #     __tablename__ = 'targets'

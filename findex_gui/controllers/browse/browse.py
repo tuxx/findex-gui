@@ -62,9 +62,16 @@ class Browse:
             setattr(cdup, 'file_name_human', '..')
             files.insert(0, cdup)
 
+        from collections import OrderedDict
+        if resource.meta.file_distribution:
+            file_distribution = OrderedDict(sorted(resource.meta.file_distribution.items(), key=lambda t: t[0]))
+        else:
+            file_distribution = {}
+
         return {
             'files': files,
             'path': data['path'],
             'resource': resource,
-            'breadcrumbs': [data['resource_id']] + data['path'].split('/')[1:]
+            'breadcrumbs': [data['resource_id']] + data['path'].split('/')[1:],
+            'file_distribution': file_distribution
         }

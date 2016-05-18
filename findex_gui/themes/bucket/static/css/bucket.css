@@ -251,6 +251,7 @@ ul.navbar-nav .file_counter{
 .sidebar-nav>.header{
 	line-height:normal;
     margin-top: 22px;
+    margin-bottom: 6px;
 }
 .sidebar-nav>.header>.cont>.icon>img{
 	max-height:70px; border-radius: 64px;

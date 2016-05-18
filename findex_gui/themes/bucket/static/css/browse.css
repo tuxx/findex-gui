@@ -2,7 +2,12 @@
     padding-left: 14px;
     padding-right: 14px;
 }
-
+#sidebar-wrapper .file_distribution_container span#header{
+	font-weight: bold;
+    color: #5D5D5D;
+    margin-bottom: 8px;
+    display: block;
+}
 .skillbar {
 	position:relative;
 	display:block;

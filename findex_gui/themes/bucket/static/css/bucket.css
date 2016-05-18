@@ -159,6 +159,7 @@ hr{
 
     #sidebar-wrapper {
         width: 250px;
+        overflow-y:hidden;
     }
 
     #wrapper.toggled #sidebar-wrapper {
@@ -269,8 +270,27 @@ ul.navbar-nav .file_counter{
     line-height:16px;
 }
 .sidebar-nav>.header>.cont{
-	width:220px;overflow:hidden;margin-top:12px;
+	width:250px;overflow:hidden;margin-top:12px;
 }
+
+.sidebar-nav>.header>.cont>.hide_sidebar{
+    float: right;
+    text-align: center;
+    vertical-align: middle;
+    width: 22px;
+    height: 30px;
+    border: 1px solid #B9B9B9;
+    background: white;
+    display: block;
+    text-indent: 0;
+    cursor:pointer;
+}
+
+.sidebar-nav>.header>.cont>.hide_sidebar>.fa {
+    font-size: 14px;
+    line-height: 26px;
+}
+
 .sidebar-nav>li>a>span{
 	margin-right: 10px;
 }

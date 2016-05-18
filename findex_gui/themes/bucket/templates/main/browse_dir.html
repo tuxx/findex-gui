@@ -13,7 +13,7 @@
         <li class="header">
             <div class="cont">
                 <div class="icon">
-                    <img height="70px" src="http://i.imgur.com/WDGLU74.png"/>
+                    <img height="70px" src="/static/img/default_thumbnail2.png"/>
                 </div>
                 <div class="description">
                     <b style="color: #5D5D5D">{{ resource.name }}</b>
@@ -53,7 +53,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
-                <ol class="xo">
+                <ol class="breadcrumbs">
                     {% for i in range(0, breadcrumbs | length) %}
                         {% set crumb = breadcrumbs[i] %}
                         {% set href = ('../'*(breadcrumbs | length - i-1))[:-1] %}

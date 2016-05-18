@@ -1,7 +1,10 @@
 from json import loads
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP
+from sqlalchemy import (
+    Column, Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Sequence
+)
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import JSONType, IPAddressType
 from sqlalchemy.ext.declarative import declarative_base
 from flaskext.auth import AuthUser, get_current_user_data
@@ -129,13 +132,8 @@ class Crawlers(base):
     hostname = Column(String(), nullable=False)
     crawler_name = Column(String(), nullable=False)
 
-    jsonrpc_bind_host = Column(IPAddressType())
-    jsonrpc_bind_port = Column(Integer())
-
-    jsonrpc = Column(Boolean())
-    amqp = Column(Boolean())
-    amqp_name = Column(String(128))
-
+    amqp_host = Column(String(128))
+    amqp_vhost = Column(String(128))
     heartbeat = Column(TIMESTAMP())
 
 
@@ -144,11 +142,12 @@ class Resources(base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(), nullable=False)
+    name = Column(String(), unique=True, nullable=False)
     description = Column(String())
 
     address = Column(String(), nullable=False)
     port = Column(Integer(), nullable=False, default=0)
+    protocol = Column(Integer(), nullable=False)
 
     display_url = Column(String(), nullable=False)
 
@@ -157,13 +156,12 @@ class Resources(base):
     date_crawl_end = Column(DateTime())
 
     file_count = Column(Integer(), nullable=True, default=0)
-    protocol = Column(Integer(), nullable=False)
 
     basepath = Column(String(), nullable=True, default='')
 
-    busy = Column(Boolean, nullable=True, default=False)
+    meta_id = Column(Integer, ForeignKey('resource_meta.id'))
+    meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
 
-    # regular indexes
     ix_address = Index('ix_address', address)
 
     def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
@@ -182,108 +180,104 @@ class Resources(base):
         return blob
 
 
-class Options(base):
-    __tablename__ = 'options'
+class ResourceMeta(base):
+    __tablename__ = 'resource_meta'
 
     id = Column(Integer, primary_key=True)
 
-    key = Column(String())
-    val = Column(JSONType())
+    busy_crawling = Column(Boolean, nullable=True, default=False)
 
-    def __init__(self, key, val):
-        self.key = key
-        self.val = val
+    auth_user = Column(String)
+    auth_pass = Column(String)
 
-
-class Tasks(base):
-    __tablename__ = 'tasks'
-
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    method = Column(Integer, nullable=False)
-    added = Column(DateTime, nullable=False)
-    owner = Column(Integer, nullable=False)
-    task_exec = Column(String, nullable=False)
-
-    data = Column(String, nullable=False)
-    resource_prefix = Column(String)
-
-    def __init__(self, name, desc, method, added, data, resource_prefix, owner, task_exec):
-        self.name = name
-        self.description = desc
-        self.method = method
-        self.added = added
-        self.data = data
-        self.resource_prefix = resource_prefix
-        self.owner = owner
-        self.task_exec = task_exec
-
-
-class Hostgroups(base):
-    __tablename__ = 'hostgroups'
-
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False)
-    host = Column(String, nullable=False)
-    port = Column(Integer, nullable=False)
-    added = Column(DateTime, nullable=False)
-    username = Column(String, nullable=False)
-    password = Column(String, nullable=False)
-
-    queue_name = Column(String, nullable=False)
-    virtual_host = Column(String, nullable=False)
-
-    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.added = datetime.now()
-        self.username = username
-        self.password = password
-        self.queue_name = queue_name
-        self.virtual_host = virtual_host
-
-
-class Targets(base):
-    __tablename__ = 'targets'
-
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False)
-    address = Column(String, nullable=False)
-    port = Column(Integer, nullable=False)
-
-    protocol = Column(Integer, nullable=False)
-    type = Column(Integer, nullable=False)  # 0: single host   1: multiple hosts   2: range
-
-    added = Column(DateTime, nullable=False)
-
-    auth_username = Column(String)
-    auth_password = Column(String)
-
-    amqp_id = Column(Integer, nullable=False)
-
-    basepath = Column(String)
-    display_url = Column(String)
-    user_agent = Column(String)
+    web_user_agent = Column(String)
     recursive_sizes = Column(Boolean, nullable=False, default=False)
 
-    def __init__(self, name, address, port, protocol, auth_username, auth_password, amqp_id, basepath, display_url, user_agent, recursive_sizes):
-        self.name = name
-        self.address = address
-        self.port = port
-        self.protocol = protocol
-        self.added = datetime.now()
-        self.auth_username = auth_username
-        self.auth_password = auth_password
-        self.amqp_id = amqp_id
-        self.basepath = basepath
-        self.display_url = display_url
-        self.user_agent = user_agent
-        self.recursive_sizes = recursive_sizes
+
+# class Targets(base):
+#     __tablename__ = 'targets'
+#
+#     id = Column(Integer, primary_key=True)
+#
+#     name = Column(String, nullable=False)
+#     address = Column(String, nullable=False)
+#     port = Column(Integer, nullable=False)
+#
+#     auth_username = Column(String)
+#     auth_password = Column(String)
+#
+#     amqp_id = Column(Integer, nullable=False)
+#
+#     basepath = Column(String)
+#     display_url = Column(String)
+#     user_agent = Column(String)
+#     recursive_sizes = Column(Boolean, nullable=False, default=False)
+#
+#     def __init__(self, name, address, port, protocol, auth_username, auth_password, amqp_id, basepath, display_url, user_agent, recursive_sizes):
+#         self.name = name
+#         self.address = address
+#         self.port = port
+#         self.protocol = protocol
+#         self.added = datetime.now()
+#         self.auth_username = auth_username
+#         self.auth_password = auth_password
+#         self.amqp_id = amqp_id
+#         self.basepath = basepath
+#         self.display_url = display_url
+#         self.user_agent = user_agent
+#         self.recursive_sizes = recursive_sizes
+
+
+# class Tasks(base):
+#     __tablename__ = 'tasks'
+#
+#     id = Column(Integer, primary_key=True)
+#
+#     name = Column(String, nullable=False)
+#     description = Column(String, nullable=False)
+#     method = Column(Integer, nullable=False)
+#     added = Column(DateTime, nullable=False)
+#     owner = Column(Integer, nullable=False)
+#     task_exec = Column(String, nullable=False)
+#
+#     data = Column(String, nullable=False)
+#     resource_prefix = Column(String)
+#
+#     def __init__(self, name, desc, method, added, data, resource_prefix, owner, task_exec):
+#         self.name = name
+#         self.description = desc
+#         self.method = method
+#         self.added = added
+#         self.data = data
+#         self.resource_prefix = resource_prefix
+#         self.owner = owner
+#         self.task_exec = task_exec
+
+
+# class Hostgroups(base):
+#     __tablename__ = 'hostgroups'
+#
+#     id = Column(Integer, primary_key=True)
+#
+#     name = Column(String, nullable=False)
+#     host = Column(String, nullable=False)
+#     port = Column(Integer, nullable=False)
+#     added = Column(DateTime, nullable=False)
+#     username = Column(String, nullable=False)
+#     password = Column(String, nullable=False)
+#
+#     queue_name = Column(String, nullable=False)
+#     virtual_host = Column(String, nullable=False)
+#
+#     def __init__(self, name, host, port, username, password, queue_name, virtual_host):
+#         self.name = name
+#         self.host = host
+#         self.port = port
+#         self.added = datetime.now()
+#         self.username = username
+#         self.password = password
+#         self.queue_name = queue_name
+#         self.virtual_host = virtual_host
 
 
 class Amqp(base):
@@ -310,3 +304,16 @@ class Amqp(base):
         self.password = password
         self.queue_name = queue_name
         self.virtual_host = virtual_host
+
+
+class Options(base):
+    __tablename__ = 'options'
+
+    id = Column(Integer, primary_key=True)
+
+    key = Column(String())
+    val = Column(JSONType())
+
+    def __init__(self, key, val):
+        self.key = key
+        self.val = val

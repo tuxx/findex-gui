@@ -42,7 +42,7 @@ class bucket_search extends Search {
             context.toggle_loading(context);
             return;
         } else  {
-            // new additions due to page scroll - need to update the table
+            // new additions due to page scroll - need to update the results
             let old_results = search_results['results'];
             search_results = jQuery.extend(true, {}, data);
             search_results['results'] = search_results['results'].concat(old_results);
@@ -168,7 +168,7 @@ class bucket_search extends Search {
                     <td><b>${result['file_size_human']}</b></td>
                     <td id="modified">${file_modified_human}</td>
                     <td id="address">${result['resource']['address']}</td>
-                    <td id="direct"><a href="">Link</a></td>
+                    <td id="direct"><a href="${result['path_direct']}">Link</a></td>
                 </tr>`;
             });
 

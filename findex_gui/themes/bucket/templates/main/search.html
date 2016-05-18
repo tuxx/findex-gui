@@ -113,8 +113,8 @@
             /* meh */
             search_display_view = '{% if session.search_display_view %}{{ session.search_display_view }}{% endif %}';
             if(search_display_view==''){
-                search_display_view = 'fancy';
-                session_set('search_display_view', 'fancy');
+                search_display_view = 'table';
+                session_set('search_display_view', 'table');
             }
 
             $(`#misc #display i[data-name="${search_display_view}"]`).addClass('fa-active');

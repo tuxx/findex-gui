@@ -1,6 +1,6 @@
 # Findex-GUI
 
-Findex is a platform for finding and indexing files over multiple protocols. The platform consists of 3 individual python packages:
+Findex is a crawler for FTP servers and SMB shares. It provides a web interface for searching files.
 
   - `findex-gui` - provides the front-end in the form of a `flask` web application.
   - `findex-crawl` - provides the crawl bot(s) that are responsible for crawling resources.
@@ -8,19 +8,17 @@ Findex is a platform for finding and indexing files over multiple protocols. The
 
 
 ### Project status
-Findex is still in development. Forking the project is not recommended as the documentation has not been written yet and essential parts of the code are still subject to change.
-  - `findex-gui` - functional
-  - `findex-crawl` - somewhat functional
+Findex is still in development. Forking/Cloning the project is not recommended!
+  - `findex-gui` - functional but WIP
+  - `findex-crawl` - functional
   - `findex-common` - functional
-
-The only thing that still needs to be added is the functionality to add crawl jobs (point your bots to a FTP/HTTP server).
-As this is obviously an important feature for an indexer, please wait before trying to get this to run.
 
 ### Findex Features
 
   - Crawl HTTP open directories (webdav)(BASIC/DIGEST)
   - Crawl FTP servers
-  - Distributed crawling with optional RabbitMQ AMQP messaging
+  - Crawl SMB shares
+  - Optional distributed crawling with AMQP (RabbitMQ) messaging
   - Bootstrap 3.1.1 file browser.
 
 ### Example

@@ -162,7 +162,11 @@ class Resources(base):
     meta_id = Column(Integer, ForeignKey('resource_meta.id'))
     meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
 
+    group_id = Column(Integer, ForeignKey('resource_group.id'))
+    group = relationship("ResourceGroup", back_populates="parents")
+
     ix_address = Index('ix_address', address)
+    ix_name = Index('ix_name', name)
 
     def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
         self.address = address
@@ -193,6 +197,61 @@ class ResourceMeta(base):
     web_user_agent = Column(String)
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(JSONType)
+
+
+class ResourceGroup(base):
+    __tablename__ = 'resource_group'
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False)
+    description = Column(String)
+
+    added = Column(DateTime, nullable=False)
+
+    parents = relationship("Resources", back_populates="group")
+
+    amqp_id = Column(Integer, ForeignKey('amqp.id'))
+    amqp = relationship("Amqp", back_populates="parents")
+
+    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.added = datetime.now()
+        self.username = username
+        self.password = password
+        self.queue_name = queue_name
+        self.virtual_host = virtual_host
+
+
+class Amqp(base):
+    __tablename__ = 'amqp'
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False)
+    host = Column(String, nullable=False)
+    port = Column(Integer, nullable=False)
+    added = Column(DateTime, nullable=False)
+    username = Column(String, nullable=False)
+    password = Column(String, nullable=False)
+
+    queue_name = Column(String, nullable=False)
+    virtual_host = Column(String, nullable=False)
+
+    parents = relationship("ResourceGroup", back_populates="amqp")
+
+    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.added = datetime.now()
+        self.username = username
+        self.password = password
+        self.queue_name = queue_name
+        self.virtual_host = virtual_host
+
 
 # class Targets(base):
 #     __tablename__ = 'targets'
@@ -252,58 +311,6 @@ class ResourceMeta(base):
 #         self.resource_prefix = resource_prefix
 #         self.owner = owner
 #         self.task_exec = task_exec
-
-
-# class Hostgroups(base):
-#     __tablename__ = 'hostgroups'
-#
-#     id = Column(Integer, primary_key=True)
-#
-#     name = Column(String, nullable=False)
-#     host = Column(String, nullable=False)
-#     port = Column(Integer, nullable=False)
-#     added = Column(DateTime, nullable=False)
-#     username = Column(String, nullable=False)
-#     password = Column(String, nullable=False)
-#
-#     queue_name = Column(String, nullable=False)
-#     virtual_host = Column(String, nullable=False)
-#
-#     def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-#         self.name = name
-#         self.host = host
-#         self.port = port
-#         self.added = datetime.now()
-#         self.username = username
-#         self.password = password
-#         self.queue_name = queue_name
-#         self.virtual_host = virtual_host
-
-
-class Amqp(base):
-    __tablename__ = 'amqp'
-
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False)
-    host = Column(String, nullable=False)
-    port = Column(Integer, nullable=False)
-    added = Column(DateTime, nullable=False)
-    username = Column(String, nullable=False)
-    password = Column(String, nullable=False)  # to-do: hash
-
-    queue_name = Column(String, nullable=False)
-    virtual_host = Column(String, nullable=False)
-
-    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.added = datetime.now()
-        self.username = username
-        self.password = password
-        self.queue_name = queue_name
-        self.virtual_host = virtual_host
 
 
 class Options(base):

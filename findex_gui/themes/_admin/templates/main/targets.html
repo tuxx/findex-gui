@@ -1,0 +1,334 @@
+{% extends "_admin/templates/helpers/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Targets
+                <small>Add targets for crawling</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Targets</a></li>
+                <li><a href="#">List</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3 class="box-title">Targets</h3>
+                            <small id="crawlbot_counter">0 online</small>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <table id="jsontable_crawlbots" class="display table table-bordered table-striped"
+                                   cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th style="width: 30px;">ID</th>
+                                    <th style="width: 150px;">Name</th>
+                                    <th style="width: 150px;">Hostname</th>
+                                    <th style="width: 80px;">JSON-RPC</th>
+                                    <th style="width: 80px;">AMQP</th>
+                                    <th style="width: 50px;">Status</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                                </thead>
+                            </table>
+
+                            <!-- Button trigger modal -->
+                            <button style="float:right;" type="button" class="btn btn-success btn-sm"
+                                    data-toggle="modal" data-target="#add_modal">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="page-header">Add Target</h2>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Single Host</h3>
+                        </div>
+                        <!-- /.box-header -->
+
+                        <!-- form start -->
+                        <form id="singleTarget" class="form-horizontal" onsubmit="submitSingle(); return false;">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="inputSingleName" class="col-sm-2 control-label">Name</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="inputSingleName" id="inputSingleName" placeholder="Name"
+                                               autocomplete="off" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputSingleMethod" class="col-sm-2 control-label">Method</label>
+                                    <div class="col-sm-10">
+                                    <select name="inputSingleMethod" id="inputSingleMethod" class="form-control">
+                                        <option>FTP</option>
+                                        <option>HTTP</option>
+                                        <option>HTTPS</option>
+                                    </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputSingleHost" class="col-sm-2 control-label">Address</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputSingleHost"
+                                                name="inputSingleHost" placeholder="Address" autocomplete="off" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputSinglePort" class="col-sm-2 control-label">Port</label>
+
+                                    <div class="col-sm-4">
+                                        <input type="number" min="0" step="1" class="form-control" id="inputSinglePort"
+                                               name="inputSinglePort" placeholder="Port" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputSingleBasepath" class="col-sm-2 control-label">Path</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputSingleBasepath"
+                                               name="inputSingleBasepath" placeholder="/" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Authentication</h3>
+                                </div>
+
+                                <br>
+
+                                <div class="form-group">
+                                    <label for="inputSingleOptUsername" class="col-sm-2 control-label">Username</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputSingleOptUsername" placeholder="Name"
+                                               name="inputSingleOptUsername" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputSingleOptPassword" class="col-sm-2 control-label">Password</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputSingleOptPassword"
+                                               name="inputSingleOptPassword" placeholder="Address" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Options</h3>
+                                </div>
+
+                                <br>
+
+                                <div class="form-group">
+                                    <label for="inputSingleOptDisplayUrl" class="col-sm-2 control-label">Display URL</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputSingleOptDisplayUrl"
+                                               name="inputSingleOptDisplayUrl" placeholder="Display URL" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputSingleOptUserAgent" class="col-sm-2 control-label">User Agent</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputSingleOptUserAgent"
+                                               name="inputSingleOptUserAgent" placeholder="HTTP user-agent for crawling" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input name="inputSingleRecursiveDirSizes" id="inputSingleRecursiveDirSizes" type="checkbox"> Recursively calculate directory sizes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">AMQP Endpoint</h3>
+                                </div>
+
+                                <br>
+
+                                <div class="form-group">
+                                    <div class="col-sm-10">
+                                    <select name="inputSingleAMQP" id="inputSingleAMQP" class="form-control"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <input type="hidden" name="type" value="single">
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-success pull-right">Add Task</button>
+                            </div>
+                            <!-- /.box-footer -->
+
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    function submitSingle(){
+                        var data = $('form#singleTarget').serialize();
+
+                        $.post("/api/targets/add", data, function(result){
+                            console.log(result);
+                        });
+
+                        return false;
+                    }
+                </script>
+
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Multiple Hosts</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form class="form-horizontal">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="inputMultipleName" class="col-sm-2 control-label">Name</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputMultipleName" placeholder="Name"
+                                               autocomplete="off" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputMultipleMethod" class="col-sm-2 control-label">Method</label>
+                                    <div class="col-sm-10">
+                                    <select id="inputMultipleMethod" class="form-control">
+                                        <option>FTP</option>
+                                        <option>HTTP</option>
+                                        <option>HTTPS</option>
+                                    </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputMultipleOptUserAgent" class="col-sm-2 control-label">User Agent</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputMultipleOptUserAgent"
+                                               placeholder="HTTP user-agent for crawling" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input id="inputMultipleRecursiveDirSizes" type="checkbox"> Recursively calculate directory sizes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-success pull-right">Add Task</button>
+                            </div>
+                            <!-- /.box-footer -->
+
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">A lot of hosts</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <form role="form" lpformnum="1">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Email address</label>
+                                    <input type="email" class="form-control" id="exampleInputEmail1"
+                                           placeholder="Enter email" autocomplete="off"
+                                           style="cursor: auto; background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDhss3LcOZQAAAU5JREFUOMvdkzFLA0EQhd/bO7iIYmklaCUopLAQA6KNaawt9BeIgnUwLHPJRchfEBR7CyGWgiDY2SlIQBT/gDaCoGDudiy8SLwkBiwz1c7y+GZ25i0wnFEqlSZFZKGdi8iiiOR7aU32QkR2c7ncPcljAARAkgckb8IwrGf1fg/oJ8lRAHkR2VDVmOQ8AKjqY1bMHgCGYXhFchnAg6omJGcBXEZRtNoXYK2dMsaMt1qtD9/3p40x5yS9tHICYF1Vn0mOxXH8Uq/Xb389wff9PQDbQRB0t/QNOiPZ1h4B2MoO0fxnYz8dOOcOVbWhqq8kJzzPa3RAXZIkawCenHMjJN/+GiIqlcoFgKKq3pEMAMwAuCa5VK1W3SAfbAIopum+cy5KzwXn3M5AI6XVYlVt1mq1U8/zTlS1CeC9j2+6o1wuz1lrVzpWXLDWTg3pz/0CQnd2Jos49xUAAAAASUVORK5CYII=&quot;); background-attachment: scroll; background-position: 100% 50%; background-repeat: no-repeat;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputPassword1">Password</label>
+                                    <input type="password" class="form-control" id="exampleInputPassword1"
+                                           placeholder="Password" autocomplete="off"
+                                           style="cursor: auto; background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDhss3LcOZQAAAU5JREFUOMvdkzFLA0EQhd/bO7iIYmklaCUopLAQA6KNaawt9BeIgnUwLHPJRchfEBR7CyGWgiDY2SlIQBT/gDaCoGDudiy8SLwkBiwz1c7y+GZ25i0wnFEqlSZFZKGdi8iiiOR7aU32QkR2c7ncPcljAARAkgckb8IwrGf1fg/oJ8lRAHkR2VDVmOQ8AKjqY1bMHgCGYXhFchnAg6omJGcBXEZRtNoXYK2dMsaMt1qtD9/3p40x5yS9tHICYF1Vn0mOxXH8Uq/Xb389wff9PQDbQRB0t/QNOiPZ1h4B2MoO0fxnYz8dOOcOVbWhqq8kJzzPa3RAXZIkawCenHMjJN/+GiIqlcoFgKKq3pEMAMwAuCa5VK1W3SAfbAIopum+cy5KzwXn3M5AI6XVYlVt1mq1U8/zTlS1CeC9j2+6o1wuz1lrVzpWXLDWTg3pz/0CQnd2Jos49xUAAAAASUVORK5CYII=&quot;); background-attachment: scroll; background-position: 100% 50%; background-repeat: no-repeat;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputFile">File input</label>
+                                    <input type="file" id="exampleInputFile">
+
+                                    <p class="help-block">Example block-level help text here.</p>
+                                </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox"> Check me out
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $.getJSON("/api/amqp/list", function(data){
+                data = data['amqp/list'];
+
+                var sel = $('#inputSingleAMQP');
+                for (var i = 0; i < data.length; i++) {
+                    var obj = data[i];
+
+                    sel.append('<option value="' +
+                            obj['id'] +'">' +
+                            'amqp://' +
+                            obj['host'] +
+                            ':' +
+                            obj['port'] +
+                            '</option>');
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

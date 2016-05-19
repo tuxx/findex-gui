@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Findex Admin</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    {% include '_admin/templates/helpers/resources.html' %}
+</head>
+<body class="hold-transition skin-black-light sidebar-mini">
+<div class="wrapper">
+    {% include '_admin/templates/navigation/top.html' %}
+    {% include '_admin/templates/navigation/sidebar.html' %}
+
+    {% block content %} {% endblock %}
+</div>
+</body>
+
+</html>

@@ -9,6 +9,7 @@ from sqlalchemy_utils import JSONType, IPAddressType
 from sqlalchemy.ext.declarative import declarative_base
 from flaskext.auth import AuthUser, get_current_user_data
 
+from findex_common.static_variables import ResourceStatus
 from findex_common.utils import Sanitize
 
 base = declarative_base(name='Model')
@@ -151,28 +152,24 @@ class Resources(base):
 
     display_url = Column(String(), nullable=False)
 
-    date_added = Column(DateTime())
+    date_added = Column(DateTime(), default=datetime.utcnow)
     date_crawl_start = Column(DateTime())
     date_crawl_end = Column(DateTime())
-
-    file_count = Column(Integer(), nullable=True, default=0)
 
     basepath = Column(String(), nullable=True, default='')
 
     meta_id = Column(Integer, ForeignKey('resource_meta.id'))
     meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
-
     group_id = Column(Integer, ForeignKey('resource_group.id'))
     group = relationship("ResourceGroup", back_populates="parents")
 
     ix_address = Index('ix_address', address)
     ix_name = Index('ix_name', name)
 
-    def __init__(self, address, display_url, date_added, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
+    def __init__(self, address, display_url, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
         self.address = address
         self.hostname = hostname
         self.display_url = display_url
-        self.date_added = date_added
         self.date_crawl_start = date_crawl_start
         self.date_crawl_end = date_crawl_end
         self.file_count = file_count
@@ -188,41 +185,20 @@ class ResourceMeta(base):
     __tablename__ = 'resource_meta'
 
     id = Column(Integer, primary_key=True)
-
-    busy_crawling = Column(Boolean, nullable=True, default=False)
+    file_count = Column(Integer(), nullable=True, default=0)
+    busy = Column(Integer, nullable=True, default=False)
 
     auth_user = Column(String)
     auth_pass = Column(String)
 
     web_user_agent = Column(String)
+
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(JSONType)
 
-
-class ResourceGroup(base):
-    __tablename__ = 'resource_group'
-
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False)
-    description = Column(String)
-
-    added = Column(DateTime, nullable=False)
-
-    parents = relationship("Resources", back_populates="group")
-
-    amqp_id = Column(Integer, ForeignKey('amqp.id'))
-    amqp = relationship("Amqp", back_populates="parents")
-
-    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.added = datetime.now()
-        self.username = username
-        self.password = password
-        self.queue_name = queue_name
-        self.virtual_host = virtual_host
+    @classmethod
+    def is_busy(cls):
+        return ResourceStatus().name_by_id(cls.busy)
 
 
 class Amqp(base):
@@ -233,12 +209,13 @@ class Amqp(base):
     name = Column(String, nullable=False)
     host = Column(String, nullable=False)
     port = Column(Integer, nullable=False)
-    added = Column(DateTime, nullable=False)
-    username = Column(String, nullable=False)
-    password = Column(String, nullable=False)
+    vhost = Column(String, nullable=False)
+    queue = Column(String, nullable=False)
 
-    queue_name = Column(String, nullable=False)
-    virtual_host = Column(String, nullable=False)
+    auth_user = Column(String, nullable=False)
+    auth_pass = Column(String)
+
+    added = Column(DateTime(), default=datetime.utcnow)
 
     parents = relationship("ResourceGroup", back_populates="amqp")
 
@@ -246,71 +223,60 @@ class Amqp(base):
         self.name = name
         self.host = host
         self.port = port
-        self.added = datetime.now()
         self.username = username
         self.password = password
         self.queue_name = queue_name
         self.virtual_host = virtual_host
 
 
-# class Targets(base):
-#     __tablename__ = 'targets'
-#
-#     id = Column(Integer, primary_key=True)
-#
-#     name = Column(String, nullable=False)
-#     address = Column(String, nullable=False)
-#     port = Column(Integer, nullable=False)
-#
-#     auth_username = Column(String)
-#     auth_password = Column(String)
-#
-#     amqp_id = Column(Integer, nullable=False)
-#
-#     basepath = Column(String)
-#     display_url = Column(String)
-#     user_agent = Column(String)
-#     recursive_sizes = Column(Boolean, nullable=False, default=False)
-#
-#     def __init__(self, name, address, port, protocol, auth_username, auth_password, amqp_id, basepath, display_url, user_agent, recursive_sizes):
-#         self.name = name
-#         self.address = address
-#         self.port = port
-#         self.protocol = protocol
-#         self.added = datetime.now()
-#         self.auth_username = auth_username
-#         self.auth_password = auth_password
-#         self.amqp_id = amqp_id
-#         self.basepath = basepath
-#         self.display_url = display_url
-#         self.user_agent = user_agent
-#         self.recursive_sizes = recursive_sizes
+class Tasks(base):
+    __tablename__ = 'tasks'
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False)
+    added = Column(DateTime(), default=datetime.utcnow)
+    description = Column(String, nullable=False)
+    uid_frontend = Column(String, nullable=False)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    data = Column(String, nullable=False)
+    groups = relationship('ResourceGroup', backref="group", cascade="all", lazy='dynamic')
+
+    ix_name = Index('ix_name', name)
+    ix_uid_frontend = Index('ix_uid_frontend', uid_frontend)
+
+    def __init__(self, name, desc, data, owner):
+        self.name = name
+        self.description = desc
+        self.data = data
+        self.owner = owner
 
 
-# class Tasks(base):
-#     __tablename__ = 'tasks'
-#
-#     id = Column(Integer, primary_key=True)
-#
-#     name = Column(String, nullable=False)
-#     description = Column(String, nullable=False)
-#     method = Column(Integer, nullable=False)
-#     added = Column(DateTime, nullable=False)
-#     owner = Column(Integer, nullable=False)
-#     task_exec = Column(String, nullable=False)
-#
-#     data = Column(String, nullable=False)
-#     resource_prefix = Column(String)
-#
-#     def __init__(self, name, desc, method, added, data, resource_prefix, owner, task_exec):
-#         self.name = name
-#         self.description = desc
-#         self.method = method
-#         self.added = added
-#         self.data = data
-#         self.resource_prefix = resource_prefix
-#         self.owner = owner
-#         self.task_exec = task_exec
+class ResourceGroup(base):
+    __tablename__ = 'resource_group'
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False)
+    description = Column(String)
+
+    added = Column(DateTime(), default=datetime.utcnow)
+
+    parents = relationship("Resources", back_populates="group")
+
+    amqp_id = Column(Integer, ForeignKey('amqp.id'))
+    amqp = relationship("Amqp", back_populates="parents")
+
+    task_id = Column(Integer, ForeignKey('tasks.id'))
+
+    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.queue_name = queue_name
+        self.virtual_host = virtual_host
 
 
 class Options(base):

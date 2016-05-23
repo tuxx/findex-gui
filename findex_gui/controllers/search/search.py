@@ -32,7 +32,6 @@ class SearchController:
     def _get_iface(self):
         return DatabaseSearchController
 
-    # /search/die%20hard&cats=[unknown,documents,movies,music,pictures]&proto=[ftp,http,smb]&type=both&size=134217728-536870912&exts=[mp3]
     def search(self, key, file_categories=[], file_extensions=[], file_size=[], file_type='both', page=0, per_page=30,
                autocomplete=False, lazy_search=False, **kwargs):
 
@@ -66,29 +65,25 @@ class DatabaseSearchController:
     def search(**kwargs):
         kwargs['key'] = DatabaseSearchController.clean_and_validate_key(kwargs['key'])
 
-        # @TODO: filter by protocols / hosts: http://stackoverflow.com/a/6226740/2054778  - make a relation
+        # @TODO: filter by protocols / hosts
         q = Files.query
 
         # ignores certain filters
-        ignore_keys = []
+        ignore_filters = []
 
-        #
         # filter only files/dirs, or both
-        #
         if 'folders' in kwargs['file_type'] and 'files' in kwargs['file_type']:
             pass
         elif 'folders' in kwargs['file_type']:
             q = q.filter(Files.file_isdir == True)
 
             # When searching only for directories, ignore filters that are not relevant
-            ignore_keys.extend(('file_size', 'file_categories', 'file_extensions'))
+            ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
         elif 'files' in kwargs['file_type']:
             q = q.filter(Files.file_isdir == False)
 
-        #
         # size
-        #
-        if kwargs['file_size'] and not 'file_size' in ignore_keys:
+        if kwargs['file_size'] and not 'file_size' in ignore_filters:
             try:
                 file_size = kwargs['file_size'].split('-')
 
@@ -104,9 +99,7 @@ class DatabaseSearchController:
             except:
                 pass
 
-        #
         # filter categories
-        #
         filecategories = FileCategories()
 
         cat_ids = []
@@ -118,16 +111,14 @@ class DatabaseSearchController:
 
             cat_ids.append(FileCategories().id_by_name(cat))
 
-        if cat_ids and not 'file_categories' in ignore_keys:
+        if cat_ids and not 'file_categories' in ignore_filters:
             q = q.filter(Files.file_format.in_(cat_ids))
 
         if not kwargs['file_categories']:
             file_categories = filecategories.get_names()
 
-        #
         # filter extensions
-        #
-        if kwargs['file_extensions'] and not 'file_extensions' in ignore_keys:
+        if kwargs['file_extensions'] and not 'file_extensions' in ignore_filters:
             exts = []
 
             for ext in kwargs['file_extensions']:
@@ -138,14 +129,12 @@ class DatabaseSearchController:
 
             q = q.filter(Files.file_ext.in_(exts))
 
-        #
         # Search
         if kwargs['autocomplete'] or kwargs['lazy_search'] or app.config['db_file_count'] > 5000000:
             q = q.filter(Files.searchable.like(escape_like(kwargs['key']) + '%'))
         else:
             q = q.filter(Files.searchable.like('%' + escape_like(kwargs['key']) + '%'))
 
-        #
         # pagination
         q = q.offset(kwargs['page'])
 
@@ -155,7 +144,6 @@ class DatabaseSearchController:
         else:
             q = q.limit(kwargs['per_page'])
 
-        #
         # fetch
         results = q.all()
 

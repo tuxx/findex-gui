@@ -63,7 +63,7 @@ class Browse:
             setattr(cdup, 'file_name_human', '..')
             files.insert(0, cdup)
 
-        if resource.meta.file_distribution:
+        if hasattr(resource, 'meta') and resource.meta.file_distribution:
             file_distribution = OrderedDict(sorted(resource.meta.file_distribution.items(), key=lambda t: t[0]))
         else:
             file_distribution = {}

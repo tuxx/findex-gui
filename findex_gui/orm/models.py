@@ -19,7 +19,7 @@ force_auto_coercion()
 
 
 class User(base, AuthUser):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
@@ -28,6 +28,9 @@ class User(base, AuthUser):
     role = Column(String(80))
     created = Column(DateTime(), default=datetime.utcnow)
     modified = Column(DateTime())
+
+    group_id = Column(Integer, ForeignKey('user_group.id'))
+    group = relationship("UserGroup", back_populates="users")
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
@@ -53,6 +56,23 @@ class User(base, AuthUser):
         if not data:
             return None
         return cls.query.filter(cls.username == data['username']).one()
+
+
+class UserGroup(base):
+    __tablename__ = 'user_group'
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False, unique=True)
+    description = Column(String)
+
+    added = Column(DateTime(), default=datetime.utcnow)
+
+    users = relationship("User", back_populates="group")
+
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
 
 
 class Files(base):
@@ -131,7 +151,7 @@ class Crawlers(base):
 
     id = Column(Integer, primary_key=True)
     hostname = Column(String(), nullable=False)
-    crawler_name = Column(String(), nullable=False)
+    crawler_name = Column(String(), nullable=False, unique=True)
 
     amqp_host = Column(String(128))
     amqp_vhost = Column(String(128))
@@ -160,11 +180,12 @@ class Resources(base):
 
     meta_id = Column(Integer, ForeignKey('resource_meta.id'))
     meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
+
     group_id = Column(Integer, ForeignKey('resource_group.id'))
     group = relationship("ResourceGroup", back_populates="parents")
 
-    ix_address = Index('ix_address', address)
-    ix_name = Index('ix_name', name)
+    ix_address = Index('ix_resource_address', address)
+    ix_name = Index('ix_resource_name', name)
 
     def __init__(self, address, display_url, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
         self.address = address
@@ -206,7 +227,7 @@ class Amqp(base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     host = Column(String, nullable=False)
     port = Column(Integer, nullable=False)
     vhost = Column(String, nullable=False)
@@ -234,16 +255,16 @@ class Tasks(base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     added = Column(DateTime(), default=datetime.utcnow)
     description = Column(String, nullable=False)
     uid_frontend = Column(String, nullable=False)
-    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner_id = Column(Integer, ForeignKey('user.id'))
     data = Column(String, nullable=False)
     groups = relationship('ResourceGroup', backref="group", cascade="all", lazy='dynamic')
 
-    ix_name = Index('ix_name', name)
-    ix_uid_frontend = Index('ix_uid_frontend', uid_frontend)
+    ix_name = Index('ix_tasks_name', name)
+    ix_uid_frontend = Index('ix_tasks_uid_frontend', uid_frontend)
 
     def __init__(self, name, desc, data, owner):
         self.name = name
@@ -257,7 +278,7 @@ class ResourceGroup(base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     description = Column(String)
 
     added = Column(DateTime(), default=datetime.utcnow)

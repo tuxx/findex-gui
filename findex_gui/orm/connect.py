@@ -9,6 +9,7 @@ from findex_gui.orm.models import base, Options
 
 # https://github.com/Mikulas/pg-es-fdw
 
+
 class Orm(object):
     def __init__(self, app):
         self.app = app

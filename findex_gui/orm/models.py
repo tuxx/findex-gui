@@ -18,7 +18,7 @@ from sqlalchemy_utils import force_auto_coercion
 force_auto_coercion()
 
 
-class User(base, AuthUser):
+class Users(base, AuthUser):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -33,7 +33,7 @@ class User(base, AuthUser):
     group = relationship("UserGroup", back_populates="users")
 
     def __init__(self, *args, **kwargs):
-        super(User, self).__init__(*args, **kwargs)
+        super(Users, self).__init__(*args, **kwargs)
         password = kwargs.get('password')
 
         # Initialize and encrypt password before first save.
@@ -68,7 +68,7 @@ class UserGroup(base):
 
     added = Column(DateTime(), default=datetime.utcnow)
 
-    users = relationship("User", back_populates="group")
+    users = relationship("Users", back_populates="group")
 
     def __init__(self, name, description):
         self.name = name
@@ -94,19 +94,6 @@ class Files(base):
     file_perm = Column(Integer())
 
     searchable = Column(String(23))
-
-    def __init__(self, file_name, file_path, file_ext, file_format, file_isdir, file_modified, file_perm, searchable, file_size, resource_id, img_icon=None):
-        self.resource_id = resource_id
-        self.file_name = file_name
-        self.file_path = file_path
-        self.file_ext = file_ext
-        self.file_format = file_format
-        self.file_size = file_size
-        self.file_isdir = file_isdir
-        self.file_modified = file_modified
-        self.file_perm = file_perm
-        self.searchable = searchable
-        self.img_icon = None
 
     # regular indexes
     ix_file_ext = Index('ix_file_ext', file_ext)
@@ -164,7 +151,7 @@ class Resources(base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(), unique=True, nullable=False)
-    description = Column(String())
+    description = Column(String(), default='')
 
     address = Column(String(), nullable=False)
     port = Column(Integer(), nullable=False, default=0)
@@ -187,15 +174,13 @@ class Resources(base):
     ix_address = Index('ix_resource_address', address)
     ix_name = Index('ix_resource_name', name)
 
-    def __init__(self, address, display_url, date_crawl_start, date_crawl_end, file_count, protocol, description, hostname):
+    def __init__(self, name, address, port, display_url, basepath, protocol):
+        self.name = name
         self.address = address
-        self.hostname = hostname
+        self.port = port
         self.display_url = display_url
-        self.date_crawl_start = date_crawl_start
-        self.date_crawl_end = date_crawl_end
-        self.file_count = file_count
         self.protocol = protocol
-        self.description = description
+        self.basepath = basepath
 
     def to_dict(self):
         blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith('_') and not issubclass(v.__class__, base)}

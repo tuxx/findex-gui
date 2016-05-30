@@ -1,15 +1,15 @@
-{% extends "_admin/templates/helpers/base.html" %}
+{% extends "_admin/templates/base.html" %}
 {% block content %}
 
     <div class="content-wrapper" style="min-height: 946px;">
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Targets
-                <small>Add targets for crawling</small>
+                Servers
+                <small>Add servers</small>
             </h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Targets</a></li>
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
                 <li><a href="#">List</a></li>
             </ol>
         </section>
@@ -20,7 +20,43 @@
                 <div class="col-md-12">
                     <div class="box">
                         <div class="box-header">
-                            <h3 class="box-title">Targets</h3>
+                            <h3 class="box-title">Server list</h3>
+                            <small id="crawlbot_counter">0 online</small>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <table id="jsontable_crawlbots" class="display table table-bordered table-striped"
+                                   cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th style="width: 30px;">IP</th>
+                                    <th style="width: 150px;">Name</th>
+                                    <th style="width: 80px;">Protocol</th>
+                                    <th>Url</th>
+                                    <th>Date added</th>
+                                    <th>Last crawl</th>
+                                    <th>Options</th>
+                                </tr>
+                                </thead>
+                            </table>
+
+                            <!-- Button trigger modal -->
+                            <button style="float:right;" type="button" class="btn btn-success btn-sm"
+                                    data-toggle="modal" data-target="#add_modal">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="page-header">Groups</h2>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3 class="box-title">Server list</h3>
                             <small id="crawlbot_counter">0 online</small>
                         </div>
                         <!-- /.box-header -->
@@ -48,11 +84,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <h2 class="page-header">Add Target</h2>
-
-            <div class="row">
                 <div class="col-md-4">
                     <div class="box">
                         <div class="box-header with-border">

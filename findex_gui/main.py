@@ -2,7 +2,7 @@ import os
 from flask import render_template, request, flash, session, redirect, url_for, send_from_directory, abort
 from findex_gui import app, settings, themes
 from forms import ContactForm
-from orm.models import User, Files
+from orm.models import Users, Files
 from findex_gui import db
 from flaskext.auth import Auth, AuthUser, login_required, logout
 

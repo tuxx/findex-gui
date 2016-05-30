@@ -1,7 +1,7 @@
 from flask import request, redirect, url_for
 
 from findex_gui import app, db, themes
-from findex_gui.orm.models import User
+from findex_gui.orm.models import Users
 
 
 class AuthController:
@@ -9,10 +9,10 @@ class AuthController:
         pass
 
     def register(self, username, password):
-        if User.query.filter(User.username == username).first():
+        if Users.query.filter(Users.username == username).first():
             return 'User already exists.'
 
-        user = User(username=username, password=password)
+        user = Users(username=username, password=password)
         db.session.add(user)
         db.session.commit()
 
@@ -20,7 +20,7 @@ class AuthController:
 
     def login(self, username, password):
         try:
-            user = User.query.filter(User.username == username).one()
+            user = Users.query.filter(Users.username == username).one()
             return user.authenticate(password)
         except:
             pass

@@ -14,6 +14,7 @@ appapi = Api(app)
 app.config['SECRET_KEY'] = settings.app_secret
 app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
 app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
+app.config['APPLICATION_ROOT'] = settings.bind_route
 
 SECRET_KEY = open("/dev/random", "rb").read(32)
 

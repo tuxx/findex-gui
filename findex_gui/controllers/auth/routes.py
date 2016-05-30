@@ -1,7 +1,7 @@
 from flask import request, redirect, flash, url_for
 
 from findex_gui import app, db, themes
-from findex_gui.orm.models import User
+from findex_gui.orm.models import Users
 from findex_gui.controllers.auth.auth import AuthController
 from findex_gui.controllers.helpers import redirect_url
 from flaskext.auth.auth import get_current_user_data

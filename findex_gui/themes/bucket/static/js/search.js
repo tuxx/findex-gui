@@ -1,6 +1,6 @@
 class bucket_search extends Search {
-    constructor(autocomplete, per_page, selectors) {
-        super(autocomplete, per_page, selectors);
+    constructor(application_root, autocomplete, per_page, selectors) {
+        super(application_root, autocomplete, per_page, selectors);
 
         this.icons = {
             'd': '/static/themes/bucket/static/img/icons/folder-128.png',

@@ -100,10 +100,13 @@
     </div>
 
     <script>
+        "use strict";
+
         var search_controller;
         var search_results = {};
         var search_display_view;
         var no_more_search_results = false;
+        var application_root = {{ env['application_root'] }};
 
         $( document ).ready(function() {
             var sel_sidebar = $('#sidebar');
@@ -277,7 +280,7 @@
             };
 
             /* init search class */
-            search_controller = new bucket_search(false, 50, {
+            search_controller = new bucket_search(application_root, false, 50, {
                 'search_input': 'input#search',
                 'search_results': 'ol#search_results'
             });

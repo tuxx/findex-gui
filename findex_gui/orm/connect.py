@@ -54,7 +54,7 @@ class Postgres(Orm):
         random.shuffle(self._db_hosts)
         for host in self._db_hosts:
             try:
-                return psycopg2.connect(host=host, user=self._db_user, dbname=self._db_database, password=self._db_pass)
+                return psycopg2.connect(host=host, user=self._db_user, dbname=self._db_database, password=self._db_pass, port=self._db_port)
             except psycopg2.OperationalError as e:
                 print 'Failed to connect to %s: %s' % (host, e)
 

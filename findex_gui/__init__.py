@@ -21,8 +21,6 @@ SECRET_KEY = open("/dev/random", "rb").read(32)
 from bin.config import Config
 settings = Config()
 
-
-# parse local settings file
 if not settings.local:
     raise Exception('Local settings (%s/settings.py) not found' % app.config['dir_root'])
 

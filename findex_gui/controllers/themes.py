@@ -43,6 +43,7 @@ class ThemeController:
         theme = self.get_active()
 
         kwargs['env'] = {z: app.config[z] for z in app.config if z.islower()}
+        kwargs['env']['application_root'] = app.config['APPLICATION_ROOT']
 
         return render_template('%s/templates/%s.html' % (theme, template_path), **kwargs), status_code
 

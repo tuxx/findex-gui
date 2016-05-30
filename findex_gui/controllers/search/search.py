@@ -68,6 +68,9 @@ class DatabaseSearchController:
         # @TODO: filter by protocols / hosts
         q = Files.query
 
+        # only find files that are not in 'temp' mode
+        q = q.filter(Files.resource_id >= 1)
+
         # ignores certain filters
         ignore_filters = []
 
@@ -147,7 +150,6 @@ class DatabaseSearchController:
         # fetch
         results = q.all()
 
-        # @TODO make relationship
         resource_ids = set([z.resource_id for z in results])
         resource_obs = {z.id: z for z in Resources.query.filter(Resources.id.in_(resource_ids)).all()}
 

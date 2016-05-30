@@ -1,8 +1,11 @@
+"use strict";
+
 class Search {
-    constructor(autocomplete, per_page, selectors) {
+    constructor(application_root, autocomplete, per_page, selectors) {
         this.autocomplete = autocomplete;
         this.per_page = per_page;
         this.selectors = selectors;
+        this.application_root = application_root;
     }
 
     /**
@@ -55,7 +58,7 @@ class Search {
     get_url(params){
         if (!params) params = this._gather_params('urls');
 
-        let url = `/search/${this.get_key()}`;
+        let url = `${this.application_root}/search/${this.get_key()}`;
 
         $.each(['file_categories', 'file_type', 'file_size', 'file_extensions'], function(index, key){
             if(params.hasOwnProperty(key)){

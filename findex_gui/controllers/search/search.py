@@ -63,7 +63,7 @@ class SearchController:
 class DatabaseSearchController:
     @staticmethod
     def search(**kwargs):
-        kwargs['key'] = DatabaseSearchController.clean_and_validate_key(kwargs['key'])
+        kwargs['key'] = DatabaseSearchController.make_valid_key(kwargs['key'])
 
         # @TODO: filter by protocols / hosts
         q = Files.query
@@ -161,7 +161,7 @@ class DatabaseSearchController:
         return results
 
     @staticmethod
-    def clean_and_validate_key(key):
+    def make_valid_key(key):
         # `Files.searchable` does not have any of these characters, strip them.
         for clean in ['-', ',', '+', '_', '%']:
             key = key.replace(clean, ' ')

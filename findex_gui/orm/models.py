@@ -52,7 +52,7 @@ class Users(base, AuthUser):
         }
 
     @staticmethod
-    def make_valid_nickname(nickname):
+    def make_valid_username(nickname):
         return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
 
     @classmethod

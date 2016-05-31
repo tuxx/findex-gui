@@ -1,3 +1,4 @@
+import re
 from json import loads
 from datetime import datetime
 
@@ -49,6 +50,10 @@ class Users(base, AuthUser):
             'created': self.created,
             'modified': self.modified,
         }
+
+    @staticmethod
+    def make_valid_nickname(nickname):
+        return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
 
     @classmethod
     def load_current_user(cls, apply_timeout=True):

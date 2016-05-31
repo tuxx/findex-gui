@@ -13,6 +13,9 @@ def register():
         username = request.form['username']
         password = request.form['password']
 
+        # anti-xss
+        username = Users.make_valid_nickname(username)
+
         if AuthController().register(username, password):
             return redirect(redirect_url())
         else:

@@ -83,6 +83,7 @@ class UserGroup(base):
     def make_valid_group(groupname):
         return re.sub('[^a-zA-Z0-9_\.]', '', groupname)
 
+
 class Files(base):
     __tablename__ = 'files'
 
@@ -193,6 +194,10 @@ class Resources(base):
     def to_dict(self):
         blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith('_') and not issubclass(v.__class__, base)}
         return blob
+
+    @staticmethod
+    def make_valid_resourcename(resourcename):
+        return re.sub('[^a-zA-Z0-9_\.]', '', resourcename)
 
 
 class ResourceMeta(base):

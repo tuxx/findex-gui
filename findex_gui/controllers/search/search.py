@@ -16,7 +16,7 @@ class SearchResult:
 
     def to_dict(self):
         blob = {
-            'results': [z.to_dict() for z in self.results],
+            'results': [z.make_dict() for z in self.results],
             'params': self.params,
             'results_count': len(self.results)
         }

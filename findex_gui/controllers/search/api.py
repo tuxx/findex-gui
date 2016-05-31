@@ -46,7 +46,7 @@ class SearchAPI(Resource):
         controller = SearchController()
         result = controller.search(key=key)
 
-        return flask.jsonify(**result.to_dict())
+        return flask.jsonify(**result.make_dict())
 
     def post(self, key):
         args = self.reqparse.parse_args()
@@ -61,7 +61,7 @@ class SearchAPI(Resource):
                 'message': str(ex)
             })
 
-        return flask.jsonify(**result.to_dict())
+        return flask.jsonify(**result.make_dict())
 
 appapi.add_resource(SearchAPI, '/api/v2/search/<string:key>', endpoint='api_search')
 

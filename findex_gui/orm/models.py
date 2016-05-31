@@ -60,6 +60,7 @@ class Users(base, AuthUser):
         data = get_current_user_data(apply_timeout)
         if not data:
             return None
+
         return cls.query.filter(cls.username == data['username']).one()
 
 
@@ -132,7 +133,7 @@ class Files(base):
 
         return obj
 
-    def to_dict(self):
+    def make_dict(self):
         blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith('_') and not issubclass(v.__class__, base)}
 
         blob['resource'] = {
@@ -191,7 +192,7 @@ class Resources(base):
         self.protocol = protocol
         self.basepath = basepath
 
-    def to_dict(self):
+    def make_dict(self):
         blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith('_') and not issubclass(v.__class__, base)}
         return blob
 

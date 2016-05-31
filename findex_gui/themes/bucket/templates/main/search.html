@@ -105,7 +105,7 @@
         var search_controller;
         var search_results = {};
         var search_display_view;
-        var no_more_search_results = false;
+        var exhausted_results = false;
         var application_root = '{{ env['application_root'] }}';
 
         $( document ).ready(function() {
@@ -237,7 +237,7 @@
                     $.ajax({
                         type: 'post',
                         contentType: 'application/json',
-                        url: '/api/v2/search/' + $('input#search').val(),
+                        url: `${application_root}api/v2/search/` + $('input#search').val(),
                         dataType: 'json',
                         data: JSON.stringify({
                             'autocomplete': true,
@@ -296,7 +296,7 @@
                 $.ajax({
                     type: 'post',
                     contentType: 'application/json',
-                    url: '/api/v2/session/set',
+                    url: `${application_root}api/v2/session/set`,
                     async: false,
                     dataType: 'json',
                     data: JSON.stringify({
@@ -313,7 +313,7 @@
                 $.ajax({
                     type: 'post',
                     contentType: 'application/json',
-                    url: '/api/v2/session/get',
+                    url: `${application_root}api/v2/session/get`,
                     dataType: 'json',
                     data: JSON.stringify({
                         'key': key
@@ -356,7 +356,7 @@
             // Detect end of page scroll
             $(window).scroll(function() {
                if($(window).scrollTop() + $(window).height() == $(document).height()) {
-                    if(!no_more_search_results && Object.keys(search_results).length !== 0 && search_results.constructor === Object && search_results['results'].length > 0){
+                    if(!exhausted_results && Object.keys(search_results).length !== 0 && search_results.constructor === Object && search_results['results'].length > 0){
                         search_controller.search(search_results['results'].length);
                     }
                }

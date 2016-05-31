@@ -37,7 +37,7 @@ class bucket_search extends Search {
         } else if(search_results['results'].length > 0 && data['results'].length == 0) {
             // hit end of search
             $(sel_results_container).append(`<span id="no_more_results">no more results</span>`);
-            no_more_search_results = true;
+            exhausted_results = true;
 
             context.toggle_loading(context);
             return;

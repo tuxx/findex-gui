@@ -58,7 +58,7 @@ class Search {
     get_url(params){
         if (!params) params = this._gather_params('urls');
 
-        let url = `${this.application_root}/search/${this.get_key()}`;
+        let url = `${this.application_root}search/${this.get_key()}`;
 
         $.each(['file_categories', 'file_type', 'file_size', 'file_extensions'], function(index, key){
             if(params.hasOwnProperty(key)){
@@ -169,7 +169,7 @@ class Search {
         $.ajax({
             type: 'post',
             contentType: 'application/json',
-            url: `/api/v2/search/${key}`,
+            url: `${this.application_root}api/v2/search/${key}`,
             dataType: 'json',
             data: JSON.stringify(params),
             timeout: 50000,

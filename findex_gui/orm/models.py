@@ -128,7 +128,7 @@ class Files(base):
             display_url = display_url[:-1]
 
         setattr(obj, 'path_dir', '/browse/%s%s' % (obj.resource.name, obj.file_path))
-        setattr(obj, 'path_file', '/browse/%s%s%s' % (obj.resource.name, obj.file_path, obj.file_name))
+        setattr(obj, 'path_file', '/browse/%s%s%s%s' % (obj.resource.name, obj.file_path, obj.file_name, '/' if obj.file_isdir else ''))
         setattr(obj, 'path_direct', display_url + file_url)
 
         return obj

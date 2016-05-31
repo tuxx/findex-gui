@@ -297,6 +297,10 @@ class ResourceGroup(base):
         self.queue_name = queue_name
         self.virtual_host = virtual_host
 
+    @staticmethod
+    def make_valid_groupname(groupname):
+        return re.sub('[^a-zA-Z0-9_\.]', '', groupname)
+
 
 class Options(base):
     __tablename__ = 'options'

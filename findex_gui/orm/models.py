@@ -79,6 +79,9 @@ class UserGroup(base):
         self.name = name
         self.description = description
 
+    @staticmethod
+    def make_valid_group(groupname):
+        return re.sub('[^a-zA-Z0-9_\.]', '', groupname)
 
 class Files(base):
     __tablename__ = 'files'

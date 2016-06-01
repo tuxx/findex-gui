@@ -2,7 +2,7 @@
 
 Findex is a platform for finding and indexing files over multiple protocols. The platform consists of 3 individual python packages:
 
-  - `findex-gui` - provides the front-end in the form of a `bottle.py` web application.
+  - `findex-gui` - provides the front-end in the form of a `flask` web application.
   - `findex-crawl` - provides the crawl bot(s) that are responsible for crawling resources.
   - `findex-common` - provides utitilies used by both the GUI and crawl instances.
 

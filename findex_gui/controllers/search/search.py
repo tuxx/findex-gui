@@ -1,12 +1,10 @@
-import os
+from flask.ext.babel import gettext
 from sqlalchemy_utils import escape_like
 from sqlalchemy import func
+
 from findex_gui import app
 from findex_gui.orm.models import Files, Resources
 from findex_common.static_variables import FileCategories, FileProtocols
-from findex_common.utils import Sanitize
-
-import json
 
 
 class SearchResult:
@@ -167,6 +165,6 @@ class DatabaseSearchController:
             key = key.replace(clean, ' ')
 
         if len(key) <= 1:
-            raise Exception('Search key too short')
+            raise Exception(gettext('Search key too short'))
 
         return key.lower()

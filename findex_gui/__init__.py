@@ -3,13 +3,11 @@ import settings
 import inspect
 from flask import Flask
 from flask_restful import Api
-
+from flask.ext.babel import Babel
 
 app = Flask(import_name=__name__,
             static_folder=None,
             template_folder='themes')
-
-appapi = Api(app)
 
 app.config['SECRET_KEY'] = settings.app_secret
 app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +15,14 @@ app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
 app.config['APPLICATION_ROOT'] = settings.bind_route
 
 SECRET_KEY = open("/dev/random", "rb").read(32)
+
+appapi = Api(app)
+babel = Babel(app)
+
+languages = {
+    'en': 'English',
+    'nl': 'Nederlands'
+}
 
 from bin.config import Config
 settings = Config()
@@ -72,6 +78,7 @@ auth = Auth(app)
 
 # init routes
 import main
+from findex_gui.controllers.lang import routes
 from findex_gui.controllers.auth import routes
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.search import routes

@@ -9,14 +9,14 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-                    <h3>Search</h3>
+                    <h3>{{ _('Search') }}</h3>
 
                     <div class="form-inline" role="form">
                         <div class="form-group" style="display:inline;">
                             <input type="text" class="form-control" id="search" value="" style="max-width: 300px;width: 30%;">
                         </div>
                         <div class="form-group" style="display:inline;">
-                            <button type="submit" id="submit_search" class="btn btn-primary btn-md">Search</button>
+                            <button type="submit" id="submit_search" class="btn btn-primary btn-md">{{ _('Search') }}</button>
                         </div>
                     </div>
                 </div>
@@ -34,52 +34,52 @@
                 <div class="col-md-2" id="leftCol">
 
                     <form class="form-horizontal" role="form" id="sidebar">
-                        <h4 style="margin-top:24px;">Filters</h4>
+                        <h4 style="margin-top:24px;">{{ _('Filters') }}</h4>
 
                         <div id="size" class="noUi-target noUi-ltr noUi-horizontal noUi-background"></div>
 
                         <div class="btn-group" id="cats">
                             <button id="cats" style="width: 100%;text-align: left;" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
-                                File Categories <span class="caret"></span>
+                                {{ _('File Categories') }} <span class="caret"></span>
                             </button>
 
                             <ul class="dropdown-menu noclose">
                                 <li>
                                   <input type="checkbox" id="ex3_0" name="cats" data-name="unknown" value="0">
-                                  <label for="ex3_0">Unknown</label>
+                                  <label for="ex3_0">{{ _('Unknown') }}</label>
                                 </li>
                                 <li>
                                   <input type="checkbox" id="ex3_1" name="cats" data-name="documents" value="1">
-                                  <label for="ex3_1">Documents</label>
+                                  <label for="ex3_1">{{ _('Documents') }}</label>
                                 </li>
                                 <li>
                                   <input type="checkbox" id="ex3_2" name="cats" data-name="movies" value="2">
-                                  <label for="ex3_2">Movies</label>
+                                  <label for="ex3_2">{{ _('Movies') }}</label>
                                 </li>
                                 <li>
                                   <input type="checkbox" id="ex3_3" name="cats" data-name="music" value="3">
-                                  <label for="ex3_3">Music</label>
+                                  <label for="ex3_3">{{ _('Music') }}</label>
                                 </li>
                                 <li>
                                   <input type="checkbox" id="ex3_4" name="cats" data-name="images" value="4">
-                                  <label for="ex3_4">Images</label>
+                                  <label for="ex3_4">{{ _('Images') }}</label>
                                 </li>
                             </ul>
                         </div>
 
                         <div class="btn-group" id="type">
                             <button id="type" style="width: 100%;text-align: left;" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-placeholder="false">
-                                 File Types<span class="caret"></span>
+                                 {{ _('File Types') }}<span class="caret"></span>
                             </button>
 
                             <ul class="dropdown-menu noclose">
                                 <li>
                                   <input type="checkbox" id="ex4_0" data-name="files" name="type" value="1">
-                                  <label for="ex4_0">Files</label>
+                                  <label for="ex4_0">{{ _('Files') }}</label>
                                 </li>
                                 <li>
                                   <input type="checkbox" id="ex4_1" data-name="folders" name="type" value="2">
-                                  <label for="ex4_1">Folders</label>
+                                  <label for="ex4_1">{{ _('Folders') }}</label>
                                 </li>
                             </ul>
                         </div>

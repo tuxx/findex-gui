@@ -10,3 +10,4 @@ psycopg2
 sqlalchemy-utils
 ipaddr
 furl
+flask-babel

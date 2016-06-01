@@ -1,3 +1,4 @@
+from flask.ext.babel import gettext
 from collections import OrderedDict
 from datetime import datetime
 
@@ -23,7 +24,7 @@ class Browse:
         if resource:
             return resource
 
-        raise Exception('No resource could be found for \"%s\"' % resource_id)
+        raise Exception(gettext('No resource could be found for ') + resource_id)
 
     def inspect(self, data):
         resource = self.get_resource(data['resource_id'])

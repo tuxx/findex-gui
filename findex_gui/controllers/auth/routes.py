@@ -1,4 +1,5 @@
 from flask import request, redirect, flash, url_for
+from flask.ext.babel import gettext
 
 from findex_gui import app, db, themes
 from findex_gui.orm.models import Users
@@ -19,7 +20,7 @@ def register():
         if AuthController().register(username, password):
             return redirect(redirect_url())
         else:
-            return themes.render('main/register', error="Error while registering")
+            return themes.render('main/register', error=gettext("Error while registering"))
 
     return themes.render('main/register')
 
@@ -27,7 +28,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if get_current_user_data():
-        return 'user already logged in'
+        return gettext('user already logged in')
 
     error = None
 
@@ -36,12 +37,12 @@ def login():
         password = request.form['password']
 
         if AuthController().login(username, password):
-            flash('You were successfully logged in')
+            flash(gettext('You were successfully logged in'))
             if request.referrer.endswith('/login'):
                 return redirect(url_for('.root'))
 
             return redirect(redirect_url())
         else:
-            error = 'Invalid credentials'
+            error = gettext('Invalid credentials')
 
     return themes.render('main/login', error=error)

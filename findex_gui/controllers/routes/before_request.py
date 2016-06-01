@@ -1,6 +1,8 @@
+from flask import request, session
+from flaskext.auth.auth import get_current_user_data
+
 from findex_gui import app
-from flask import request
-#SELECT reltuples::int FROM pg_class WHERE relname ='files'
+from findex_gui import babel, locales
 
 
 @app.before_request
@@ -14,3 +16,23 @@ def require_authorization():
     app.config['db_file_count'] = int(db.session.execute("""
     SELECT reltuples::int FROM pg_class WHERE relname ='files'
     """).first()[0])
+
+
+@babel.localeselector
+def get_locale():
+    """
+    Try to determine the locale based on the:
+    - currently logged in user preference
+    or
+    - session cookie preference
+    or
+    - 'Accept-Language' user agent
+    """
+
+    user = get_current_user_data()
+    if user:
+        return user.language
+    elif 'locale' in session:
+        return session['locale']
+    else:
+        return request.accept_languages.best_match(locales.keys())

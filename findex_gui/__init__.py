@@ -19,7 +19,7 @@ SECRET_KEY = open("/dev/random", "rb").read(32)
 appapi = Api(app)
 babel = Babel(app)
 
-languages = {
+locales = {
     'en': 'English',
     'nl': 'Nederlands'
 }
@@ -78,10 +78,11 @@ auth = Auth(app)
 
 # init routes
 import main
-from findex_gui.controllers.lang import routes
 from findex_gui.controllers.auth import routes
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.search import routes
 from findex_gui.controllers.browse import routes
+
 from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api
+from findex_gui.controllers.user import api

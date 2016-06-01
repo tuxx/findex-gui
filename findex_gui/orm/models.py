@@ -20,7 +20,7 @@ force_auto_coercion()
 
 
 class Users(base, AuthUser):
-    __tablename__ = 'user'
+    __tablename__ = 'user'  # @TODO: change to users
 
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
@@ -33,11 +33,14 @@ class Users(base, AuthUser):
     group_id = Column(Integer, ForeignKey('user_group.id'))
     group = relationship("UserGroup", back_populates="users")
 
+    locale = Column(String(8), default='en')
+
     def __init__(self, *args, **kwargs):
+        kwargs['username'] = self.make_valid_username(kwargs.get('username'))
         super(Users, self).__init__(*args, **kwargs)
-        password = kwargs.get('password')
 
         # Initialize and encrypt password before first save.
+        password = kwargs.get('password')
         if password is not None and not self.id:
             self.created = datetime.utcnow()
             self.set_and_encrypt_password(password)
@@ -49,11 +52,12 @@ class Users(base, AuthUser):
             'role': self.role,
             'created': self.created,
             'modified': self.modified,
+            'locale': self.locale
         }
 
     @staticmethod
-    def make_valid_username(nickname):
-        return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
+    def make_valid_username(username):
+        return re.sub('[^a-zA-Z0-9_\.]', '', username)
 
     @classmethod
     def load_current_user(cls, apply_timeout=True):

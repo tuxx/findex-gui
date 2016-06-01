@@ -16,49 +16,58 @@ Findex is a platform for finding and indexing files over multiple protocols. The
 ### Status
 **warning:** It is not recommended you clone this repository as it is still in development.
 
+
 **Backend**
-| Feature  | Status  | Details  |
-|---|---|---|
-| API  |  :white_check_mark:  | Supported: Search, Browse, Session, Admin  |
-| Users | :white_check_mark:  | Supported: Register, Login  |
-| Roles | :clock2:  | In development |
-| Sessions | :white_check_mark: | Supported |
-| Admin Panel  | :clock2:  | In development |
-| I18n Translations | :white_check_mark:  | Supported: English, Dutch  |
-| In-App Crawling  | :clock2:  | In development |
-| WebDav Interface  | :x:  | Not yet  |
-| RAW/JSON Interface | :clock2:  | In development |
+
+ Feature  |  Status  | Details
+---|:---:|---|
+ API  | :white_check_mark: | Supported: Search, Browse, Session, Admin
+ Users | :white_check_mark: | Supported: Register, Login
+ Roles | :clock2: | In development
+ Sessions | :white_check_mark: | Supported
+ Admin Panel  | :clock2: | In development
+ I18n Translations | :white_check_mark: | Supported: English, Dutch
+ In-App Crawling  | :clock2: | In development
+ RAW/JSON Interface | :x: | Not yet
+ WebDav Interface  | :x: | Not yet
+
 
 **Frontend**
-| Feature  | Status  | Details  |
-|---|---|---|
-| Themes  | :white_check_mark:  | Custom themes supported  |
-| Bootstrap  |  :white_check_mark:  | v3  |
-| jQuery |  :white_check_mark:  | v1.11.3  |
-| ES6 Transpilers  | :clock2:  | In development |
-| Grunt  | :x:  | Not yet  |
-| SCSS/Sass  | :x:  | Not yet  |
+
+ Feature  |  Status  | Details
+---|:---:|---|
+Themes  | :white_check_mark:  |  Custom themes supported
+Bootstrap | :white_check_mark:  |  v3
+jQuery  | :white_check_mark:  |  v1.11.3
+ES6 Transpilers | :clock2:  |  In development
+Grunt | :x: | Not yet
+SCSS/Sass | :x: | Not yet
+
 
 **Crawling**
-| Feature  | Status  | Details  |
-|---|---|---|
-| HTTP | :white_check_mark:  | Supported  |
-| FTP | :white_check_mark:  | Supported  |
-| DC | :clock2:  | Not yet |
-| SMB | :clock2:  | Not yet |
-| SSH | :clock2:  | Not yet  |
+
+ Feature  |  Status  | Details
+---|:---:|---|
+HTTP|:white_check_mark:|Supported
+FTP|:white_check_mark:|Supported
+Direct Connect|:x:| Not yet
+SMB|:x:| Not yet
+SSH|:x:| Not yet
+
 
 **File Metadata and Performance**
+
 | Feature  | Status  | Details  |
 |---|---|---|
-| Movie Metadata | :clock2:  | In development |
-| Image Metadata | :clock2:  | In development |
-| Music Metadata | :clock2:  | Not yet  |
-| Document Metadata | :clock2:  | Not yet  |
-| DB Pools  | :white_check_mark:  | Supported |
-| Memcached | :clock2:  | In development |
-| ES backend | :x:  | Not yet  |
-| SQLite backend | :x:  | Not yet  |
+Movie Metadata|:clock2:| In development
+Image Metadata|:clock2:| In development
+Music Metadata|:x:| Not yet
+Document Metadata|:x:| Not yet
+DB Pools|:white_check_mark:| Supported
+Memcached|:clock2:| In development
+ES backend|:x:| Not yet
+SQLite backend|:x:|Not yet
+
 
 ### Example
 [http://findex.cedsys.nl](http://findex.cedsys.nl)

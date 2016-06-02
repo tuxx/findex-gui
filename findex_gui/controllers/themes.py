@@ -1,9 +1,14 @@
 import os
 from flask import render_template
-from findex_gui import db, app
-from findex_gui.orm.models import Options
+
+from flaskext.auth import get_current_user_data
+
+from findex_gui import app
 from findex_gui.controllers.options.options import OptionsController
 from findex_common import utils
+
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 
 
 class Theme:
@@ -44,6 +49,7 @@ class ThemeController:
 
         kwargs['env'] = {z: app.config[z] for z in app.config if z.islower()}
         kwargs['env']['application_root'] = app.config['APPLICATION_ROOT']
+        kwargs['user'] = get_current_user_data()
 
         return render_template('%s/templates/%s.html' % (theme, template_path), **kwargs), status_code
 

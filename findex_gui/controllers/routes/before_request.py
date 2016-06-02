@@ -31,7 +31,7 @@ def get_locale():
 
     user = get_current_user_data()
     if user:
-        return user.language
+        return user['locale']
     elif 'locale' in session:
         return session['locale']
     else:

@@ -1,14 +1,14 @@
 from findex_gui import app, settings, themes
 from flask import render_template
-from flaskext.auth import Auth, AuthUser, login_required, logout
+from findex_gui.controllers.user.decorators import admin_required
 
 
-#@login_required()
+@admin_required
 def admin_home():
     return render_template('_admin/templates/main/home.html')
 
 
-#@login_required()
+@admin_required
 def admin_servers():
     return render_template('_admin/templates/main/servers.html')
 

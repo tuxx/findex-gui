@@ -4,14 +4,11 @@ from findex_gui import app, appapi
 from findex_gui.controllers.search.search import SearchController
 from flask_restful import reqparse, abort, Api, Resource
 from findex_common.static_variables import FileCategories
-from flaskext.auth import login_required
 
 from flask.ext.restful import Resource
 
 
 class SearchAPI(Resource):
-    # decorators = [login_required]
-
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
 
@@ -57,9 +54,7 @@ class SearchAPI(Resource):
             controller = SearchController()
             result = controller.search(key, **args)
         except Exception as ex:
-            return flask.jsonify(**{
-                'message': str(ex)
-            })
+            return abort(404, message=str(ex))
 
         return flask.jsonify(**result.make_dict())
 

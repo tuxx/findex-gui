@@ -26,7 +26,7 @@ class Users(base, AuthUser):
     username = Column(String(80), unique=True, nullable=False)
     password = Column(String(120), nullable=False)
     salt = Column(String(80))
-    role = Column(String(80))
+    role = Column(Integer, default=1)
     created = Column(DateTime(), default=datetime.utcnow)
     modified = Column(DateTime())
 
@@ -52,8 +52,13 @@ class Users(base, AuthUser):
             'role': self.role,
             'created': self.created,
             'modified': self.modified,
-            'locale': self.locale
+            'locale': self.locale,
+            'admin': self.is_admin()
         }
+
+    @classmethod
+    def is_admin(cls):
+        return True if cls.role == 0 and isinstance(cls.role, int) else False
 
     @staticmethod
     def make_valid_username(username):

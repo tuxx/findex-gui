@@ -17,26 +17,43 @@
             <ul class="nav navbar-nav">
                 <li class="file_counter">{{ ('{:,}').format(env['db_file_count']) }}</li>
                 <li><a href="/search">{{ _('Search') }}</a></li>
-                <li><a href="/about">{{ _('Browse') }}</a></li>
+                <li><a href="/browse">{{ _('Browse') }}</a></li>
                 <li><a href="/api">API</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">Admin <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li class="dropdown-header">Nav header</li>
-                        <li><a href="#">Separated link</a></li>
-                        <li><a href="#">One more separated link</a></li>
-                    </ul>
-                </li>
             </ul>
+
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="../navbar/">Default</a></li>
-                <li><a href="../navbar-static-top/">Static top</a></li>
-                <li><a href="./">Fixed top <span class="sr-only">(current)</span></a></li>
+                {% if not user %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-user" aria-hidden="true" style="margin-right: 4px;"></i> {{ _('Account') }} <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li><a href="/user/login">{{ _('Login') }}</a></li>
+                            <li><a href="/user/register">{{ _('Register') }}</a></li>
+
+                        </ul>
+                    </li>
+                {% else %}
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-user" aria-hidden="true" style="margin-right: 4px;"></i> {{ user.username }} <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li><a href="/user/cp">User CP</a></li>
+                            <li><a href="/user/logout">Logout</a></li>
+                            <!--admin-->
+                            {% if user.role == 0 %}
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header">Admin Panel</li>
+                                <li><a href="/admin">Home</a></li>
+                                <li><a href="/admin/appearance">Appearance</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endif %}
             </ul>
         </div>
         <!--/.nav-collapse -->

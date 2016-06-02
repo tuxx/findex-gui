@@ -38,9 +38,9 @@ import orm.connect as db_connect
 db_types = {k.lower(): v for k, v in vars(db_connect).items() if inspect.isclass(v) and issubclass(v, db_connect.Orm)}
 
 if not app.config['DB_TYPE'] in db_types:
-    raise Exception('Unsupported database type \"%s\". Supported: %s' % (app.config['DB_TYPE'],
-                                                                         ','.join([z.lower() for z in db_types.keys() \
-                                                                                   if not z == 'Orm'])))
+    raise Exception('Unsupported database type \"%s\". Supported: %s' % (
+        app.config['DB_TYPE'],
+        ','.join([z.lower() for z in db_types.keys() if not z == 'Orm'])))
 
 db = db_types[app.config['DB_TYPE']](app)
 db.connect()
@@ -51,37 +51,12 @@ themes = ThemeController()
 from flaskext.auth import Auth
 auth = Auth(app)
 
-# init taskloop
-# import gevent
-# from gevent import Greenlet
-
-
-# def test(message, n):
-#     """
-#     Each thread will be passed the message, and n arguments
-#     in its initialization.
-#     """
-#     from orm.models import User, Files
-#
-#     while True:
-#         print(message)
-#
-#         a = Files.query.first()
-#         print a
-#         e= ''
-#         gevent.sleep(n)
-#
-# # Initialize Greenlet instance
-# thread1 = Greenlet.spawn(test, "Hello", 21)
-#
-# gevent.joinall([thread1])
-
 # init routes
 import main
-from findex_gui.controllers.auth import routes
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.search import routes
 from findex_gui.controllers.browse import routes
+from findex_gui.controllers.user import routes
 
 from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api

@@ -59,20 +59,3 @@ class SearchAPI(Resource):
         return flask.jsonify(**result.make_dict())
 
 appapi.add_resource(SearchAPI, '/api/v2/search/<string:key>', endpoint='api_search')
-
-
-# class AdminAPI(Resource):
-#     decorators = [auth.login_required]
-
-# documentation
-# from flask_restful_swagger import swagger
-#
-# app = Flask(__name__)
-# api = swagger.docs(Api(app), apiVersion='1', api_spec_url="/api/v1/spec")
-#
-# class Unicorn(Resource):
-# "Describing unicorns"
-# @swagger.operation(
-#     notes='some really good notes'
-# )
-# def get(self, todo_id):

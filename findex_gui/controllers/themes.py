@@ -44,7 +44,7 @@ class ThemeController:
         self.data = {}
 
     def render(self, template_path, status_code=200, **kwargs):
-        # check session theme here
+        # @TO-DO: check session theme here
         theme = self.get_active()
 
         kwargs['env'] = {z: app.config[z] for z in app.config if z.islower()}

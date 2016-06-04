@@ -27,3 +27,15 @@ def admin_required(f):
 
         return f(*args, **kwargs)
     return decorator
+
+
+def login_required(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        data = get_current_user_data()
+
+        if data is None:
+            return not_logged_in(_not_logged_in, *args, **kwargs)
+
+        return f(*args, **kwargs)
+    return decorator

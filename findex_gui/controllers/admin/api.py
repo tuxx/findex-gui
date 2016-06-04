@@ -61,5 +61,5 @@ class OptionsPostAPI(Resource):
         return flask.jsonify(**{'message': 'key set'})
 
 
-appapi.add_resource(OptionsPostAPI, '/api/v2/admin/option_set', endpoint='option_set')
-appapi.add_resource(OptionsGetAPI, '/api/v2/admin/option_get', endpoint='option_get')
+appapi.add_resource(OptionsPostAPI, '/api/v2/admin/option_set', endpoint='api_admin_option_set')
+appapi.add_resource(OptionsGetAPI, '/api/v2/admin/option_get', endpoint='api_admin_option_get')

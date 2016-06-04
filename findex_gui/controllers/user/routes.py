@@ -3,6 +3,7 @@ from flaskext.auth.auth import get_current_user_data
 from flask.ext.babel import gettext
 
 from findex_gui import app, themes
+from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.helpers import redirect_url
 
@@ -44,3 +45,9 @@ def login():
             error = gettext('Invalid credentials')
 
     return themes.render('main/login', error=error)
+
+
+@app.route('/user/cp')
+@login_required
+def user_cp():
+    return themes.render('main/user_cp')

@@ -18,7 +18,7 @@ SECRET_KEY = open("/dev/random", "rb").read(32)
 
 appapi = Api(app)
 babel = Babel(app)
-
+#user_timeout
 locales = {
     'en': 'English',
     'nl': 'Nederlands'
@@ -50,6 +50,7 @@ themes = ThemeController()
 
 from flaskext.auth import Auth
 auth = Auth(app)
+auth.user_timeout = 604800
 
 # init routes
 import main

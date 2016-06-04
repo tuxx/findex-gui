@@ -60,6 +60,6 @@ class SessionSet(Resource):
             'message': 'ok'
         })
 
-appapi.add_resource(SessionSet, '/api/v2/session/set', endpoint='session_set')
-appapi.add_resource(SessionGet, '/api/v2/session/get', endpoint='session_get')
+appapi.add_resource(SessionSet, '/api/v2/session/set', endpoint='api_session_set')
+appapi.add_resource(SessionGet, '/api/v2/session/get', endpoint='api_session_get')
 

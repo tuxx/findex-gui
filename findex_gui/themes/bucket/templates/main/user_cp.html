@@ -1,0 +1,85 @@
+{% extends "bucket/templates/base.html" %}
+
+{% block content %}
+    <style>
+        #sidebar-wrapper{
+            background-color: white;
+        }
+
+        .sidebar-nav li a:hover {
+            background: #F5F5F5;
+        }
+
+        .cp_header{
+            background-color: #f5f5f5;
+            height: 72px;
+            border-bottom: 1px solid #ccc;
+            position: fixed;
+            left: 0;
+            top: 40px;
+            width: 100%;
+        }
+
+        .cp_header>.inner {
+            padding-top: 22px;
+            margin-left: 24px;
+            color: #4D4D4D;
+        }
+
+        .cp_header>.inner>span:nth-child(1){
+            font-size:20px;
+        }
+
+        .cp_header>.inner>span:nth-child(2) {
+            font-size:14px;
+            margin-left:4px;
+            vertical-align:text-bottom;
+        }
+
+        @media(min-width:768px) {
+            #wrapper {
+                padding-left: 250px;
+                padding-top:72px;
+            }
+        }
+
+        label{
+            color: #707070;
+            font-weight: inherit;
+        }
+    </style>
+
+    <div class="cp_header">
+        <div class="inner">
+            <span>User Control Panel</span>
+            <span>{{ user.username }}</span>
+        </div>
+    </div>
+    <!-- {u'username': u'dsc', u'created': datetime.datetime(2016, 6, 2, 23, 19, 21), u'admin': False, u'modified': None, u'locale': u'en', u'role': u'1', u'id': 4} e -->
+
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <strong style="
+                display: block;
+                color: #707070;
+                padding: 20px 20px 10px;
+                font-family: monospace;
+            ">GENERAL</strong>
+
+            <li><a href="#"><i class="fa fa-wrench"><span>General</span></i></a></li>
+            <li><a href="#"><i class="fa fa-globe"><span>Localization</span></i></a></li>
+        </ul>
+    </div>
+
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div id="content" class="col-lg-8">
+                    <h3>Files</h3>
+                    {% include 'bucket/templates/main/user_cp/localization.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

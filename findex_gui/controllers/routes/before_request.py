@@ -1,5 +1,4 @@
 from flask import request, session
-from flaskext.auth.auth import get_current_user_data
 
 from findex_gui import app
 from findex_gui import babel, locales
@@ -28,11 +27,7 @@ def get_locale():
     or
     - 'Accept-Language' user agent
     """
-
-    user = get_current_user_data()
-    if user:
-        return user['locale']
-    elif 'locale' in session:
+    if 'locale' in session:
         return session['locale']
     else:
         return request.accept_languages.best_match(locales.keys())

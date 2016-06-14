@@ -355,3 +355,7 @@ table.browser>thead>tr{
     color: #707070;
     font-size: 13px;
 }
+
+#login-overlay{
+    padding-top:40px;
+}

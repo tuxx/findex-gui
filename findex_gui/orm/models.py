@@ -1,20 +1,23 @@
 import re
-from json import loads
 from datetime import datetime
+from flask import request
 
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
+from sqlalchemy.event import listen
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Column, Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Sequence
 )
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy_utils import JSONType, IPAddressType
-from sqlalchemy.ext.declarative import declarative_base
+
 from flaskext.auth import AuthUser, get_current_user_data
 
+from findex_gui import locales
 from findex_common.static_variables import ResourceStatus
-from findex_common.utils import Sanitize
+from findex_common.utils import Sanitize, rand_str
 
 base = declarative_base(name='Model')
-from sqlalchemy_utils import force_auto_coercion
+
 
 force_auto_coercion()
 
@@ -25,7 +28,7 @@ class Users(base, AuthUser):
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
     password = Column(String(120), nullable=False)
-    salt = Column(String(80))
+    salt = Column(String(16), default=rand_str(16))
     role = Column(Integer, default=1)
     created = Column(DateTime(), default=datetime.utcnow)
     modified = Column(DateTime())
@@ -33,17 +36,17 @@ class Users(base, AuthUser):
     group_id = Column(Integer, ForeignKey('user_group.id'))
     group = relationship("UserGroup", back_populates="users")
 
-    locale = Column(String(8), default='en')
+    locale = Column(String(8))
 
     def __init__(self, *args, **kwargs):
         kwargs['username'] = self.make_valid_username(kwargs.get('username'))
         super(Users, self).__init__(*args, **kwargs)
 
-        # Initialize and encrypt password before first save.
         password = kwargs.get('password')
         if password is not None and not self.id:
-            self.created = datetime.utcnow()
-            self.set_and_encrypt_password(password)
+            self.locale = request.accept_languages.best_match(locales.keys())
+            self.set_and_encrypt_password(password=password,
+                                          salt=rand_str(16))
 
     def __getstate__(self):
         return {

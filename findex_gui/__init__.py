@@ -49,8 +49,10 @@ from controllers.themes import ThemeController
 themes = ThemeController()
 
 from flaskext.auth import Auth
+import hashlib
 auth = Auth(app)
 auth.user_timeout = 604800
+auth.hash_algorithm = hashlib.sha256
 
 # init routes
 import main

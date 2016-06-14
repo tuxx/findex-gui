@@ -1,30 +1,47 @@
 import flask
-from flask import session
+from flask import request
 
+from flaskext.auth import get_current_user_data
 from flask_restful import reqparse, abort
-from flask.ext.restful import Resource
+from flask_restful import Resource
 
-from findex_gui import appapi
+
+from findex_gui import app, locales
+from findex_gui.orm.models import Users
+from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
 
 
-class UserControlPanel(Resource):
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
+@app.route('/api/v2/user/locale', methods=['POST'])
+def api_user_locale():
+    e = ''
 
-        self.reqparse.add_argument('lang', location='json', type=str, help='Set locale')
 
-        super(UserControlPanel, self).__init__()
+@app.route('/api/v2/user/locale/all', methods=['GET'])
+def api_user_locale_available():
+    return flask.jsonify(**locales)
 
-    def put(self):
-        args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
 
-        try:
-            if 'lang' in args:
-                UserController().locale_set(args['lang'])
-        except Exception as ex:
-            return abort(404, message=str(ex))
+@app.route('/api/v2/user/locale/set', methods=['POST'])
+def api_user_locale_set():
+    if 'lang' not in request.form:
+        return flask.jsonify(**{'fail': 'parameter \'lang\' not given'}), 400
+
+    try:
+        if request.authorization or get_current_user_data():
+            if request.authorization:
+                user = UserController.authenticate_basic()
+            else:
+                user = Users.query.filter(Users.id == get_current_user_data()['id']).one()
+
+            if user:
+                UserController.locale_set(locale=request.form['lang'], user=user)
+                return flask.jsonify(**{'success': True}), 201
+
+        UserController.locale_set(locale=request.form['lang'])
+        return flask.jsonify(**{'success': True}), 201
+    except Exception as ex:
+        return flask.jsonify(**{'fail': str(ex)}), 400
 
 
 class UserRegister(Resource):
@@ -49,5 +66,5 @@ class UserRegister(Resource):
             return flask.jsonify(**args)
 
 
-appapi.add_resource(UserControlPanel, '/api/v2/user/cp', endpoint='api_user_cp')
+
 #appapi.add_resource(UserRegister, '/api/v2/user/register', endpoint='api_user_register')

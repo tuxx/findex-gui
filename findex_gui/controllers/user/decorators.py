@@ -1,9 +1,11 @@
-from flask import abort
+from flask import abort, request
 from functools import wraps
 
 from flask.ext.babel import gettext
 from flaskext.auth import get_current_user_data
 from flaskext.auth.auth import not_logged_in
+
+from findex_gui.controllers.user.user import UserController
 
 
 def _not_logged_in():
@@ -35,6 +37,10 @@ def login_required(f):
         data = get_current_user_data()
 
         if data is None:
+            if request.authorization:
+                if UserController.authenticate_basic(inject=True):
+                    return f(*args, **kwargs)
+
             return not_logged_in(_not_logged_in, *args, **kwargs)
 
         return f(*args, **kwargs)

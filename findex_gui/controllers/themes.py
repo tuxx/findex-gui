@@ -1,10 +1,11 @@
 import os
-from flask import render_template
+from flask import render_template, session
 
 from flaskext.auth import get_current_user_data
 
 from findex_gui import app
 from findex_gui.controllers.options.options import OptionsController
+from findex_gui.orm.models import Users
 from findex_common import utils
 
 app.jinja_env.trim_blocks = True
@@ -47,9 +48,21 @@ class ThemeController:
         # @TO-DO: check session theme here
         theme = self.get_active()
 
+        # @TO-DO: use a context processor
         kwargs['env'] = {z: app.config[z] for z in app.config if z.islower()}
         kwargs['env']['application_root'] = app.config['APPLICATION_ROOT']
-        kwargs['user'] = get_current_user_data()
+
+        user_context = get_current_user_data()
+        if user_context:
+            user = Users.query.filter(Users.id == user_context['id']).one()
+
+            if not session.get('locale'):
+                session['locale'] = user.locale
+
+            elif session['locale'] != user.locale:
+                session['locale'] = user.locale
+
+            kwargs['user'] = user
 
         return render_template('%s/templates/%s.html' % (theme, template_path), **kwargs), status_code
 

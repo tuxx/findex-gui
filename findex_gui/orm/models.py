@@ -23,7 +23,7 @@ force_auto_coercion()
 
 
 class Users(base, AuthUser):
-    __tablename__ = 'user'  # @TODO: change to users
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
@@ -59,9 +59,8 @@ class Users(base, AuthUser):
             'admin': self.is_admin()
         }
 
-    @classmethod
-    def is_admin(cls):
-        return True if cls.role == 0 and isinstance(cls.role, int) else False
+    def is_admin(self):
+        return True if self.role == 0 and isinstance(self.role, int) else False
 
     @staticmethod
     def make_valid_username(username):
@@ -175,8 +174,8 @@ class Resources(base):
     name = Column(String(), unique=True, nullable=False)
     description = Column(String(), default='')
 
-    address = Column(String(), nullable=False)
-    port = Column(Integer(), nullable=False, default=0)
+    address = Column(String(), nullable=True)
+    port = Column(Integer(), nullable=True, default=0)
     protocol = Column(Integer(), nullable=False)
 
     display_url = Column(String(), nullable=False)

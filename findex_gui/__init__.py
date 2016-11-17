@@ -13,8 +13,9 @@ app.config['SECRET_KEY'] = settings.app_secret
 app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
 app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
 app.config['APPLICATION_ROOT'] = settings.bind_route
+app.config['TEMPLATES_AUTO_RELOAD'] = settings.app_debug
 
-SECRET_KEY = open("/dev/random", "rb").read(32)
+SECRET_KEY = settings.app_secret
 
 appapi = Api(app)
 babel = Babel(app)
@@ -64,3 +65,4 @@ from findex_gui.controllers.user import routes
 from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api
 from findex_gui.controllers.user import api
+from findex_gui.controllers.browse import api

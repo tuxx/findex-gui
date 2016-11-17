@@ -5,7 +5,6 @@ from flaskext.auth import get_current_user_data
 from flask_restful import reqparse, abort
 from flask_restful import Resource
 
-
 from findex_gui import app, locales
 from findex_gui.orm.models import Users
 from findex_gui.controllers.user.decorators import login_required

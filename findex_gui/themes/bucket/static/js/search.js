@@ -20,12 +20,12 @@ class bucket_search extends Search {
     }
 
     /* Required */
-    parse_results(data, context){
-        if(!context._loading){
-            context._loading = true;
+    parse_results(data){
+        if(!this._loading){
+            this._loading = true;
         }
 
-        let sel_results_container = context.selectors['search_results'];
+        let sel_results_container = this.selectors['search_results'];
 
         // Below clauses will update global var `search_results` based on different scenarios
         if(Object.keys(search_results).length == 0 && search_results.constructor === Object){
@@ -39,7 +39,7 @@ class bucket_search extends Search {
             $(sel_results_container).append(`<span id="no_more_results">no more results</span>`);
             exhausted_results = true;
 
-            context.toggle_loading(context);
+            this.toggle_loading(this);
             return;
         } else  {
             // new additions due to page scroll - need to update the results
@@ -49,19 +49,19 @@ class bucket_search extends Search {
         }
 
         // assign html
-        bucket_search.set_result_html(data, context);
+        bucket_search.set_result_html(data, this);
 
         // assign icons
-        bucket_search.set_result_icons(context.icons);
+        bucket_search.set_result_icons(this.icons);
 
         // highlight search results
-        $(sel_results_container).highlight(context.key, { className: 'important' });
+        $(sel_results_container).highlight(this.key, { className: 'important' });
 
         // update title header
         $('#search_col h3#search_header').text(`Results for "${data['params']['key']}"`);
 
         // toggle the loading indication(s)
-        context.toggle_loading(context);
+        this.toggle_loading();
     }
 
     static set_result_html(data, context){
@@ -343,13 +343,13 @@ class bucket_search extends Search {
         }
     }
 
-    toggle_loading(context){
-        if(context._loading) {
+    toggle_loading(){
+        if(this._loading) {
             $('div#search_col').stop().fadeTo(200, 1);
-            context._loading = false;
+            this._loading = false;
         } else {
             $('div#search_col').stop().fadeTo(200, 0.5);
-            context._loading = true;
+            this._loading = true;
         }
     }
 

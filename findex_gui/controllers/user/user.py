@@ -83,3 +83,14 @@ class UserController:
             return 'en'
 
         return locale
+
+    @staticmethod
+    def is_admin():
+        data = get_current_user_data()
+        if data is None:
+            return
+
+        elif not data['admin']:
+            return
+
+        return True

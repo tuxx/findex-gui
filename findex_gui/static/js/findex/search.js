@@ -27,8 +27,7 @@ class Search {
         if(params['key'] == '') return;
 
         this._search_post({
-            'params': params,
-            'callback': this.parse_results
+            'params': params
         });
     }
 
@@ -157,28 +156,18 @@ class Search {
      * @param {Function} callback - the callback function
      * @return
      */
-    _search_post({params = {}, callback = {}} = {}){
+    _search_post({params = {}} = {}){
         let url_data = this.get_url();
         Search.set_urlbar(url_data);
 
         let key = params['key'];
         delete params['key'];
 
-        let self = this;
+        let _url = `search/${key}`;
+        let _data = JSON.stringify(params);
 
-        $.ajax({
-            type: 'post',
-            contentType: 'application/json',
-            url: `${this.application_root}api/v2/search/${key}`,
-            dataType: 'json',
-            data: JSON.stringify(params),
-            timeout: 50000,
-            beforeSend: function(){
-                self.toggle_loading(self);
-            },
-            success: function(data){
-                callback(data, self);
-            }
-        }).fail(err => console.log(err))
+        FindexGui.api(_url, "POST", _data).then(function(data){
+            this.parse_results(data);
+        }.bind(this));
     }
 }

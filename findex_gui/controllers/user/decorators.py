@@ -19,12 +19,7 @@ def _not_admin():
 def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
-        data = get_current_user_data()
-
-        if data is None:
-            return not_logged_in(_not_logged_in, *args, **kwargs)
-
-        elif not data['admin']:
+        if not UserController.is_admin():
             return not_logged_in(_not_admin, *args, **kwargs)
 
         return f(*args, **kwargs)

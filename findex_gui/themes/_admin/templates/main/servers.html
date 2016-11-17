@@ -6,7 +6,6 @@
         <section class="content-header">
             <h1>
                 Servers
-                <small>Add servers</small>
             </h1>
             <ol class="breadcrumb">
                 <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
@@ -21,23 +20,26 @@
                     <div class="box">
                         <div class="box-header">
                             <h3 class="box-title">Server list</h3>
-                            <small id="crawlbot_counter">0 online</small>
                         </div>
                         <!-- /.box-header -->
                         <div class="box-body">
-                            <table id="jsontable_crawlbots" class="display table table-bordered table-striped"
+                            <table id="jsontable_servers" class="display table table-bordered table-striped"
                                    cellspacing="0" width="100%">
                                 <thead>
                                 <tr>
-                                    <th style="width: 30px;">IP</th>
                                     <th style="width: 150px;">Name</th>
+                                    <th style="width: 30px;">Location</th>
                                     <th style="width: 80px;">Protocol</th>
-                                    <th>Url</th>
+                                    <th>Files</th>
                                     <th>Date added</th>
                                     <th>Last crawl</th>
                                     <th>Options</th>
+                                    <th>Group</th>
                                 </tr>
                                 </thead>
+                                <tbody>
+
+                                </tbody>
                             </table>
 
                             <!-- Button trigger modal -->
@@ -57,7 +59,6 @@
                     <div class="box">
                         <div class="box-header">
                             <h3 class="box-title">Server list</h3>
-                            <small id="crawlbot_counter">0 online</small>
                         </div>
                         <!-- /.box-header -->
                         <div class="box-body">
@@ -342,7 +343,32 @@
     </div>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
+            FindexApi("browse/servers", "GET", {}, function(data){
+                data.data.forEach(function(server) {
+                    let location = server.address;
+                    if (server.protocol == 1) {
+                        location = server.basepath;
+                    }
+
+                    let sel = $("table#jsontable_servers>tbody");
+                    let html = `
+                        <tr>
+                            <td>${server.name}</td>
+                            <td>${location.replace(" ", "&nbsp")}</td>
+                            <td>${server.protocol}</td>
+                            <td>0</td>
+                            <td>${server.added}</td>
+                            <td>${server.date_crawl_end}</td>
+                            <td>options</td>
+                        </tr>
+                    `;
+
+                    sel.empty();
+                    sel.append(html);
+                });
+            });
+
             $.getJSON("/api/amqp/list", function(data){
                 data = data['amqp/list'];
 

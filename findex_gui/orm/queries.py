@@ -60,12 +60,10 @@ class Findex(object):
         results = query.all()
 
         for result in results:
-            setattr(result, 'identifier', '%s:%s' % (result.address, int(result.port)))
+            #setattr(result, 'identifier', '%s:%s' % (result.address, int(result.port)))
+            # wtf is this identifier shit
+            self._set_cache(result)
 
-        if len(results) == 1:
-            results = results[0]
-
-        self._set_cache(results)
         return results
 
     def get_files(self, resource_id, id=None, file_name=None, file_path=None, total_count=None, offset=None):

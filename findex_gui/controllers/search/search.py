@@ -3,7 +3,7 @@ from sqlalchemy_utils import escape_like
 from sqlalchemy import func
 
 from findex_gui import app
-from findex_gui.orm.models import Files, Resources
+from findex_gui.orm.models import Files, Resource
 from findex_common.static_variables import FileCategories, FileProtocols
 
 

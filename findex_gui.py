@@ -4,7 +4,7 @@ import settings
 
 def run_synchronous():
     from findex_gui import app
-    app.run(debug=settings.app_debug, host=settings.bind_host, port=settings.bind_port, use_reloader=True)
+    app.run(debug=settings.app_debug, host=settings.bind_host, port=settings.bind_port, use_reloader=False)
 
 
 def run_asynchronous():

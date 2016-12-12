@@ -9,20 +9,19 @@ from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.helpers import redirect_url
 
 
-@app.route('/user/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        user = UserController.register(username, password)
-
-        if isinstance(user, Exception):
-            return themes.render('main/register', error=str(user))
-        else:
-            return redirect('/')
-
-    return themes.render('main/register')
+# @app.route('/user/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#
+#         user = UserController.user_add(username, password)
+#         if isinstance(user, Exception):
+#             return themes.render('main/register', error=str(user))
+#         else:
+#             return redirect('/')
+#
+#     return themes.render('main/register')
 
 
 @app.route('/user/login', methods=['GET', 'POST'])

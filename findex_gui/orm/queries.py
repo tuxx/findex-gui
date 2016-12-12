@@ -1,7 +1,7 @@
 from urllib import quote
 
 from sqlalchemy import and_, asc, desc
-from findex_gui.orm.models import Files, Resources
+from findex_gui.orm.models import Files, Resource
 from sqlalchemy.dialects import mysql, postgresql
 # from findex_common.utils import DataObjectManipulation
 

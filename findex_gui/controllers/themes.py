@@ -5,7 +5,7 @@ from flaskext.auth import get_current_user_data
 
 from findex_gui import app
 from findex_gui.controllers.options.options import OptionsController
-from findex_gui.orm.models import Users
+from findex_gui.orm.models import User
 from findex_common import utils
 
 app.jinja_env.trim_blocks = True
@@ -54,7 +54,7 @@ class ThemeController:
 
         user_context = get_current_user_data()
         if user_context:
-            user = Users.query.filter(Users.id == user_context['id']).one()
+            user = User.query.filter(User.id == user_context['id']).one()
 
             if not session.get('locale'):
                 session['locale'] = user.locale

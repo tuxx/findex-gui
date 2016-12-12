@@ -35,6 +35,12 @@ import findex_gui.controllers.routes.static
 import findex_gui.controllers.routes.errors
 import findex_gui.controllers.routes.before_request
 
+from flaskext.auth import Auth
+import hashlib
+auth = Auth(app)
+auth.user_timeout = 604800
+auth.hash_algorithm = hashlib.sha256
+
 import orm.connect as db_connect
 db_types = {k.lower(): v for k, v in vars(db_connect).items() if inspect.isclass(v) and issubclass(v, db_connect.Orm)}
 
@@ -48,12 +54,6 @@ db.connect()
 
 from controllers.themes import ThemeController
 themes = ThemeController()
-
-from flaskext.auth import Auth
-import hashlib
-auth = Auth(app)
-auth.user_timeout = 604800
-auth.hash_algorithm = hashlib.sha256
 
 # init routes
 import main

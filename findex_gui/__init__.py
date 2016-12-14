@@ -66,3 +66,4 @@ from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api
 from findex_gui.controllers.user import api
 from findex_gui.controllers.browse import api
+from findex_gui.controllers.resources import api

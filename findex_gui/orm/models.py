@@ -25,12 +25,15 @@ class Server(base):
     __tablename__ = "server"
 
     id = Column(Integer, primary_key=True)
-    address = Column(IPAddressType, nullable=False)
+    address = Column(String(128), unique=True, nullable=True)
+
+    name = Column(String(64), unique=True, nullable=False)
     description = Column(String(512), nullable=True)
 
     parents = relationship("Resource", back_populates="server")
 
     ix_address = Index("ix_resource_address", address)
+    ix_name = Index("ix_resource_name", name)
 
 
 class Resource(base):
@@ -38,10 +41,10 @@ class Resource(base):
 
     id = Column(Integer, primary_key=True)
 
-    server_id = Column(Integer, ForeignKey("server.id"))
+    server_id = Column(Integer, ForeignKey("server.id"), nullable=False)
     server = relationship("Server", back_populates="parents")
 
-    meta_id = Column(Integer, ForeignKey("resource_meta.id"))
+    meta_id = Column(Integer, ForeignKey("resource_meta.id"), nullable=False)
     meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resource", uselist=False))
 
     group_id = Column(Integer, ForeignKey("resource_group.id"))
@@ -50,8 +53,7 @@ class Resource(base):
     child_id = Column(Integer, ForeignKey('users.id'))
     child = relationship("User")
 
-    name = Column(String(), unique=True, nullable=False)
-    description = Column(String(), default="")
+    description = Column(String(), nullable=True)
 
     port = Column(Integer(), nullable=False)
     protocol = Column(Integer(), nullable=False)
@@ -64,11 +66,8 @@ class Resource(base):
 
     basepath = Column(String(), nullable=True, default="")
 
-    ix_name = Index("ix_resource_name", name)
-
-    def __init__(self, name, address, port, display_url, basepath, protocol):
-        self.name = name
-        self.address = address
+    def __init__(self, server, protocol, port, display_url, basepath):
+        self.server = server
         self.port = port
         self.display_url = display_url
         self.protocol = protocol
@@ -87,16 +86,25 @@ class ResourceMeta(base):
     __tablename__ = "resource_meta"
 
     id = Column(Integer, primary_key=True)
-    file_count = Column(Integer(), nullable=True, default=0)
-    busy = Column(Integer, nullable=True, default=False)
+    file_count = Column(Integer(), nullable=False, default=0)
+    busy = Column(Boolean, nullable=False, default=False)
 
-    auth_user = Column(String)
-    auth_pass = Column(String)
+    auth_user = Column(String, nullable=True)
+    auth_pass = Column(String, nullable=True)
+    auth_type = Column(String, nullable=True)
 
-    web_user_agent = Column(String)
+    web_user_agent = Column(String, nullable=True)
 
     recursive_sizes = Column(Boolean, nullable=False, default=False)
-    file_distribution = Column(JSONType)
+    file_distribution = Column(JSONType, nullable=True)
+
+    def set_auth(self, username, password, auth_type):
+        if username and password and not auth_type:
+            raise Exception("auth_type may not be empty")
+
+        self.auth_user = username
+        self.auth_pass = password
+        self.auth_type = auth_type
 
     @classmethod
     def is_busy(cls):
@@ -109,99 +117,72 @@ class ResourceGroup(base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String, nullable=False, unique=True)
-    description = Column(String)
-
-    added = Column(DateTime(), default=datetime.utcnow)
+    description = Column(String, nullable=True)
+    added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    removable = Column(Boolean, nullable=False, default=True)
 
     parents = relationship("Resource", back_populates="group")
+    tasks = relationship("Task", back_populates="group")
 
-    amqp_id = Column(Integer, ForeignKey("amqp.id"))
-    amqp = relationship("Amqp", back_populates="parents")
-
-    #task_id = Column(Integer, ForeignKey("tasks.id"))
-
-    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.queue_name = queue_name
-        self.virtual_host = virtual_host
+    def __init__(self, name, description, removable=True):
+        self.name = self.make_valid_groupname(name)
+        self.removable = removable
+        self.description = description
 
     @staticmethod
     def make_valid_groupname(groupname):
-        return re.sub("[^a-zA-Z0-9_\.]", "", groupname)
+        groupname = re.sub("[^a-zA-Z0-9_\.]", "", groupname)
+        if not groupname:
+            raise Exception("group name cannot be empty or invalid")
+        return groupname
 
 
-class Files(base):
-    __tablename__ = "files"
+task_crawlers = Table(
+    '_task_crawlers',
+    base.metadata,
+    Column('task_id', Integer(), ForeignKey('tasks.id')),
+    Column('id', Integer(), ForeignKey('crawlers.id'))
+)
+
+
+class Task(base):
+    __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
 
-    resource_id = Column(Integer())
+    name = Column(String, nullable=False, unique=True)
+    added = Column(DateTime(), default=datetime.utcnow)
+    description = Column(String, nullable=False)
+    uid_frontend = Column(String, nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    data = Column(String, nullable=False)
 
-    file_name = Column(String())
-    file_path = Column(String())
-    file_ext = Column(String(8))
-    file_format = Column(Integer())
-    file_isdir = Column(Boolean())
-    file_size = Column(BigInteger())
+    group_id = Column(Integer, ForeignKey("resource_group.id"), nullable=False)
+    group = relationship("ResourceGroup", back_populates="tasks")
 
-    file_modified = Column(DateTime())
+    crawlers = relationship("Crawler", secondary=task_crawlers)
 
-    file_perm = Column(Integer())
+    ix_name = Index("ix_tasks_name", name)
+    ix_uid_frontend = Index("ix_tasks_uid_frontend", uid_frontend)
 
-    searchable = Column(String(23))
-
-    # regular indexes
-    ix_file_ext = Index("ix_file_ext", file_ext)
-    ix_file_size = Index("ix_file_size", file_size)
-
-    # multi column indexes
-    ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
-    ix_file_format_searchable = Index("ix_file_format_searchable", file_format, searchable)
-
-    # @TODO: support more than postgres type indexes
-    # full text search LIKE "%needle%"
-    ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
-        "searchable": "gin_trgm_ops"
-    })
-
-    def fancify(self):
-        obj = Sanitize(self).humanize(humandates=True, humansizes=True,  dateformat="%d %b %Y")
-
-        file_url = "%s%s" % (obj.file_path, obj.file_name)
-        display_url = obj.resource.display_url
-        if display_url.endswith("/"):
-            display_url = display_url[:-1]
-
-        setattr(obj, "path_dir", "/browse/%s%s" % (obj.resource.name, obj.file_path))
-        setattr(obj, "path_file", "/browse/%s%s%s%s" % (obj.resource.name, obj.file_path, obj.file_name, "/" if obj.file_isdir else ""))
-        setattr(obj, "path_direct", display_url + file_url)
-
-        return obj
-
-    def make_dict(self):
-        blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith("_") and not issubclass(v.__class__, base)}
-
-        blob["resource"] = {
-            "address": self.resource.address
-        }
-
-        return blob
+    def __init__(self, name, desc, data, owner):
+        self.name = name
+        self.description = desc
+        self.data = data
+        self.owner = owner
 
 
-class Crawlers(base):
+class Crawler(base):
     __tablename__ = "crawlers"
 
     id = Column(Integer, primary_key=True)
+
     hostname = Column(String(), nullable=False)
     crawler_name = Column(String(), nullable=False, unique=True)
-
-    amqp_host = Column(String(128))
-    amqp_vhost = Column(String(128))
     heartbeat = Column(TIMESTAMP())
+
+    amqp_id = Column(Integer, ForeignKey("amqp.id"), nullable=False)
+    amqp = relationship("Amqp", back_populates="crawlers")
 
 
 class Amqp(base):
@@ -219,8 +200,7 @@ class Amqp(base):
     auth_pass = Column(String)
 
     added = Column(DateTime(), default=datetime.utcnow)
-
-    parents = relationship("ResourceGroup", back_populates="amqp")
+    crawlers = relationship("Crawler", back_populates="amqp")
 
     def __init__(self, name, host, port, username, password, queue_name, virtual_host):
         self.name = name
@@ -230,30 +210,6 @@ class Amqp(base):
         self.password = password
         self.queue_name = queue_name
         self.virtual_host = virtual_host
-
-
-# class Tasks(base):
-#     __tablename__ = "tasks"
-#
-#     id = Column(Integer, primary_key=True)
-#
-#     name = Column(String, nullable=False, unique=True)
-#     added = Column(DateTime(), default=datetime.utcnow)
-#     description = Column(String, nullable=False)
-#     uid_frontend = Column(String, nullable=False)
-#     owner_id = Column(Integer, ForeignKey("user.id"))
-#     data = Column(String, nullable=False)
-#     groups = relationship("ResourceGroup", backref="group", cascade="all", lazy="dynamic")
-#
-#     ix_name = Index("ix_tasks_name", name)
-#     ix_uid_frontend = Index("ix_tasks_uid_frontend", uid_frontend)
-#
-#     def __init__(self, name, desc, data, owner):
-#         self.name = name
-#         self.description = desc
-#         self.data = data
-#         self.owner = owner
-
 
 
 class Options(base):
@@ -383,7 +339,7 @@ class User(base, AuthUser):
     def taint(self):
         """Should be called to ensure Python dictionaries
         that do not propagate changes, are committed correctly
-        by SQLAlchemy upon a flush."""
+        by SQLAlchemy upon flush."""
         flag_modified(self, "roles")
 
     def is_admin(self):
@@ -400,3 +356,61 @@ class User(base, AuthUser):
             return None
 
         return cls.query.filter(cls.username == data["username"]).one()
+
+
+class Files(base):
+    __tablename__ = "files"
+
+    id = Column(Integer, primary_key=True)
+
+    resource_id = Column(Integer())
+
+    file_name = Column(String())
+    file_path = Column(String())
+    file_ext = Column(String(8))
+    file_format = Column(Integer())
+    file_isdir = Column(Boolean())
+    file_size = Column(BigInteger())
+
+    file_modified = Column(DateTime())
+
+    file_perm = Column(Integer())
+
+    searchable = Column(String(23))
+
+    # regular indexes
+    ix_file_ext = Index("ix_file_ext", file_ext)
+    ix_file_size = Index("ix_file_size", file_size)
+
+    # multi column indexes
+    ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
+    ix_file_format_searchable = Index("ix_file_format_searchable", file_format, searchable)
+
+    # @TODO: support more than postgres type indexes
+    # full text search LIKE "%needle%"
+    ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
+        "searchable": "gin_trgm_ops"
+    })
+
+    def fancify(self):
+        obj = Sanitize(self).humanize(humandates=True, humansizes=True,  dateformat="%d %b %Y")
+
+        file_url = "%s%s" % (obj.file_path, obj.file_name)
+        display_url = obj.resource.display_url
+        if display_url.endswith("/"):
+            display_url = display_url[:-1]
+
+        setattr(obj, "path_dir", "/browse/%s%s" % (obj.resource.name, obj.file_path))
+        setattr(obj, "path_file", "/browse/%s%s%s%s" % (obj.resource.name, obj.file_path, obj.file_name, "/" if obj.file_isdir else ""))
+        setattr(obj, "path_direct", display_url + file_url)
+
+        return obj
+
+    def make_dict(self):
+        blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith("_") and not issubclass(v.__class__, base)}
+
+        blob["resource"] = {
+            "address": self.resource.address
+        }
+
+        return blob

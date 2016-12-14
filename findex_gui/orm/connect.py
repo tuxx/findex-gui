@@ -30,9 +30,11 @@ class Orm(object):
 
     def _init_users(self):
         from findex_gui.controllers.user.user import UserController
+        from findex_gui.controllers.resources.resources import ResourceController
         UserController.user_add(username="root", password="root", removeable=False, admin=True, skip_authorization=True)
         UserController.user_add(username="anon", password="anonymous", removeable=False, skip_authorization=True)
-        UserController.user_view(1)
+        ResourceController.add_resource_group(name="Default", description="Default group", removable=False)
+
 
 class Postgres(Orm):
     def __init__(self, app):

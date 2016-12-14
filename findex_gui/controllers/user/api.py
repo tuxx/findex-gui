@@ -47,8 +47,8 @@ def api_user_locale_set():
 class UserRegister(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('username', location='json', type=str, required=True, help='username is required')
-        self.reqparse.add_argument('password', location='json', type=str, required=True, help='password is required')
+        self.reqparse.add_argument('username', location='json', type=str, required=True, help='Username')
+        self.reqparse.add_argument('password', location='json', type=str, required=True, help='Password')
         super(UserRegister, self).__init__()
 
     def post(self):
@@ -65,7 +65,7 @@ class UserRegister(Resource):
 class UserDelete(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('username', location='json', type=str, required=True, help='username is required')
+        self.reqparse.add_argument('username', location='json', type=str, required=True, help='Username')
         super(UserDelete, self).__init__()
 
     def post(self):

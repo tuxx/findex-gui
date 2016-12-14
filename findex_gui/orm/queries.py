@@ -31,15 +31,15 @@ class Findex(object):
         else:
             self._cache[key][item.id] = item
 
-    def get_resources(self, id=None, name=None, address=None, port=None, limit=None):
-        query = Resources.query
+    def get_resource(self, id=None, name=None, address=None, port=None, limit=None):
+        query = Resource.query
 
         if isinstance(id, (int, long)):
             cached = self._get_cache('resources', id)
             if cached:
                 return cached
 
-            query = query.filter(Resources.id == id)
+            query = query.filter(Resource.id == id)
 
         if isinstance(address, (str, unicode)):
             cached = self._get_cache('resources', address)

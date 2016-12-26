@@ -1,4 +1,6 @@
 import re
+import uuid
+import hashlib
 from datetime import datetime
 from flask import request
 
@@ -14,7 +16,7 @@ from flaskext.auth import AuthUser, get_current_user_data
 
 from findex_gui import locales, app
 from findex_gui.controllers.user.roles import RolesType
-from findex_common.static_variables import ResourceStatus
+from findex_common.static_variables import ResourceStatus, FileProtocols
 from findex_common.utils import Sanitize, rand_str
 
 base = declarative_base(name="Model")
@@ -28,12 +30,29 @@ class Server(base):
     address = Column(String(128), unique=True, nullable=True)
 
     name = Column(String(64), unique=True, nullable=False)
-    description = Column(String(512), nullable=True)
+    description = Column(String(4096), nullable=True)
 
     parents = relationship("Resource", back_populates="server")
 
     ix_address = Index("ix_resource_address", address)
     ix_name = Index("ix_resource_name", name)
+
+    def __init__(self, address):
+        m = hashlib.md5()
+        m.update(str(uuid.uuid1()))
+        self.name = m.hexdigest()
+        self.address = address
+
+    def set_valid_name(self, name):
+        name = re.sub("[^a-zA-Z0-9_\.]", "", name)
+        self.name = name
+
+    def to_json(self):
+        return {
+            "name": self.name,
+            "address": self.address,
+            "description": self.description
+        }
 
 
 class Resource(base):
@@ -45,13 +64,13 @@ class Resource(base):
     server = relationship("Server", back_populates="parents")
 
     meta_id = Column(Integer, ForeignKey("resource_meta.id"), nullable=False)
-    meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resource", uselist=False))
+    meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
 
     group_id = Column(Integer, ForeignKey("resource_group.id"))
     group = relationship("ResourceGroup", back_populates="parents")
 
-    child_id = Column(Integer, ForeignKey('users.id'))
-    child = relationship("User")
+    created_by_id = Column(Integer, ForeignKey('users.id'))
+    created_by = relationship("User")
 
     description = Column(String(), nullable=True)
 
@@ -73,9 +92,20 @@ class Resource(base):
         self.protocol = protocol
         self.basepath = basepath
 
-    def make_dict(self):
-        blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith("_") and not issubclass(v.__class__, base)}
-        return blob
+    def to_json(self):
+        out = {
+            "server": self.server.to_json(),
+            "meta": self.meta.to_json(),
+            "group": self.group.to_json(),
+            "protocol_human": FileProtocols().name_by_id(self.protocol)
+        }
+
+        for k, v in self.__dict__.iteritems():
+            if not k.startswith("_"):
+                if not issubclass(v.__class__, base):
+                    out[k] = v
+
+        return out
 
     @staticmethod
     def make_valid_resourcename(resourcename):
@@ -97,6 +127,7 @@ class ResourceMeta(base):
 
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(JSONType, nullable=True)
+    throttle_connections = Column(Boolean, nullable=False, default=False)
 
     def set_auth(self, username, password, auth_type):
         if username and password and not auth_type:
@@ -109,6 +140,18 @@ class ResourceMeta(base):
     @classmethod
     def is_busy(cls):
         return ResourceStatus().name_by_id(cls.busy)
+
+    def to_json(self):
+        return {
+            "auth_user": "***",
+            "auth_pass": "***",
+            "file_count": self.file_count,
+            "auth_type": self.auth_type,
+            "web_user_agent": self.web_user_agent,
+            "recrusive_sizes": self.recursive_sizes,
+            "file_distribution": self.file_distribution,
+            "throttle_connections": self.throttle_connections
+        }
 
 
 class ResourceGroup(base):
@@ -135,6 +178,16 @@ class ResourceGroup(base):
         if not groupname:
             raise Exception("group name cannot be empty or invalid")
         return groupname
+
+    def to_json(self):
+        out = {
+            "name": self.name,
+            "description": self.description,
+            "added": self.added,
+            "removable": self.removable
+        }
+
+        return out
 
 
 task_crawlers = Table(
@@ -171,6 +224,15 @@ class Task(base):
         self.data = data
         self.owner = owner
 
+    def to_json(self):
+        out = {
+            "name": self.name,
+            "added": self.added,
+            "description": self.description,
+            "owner_id": self.owner_id,
+            "group_id": self.group_id
+        }
+        return out
 
 class Crawler(base):
     __tablename__ = "crawlers"
@@ -320,7 +382,6 @@ class User(base, AuthUser):
                 self.locale = request.accept_languages.best_match(locales.keys())
             else:
                 self.locale = "en"
-
             with app.app_context():
                 self.set_and_encrypt_password(password=password, salt=rand_str(16))
 
@@ -406,7 +467,7 @@ class Files(base):
 
         return obj
 
-    def make_dict(self):
+    def to_json(self):
         blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith("_") and not issubclass(v.__class__, base)}
 
         blob["resource"] = {

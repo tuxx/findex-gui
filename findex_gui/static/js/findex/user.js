@@ -9,7 +9,7 @@ class UserController extends FindexGui {
             "password": password
         };
 
-        FindexGui.api("/user/register", "POST", data);
+        return FindexGui.api("/user/register", "POST", data);
     }
 
     static remove(username){
@@ -17,6 +17,6 @@ class UserController extends FindexGui {
             "username": username
         };
 
-        FindexGui.api("/user/delete", "POST", data);
+        return FindexGui.api("/user/delete", "POST", data);
     }
 }

@@ -6,35 +6,50 @@
             <div class="center-block" style="width:300px;">
 
                 <p class="lead">{{ _('Register') }}</p>
+                <form onsubmit="register(); return false;">
+                    <div class="form-group">
+                        <label for="username" class="control-label">{{ _('Username') }}</label>
+                        <input type="text" class="form-control" id="username" name="username" value=""
+                               required="" title="{{ _('Please enter you username') }}"
+                               placeholder="">
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="control-label">{{ _('Password') }}</label>
+                        <input type="password" class="form-control" id="password" name="password" value=""
+                               required="" title="{{ _('Please enter your password') }}">
+                        <span class="help-block"></span>
+                    </div>
+                    {% if error %}
+                        <p class=error style="padding-top:10px;padding-bottom:10px;">
+                            <strong style="color:red;">Error:</strong> {{ error }}
+                        </p>
+                    {% endif %}
 
-                    <form method="POST" novalidate="novalidate">
-                        <div class="form-group">
-                            <label for="username" class="control-label">{{ _('Username') }}</label>
-                            <input type="text" class="form-control" id="username" name="username" value=""
-                                   required="" title="{{ _('Please enter you username') }}"
-                                   placeholder="">
-                            <span class="help-block"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="password" class="control-label">{{ _('Password') }}</label>
-                            <input type="password" class="form-control" id="password" name="password" value=""
-                                   required="" title="{{ _('Please enter your password') }}">
-                            <span class="help-block"></span>
-                        </div>
-                        {% if error %}
-                            <p class=error style="padding-top:10px;padding-bottom:10px;">
-                                <strong style="color:red;">Error:</strong> {{ error }}
-                            </p>
-                        {% endif %}
-
-                        <button type="submit" value="Create" class="btn btn-success btn-block">{{ _('Register') }}</button>
-                        <span style="margin-top:10px;" class="help-block">
-                            <a href="/login">{{ _('Already have an account?') }}</a>
-                        </span>
-                    </form>
+                    <button type="submit" value="Create" class="btn btn-success btn-block">{{ _('Register') }}</button>
+                    <span style="margin-top:10px;" class="help-block">
+                        <a href="/login">{{ _('Already have an account?') }}</a>
+                    </span>
+                </form>
             </div>
         </div>
     </div>
 
+    <script>
+        function register(){
+            var form = $("form");
+            var username = form.find("input#username").val();
+            var password = form.find("input#password").val();
 
+            if(username && password){
+                UserController.add(username, password).then(function(data){
+                    if(data.status == true) {
+                        goto_uri("/user/login");
+                    } else {
+                        alert("Could not register user");
+                    }
+                });
+            }
+        }
+    </script>
 {% endblock %}

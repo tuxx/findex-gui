@@ -12,9 +12,9 @@ class SearchResult:
         self.results = []
         self.params = {}
 
-    def make_dict(self):
+    def to_json(self):
         blob = {
-            'results': [z.make_dict() for z in self.results],
+            'results': [z.to_json() for z in self.results],
             'params': self.params,
             'results_count': len(self.results)
         }

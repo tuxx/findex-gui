@@ -1,0 +1,72 @@
+{% extends "bucket/templates/main/user_cp/_base.html" %}
+
+{% block options %}
+{% macro render_field(field, label_visible=true) -%}
+    <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
+        {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
+            <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+        {% endif %}
+        {{ field(class_='form-control', **kwargs) }}
+        {% if field.errors %}
+            {% for e in field.errors %}
+                <p class="help-block">{{ e }}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+{%- endmacro %}
+
+<div class="panel-body form-horizontal">
+    <div class="col-md-2">
+        <h4>Menu</h4>
+        <hr>
+        <a href="/user/cp/services/add">Add a new service</a>
+    </div>
+
+    <div class="col-md-10">
+        <h4>My Services</h4>
+        <hr>
+        <table id="resource_table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Server</th>
+                    <th>Address</th>
+                    <th>Path</th>
+                    <th>Protocol</th>
+                    <th>Group</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        var resource_table = $('#resource_table').DataTable();
+        var user_id = {{ user.id }};
+
+        function _resource_table_callback(data){
+            if(!data.hasOwnProperty("data")){
+                console.log("error: " + data);
+                return;
+            }
+
+            data.data.forEach(function(obj, i){
+                let address = `${obj['server']['address']}:${obj['port']}`;
+                resource_table.row.add(
+                    [obj.server.name, address, obj.basepath, obj.protocol_human, obj.group.name]
+                ).draw(false);
+            });
+        }
+
+{#        setInterval(function () {#}
+{#            $.getJSON("/api/bot/list", callback);#}
+{#        }, 3000);#}
+
+        FindexGui.api("/resource/get", "POST", {
+            "user_id": user_id
+        }).then(_resource_table_callback);
+    });
+</script>
+
+{% endblock %}

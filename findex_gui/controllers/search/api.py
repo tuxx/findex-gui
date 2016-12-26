@@ -43,7 +43,7 @@ class SearchAPI(Resource):
         controller = SearchController()
         result = controller.search(key=key)
 
-        return flask.jsonify(**result.make_dict())
+        return flask.jsonify(**result.to_json())
 
     def post(self, key):
         # ---- make decorator of this with try catch oin parse_args (it can fail)
@@ -58,6 +58,6 @@ class SearchAPI(Resource):
         except Exception as ex:
             return abort(404, message=str(ex))
 
-        return flask.jsonify(**result.make_dict())
+        return flask.jsonify(**result.to_json())
 
 appapi.add_resource(SearchAPI, '/api/v2/search/<string:key>', endpoint='api_search')

@@ -3,34 +3,8 @@ from flaskext.auth.auth import get_current_user_data
 
 from findex_gui import db, locales, auth
 from findex_gui.orm.models import User, UserGroup
-from findex_gui.controllers.user.roles import default_anon_roles, Role
-from findex_common.exceptions import DatabaseException
-
-
-def check_role(requirements, **kwargs):
-    if "skip_authorization" not in kwargs:
-        try:
-            user = get_current_user_data()
-            if user is None:
-                user = UserController.user_view(username="anon")
-            if not user:
-                raise Exception("forbidden")
-        except Exception:
-            raise Exception("forbidden")
-
-        for requirement in requirements:
-            roles = [r.name for r in user.roles]
-            if requirement not in roles:
-                raise Exception("Forbidden")
-
-
-def role_req(*requirements):
-    def wrap(f):
-        def wrapped_f(*args, **kwargs):
-            check_role(requirements, **kwargs)
-            return f(*args, **kwargs)
-        return wrapped_f
-    return wrap
+from findex_gui.controllers.user.roles import default_registered_roles, role_req, check_role
+from findex_common.exceptions import DatabaseException, FindexException, RoleException, AuthenticationException
 
 
 class UserController:
@@ -48,14 +22,13 @@ class UserController:
             _filter = {"username": username}
 
         try:
-            user = db.session.query(User).filter_by(**_filter).first()
-            return user
+            return db.session.query(User).filter_by(**_filter).first()
         except Exception as ex:
             db.session.rollback()
             return DatabaseException(ex)
 
     @staticmethod
-    @role_req("REGISTERED", "USER_DELETE")
+    @role_req("USER_REGISTERED", "USER_DELETE")
     def user_delete(username):
         """
         Deletes an user
@@ -78,7 +51,7 @@ class UserController:
     @staticmethod
     @role_req("USER_CREATE")
     def user_add(username, password, admin=False, removable=True,
-                 privileges=default_anon_roles, create_session=False, **kwargs):
+                 privileges=default_registered_roles, create_session=False, **kwargs):
         """
         Adds an user
         :param username: username
@@ -92,11 +65,9 @@ class UserController:
         user = User(username=username, password=password)
         user.roles = privileges
         user.removable = removable
-
         if admin:
             check_role("CREATE_USER_ADMIN", **kwargs)
             user.admin = admin
-
         try:
             db.session.add(user)
             db.session.commit()
@@ -109,7 +80,7 @@ class UserController:
             return DatabaseException(ex)
 
     @staticmethod
-    @role_req("REGISTERED", "CREATE_USER_GROUP")
+    @role_req("USER_REGISTERED", "CREATE_USER_GROUP")
     def group_add(name, owner, **kwargs):
         group = UserGroup(name=name, owner=owner)
         db.session.add(group)
@@ -124,29 +95,31 @@ class UserController:
     @staticmethod
     def authenticate_basic(inject=False):
         """
-        Authenticates the user using BASIC authentication.
+        Authenticates the user using BASIC authentication
         :param inject: Inject the validated user into the `request` object
         :return: orm.models.user
         """
-
-        basic = request.authorization
-        if 'username' not in basic or 'password' not in basic or not basic['username'] or not basic['password']:
-            raise Exception('username/password not supplied')
-
-        username = basic['username']
-        password = basic['password']
-
-        user = User.query.filter(User.username == username).one()
-        if not user:
+        if not hasattr(request, "authorization"):
+            raise FindexException("request object has no attribute authorization")
+        bauth = request.authorization
+        if 'username' not in bauth or 'password' not in bauth or not bauth['username'] or not bauth['password']:
+            raise FindexException('username/password not supplied')
+        username = bauth['username']
+        password = bauth['password']
+        try:
+            user = User.query.filter(User.username == username).one()
+            if not user:
+                raise AuthenticationException("bad username/password combination")
+        except:
             return
 
         password += user.salt
-
         if auth.hash_algorithm(password).hexdigest() == user.password:
             if inject:
                 setattr(request, 'user', user)
-
             return user
+        else:
+            raise AuthenticationException("bad username/password combination")
 
     @staticmethod
     def authenticate_and_session(username, password):
@@ -162,7 +135,6 @@ class UserController:
             raise Exception('Locale %s not found. Locales available: %s' % (locale, ', '.join(locales.keys())))
 
         session['locale'] = locale
-
         if user:
             user.locale = locale
             db.session.commit()
@@ -173,22 +145,38 @@ class UserController:
         if not locale:
             session['locale'] = 'en'
             return 'en'
-
         return locale
 
     @staticmethod
-    def get_current_user_data(apply_timeout=True):
-        data = get_current_user_data(apply_timeout)
-        if data:
-            e = ""
+    def get_current_user(apply_timeout=True):
+        # auth via session cookie
+        user = get_current_user_data(apply_timeout)
+        if user:
+            user = UserController.user_view(uid=user["id"])
+        else:
+            try:
+                user = UserController.authenticate_basic()
+            except AuthenticationException as e:
+                raise e
+            except Exception as e:
+                pass
+
+            if user is None:
+                # user not logged in; assign the default anonymous role
+                user = UserController.user_view(username="anon")
+                if not user:
+                    raise RoleException("User anon not found")
+
+        if isinstance(user, DatabaseException):
+            raise user
+
+        return user
 
     @staticmethod
     def is_admin():
         data = get_current_user_data()
         if data is None:
             return
-
         elif not data['admin']:
             return
-
         return True

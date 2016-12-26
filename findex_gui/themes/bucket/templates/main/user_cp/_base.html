@@ -18,6 +18,7 @@
             left: 0;
             top: 40px;
             width: 100%;
+            z-index: 666;
         }
 
         .cp_header>.inner {
@@ -47,6 +48,23 @@
             color: #707070;
             font-weight: inherit;
         }
+
+        .form-group {
+            margin-right: 0px !important;
+            margin-left: 0px !important;
+        }
+
+        .form-horizontal .control-label {
+            padding-top: 0px;
+        }
+
+        hr{
+            margin-top: 0px;
+        }
+
+        div.helpitem{
+            margin-bottom:20px;
+        }
     </style>
 
     <div class="cp_header">
@@ -55,7 +73,6 @@
             <span>{{ user.username }}</span>
         </div>
     </div>
-    <!-- {u'username': u'dsc', u'created': datetime.datetime(2016, 6, 2, 23, 19, 21), u'admin': False, u'modified': None, u'locale': u'en', u'role': u'1', u'id': 4} e -->
 
     <div id="sidebar-wrapper">
         <ul class="sidebar-nav">
@@ -64,18 +81,18 @@
                 color: #707070;
                 padding: 20px 20px 10px;
                 font-family: monospace;
-            ">GENERAL</strong>
+            ">Options</strong>
 
-            <li><a href="#"><i class="fa fa-wrench"><span>General</span></i></a></li>
-            <li><a href="#"><i class="fa fa-globe"><span>Localization</span></i></a></li>
+            <li><a href="/user/cp"><i class="fa fa-wrench"><span>Miscellaneous</span></i></a></li>
+            <li><a href="/user/cp/services"><i class="fa fa-globe"><span>Services</span></i></a></li>
         </ul>
     </div>
 
     <div id="page-content-wrapper">
         <div class="container-fluid">
             <div class="row">
-                <div id="content" class="col-lg-8">
-                    {% include 'bucket/templates/main/user_cp/localization.html' %}
+                <div id="content" class="col-lg-12">
+                    {% block options %} {% endblock %}
                 </div>
             </div>
         </div>

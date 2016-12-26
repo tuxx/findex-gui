@@ -9,6 +9,7 @@ from findex_gui import app, locales, appapi
 from findex_gui.orm.models import User
 from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.resources.resources import ResourceController
+from findex_gui.controllers.resources.forms import ResourceForm
 
 
 class ResourceAdd(Resource):
@@ -33,8 +34,12 @@ class ResourceAdd(Resource):
         self.reqparse.add_argument('auth_type', location='json', type=str, required=False,
                                    help='Authentication type')
 
+        self.reqparse.add_argument('user_agent', location='json', type=str, required=False,
+                                   help='The string to identify ourselves with against the service.')
         self.reqparse.add_argument('recursive_sizes', location='json', type=bool, required=False,
                                    help='Recursively calculate directory sizes (performance impact during crawl)')
+        self.reqparse.add_argument('throttle_connections', location='json', type=bool, required=False,
+                                   help='wait X seconds between each request/connection')
         self.reqparse.add_argument('basepath', location='json', type=str, required=True,
                                    help='The absolute crawl root path')
         self.reqparse.add_argument('display_url', location='json', type=str, required=False,
@@ -54,4 +59,23 @@ class ResourceAdd(Resource):
             return flask.jsonify(**{'success': True})
 
 
+class ResourceGet(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('by_owner', location='json', type=int, required=False,
+                                   help='Filter on resources that owner id owns')
+        super(ResourceGet, self).__init__()
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        args = {k: v for k, v in args.items() if v is not None}
+
+        data = ResourceController.get_resources(**args)
+        if isinstance(data, Exception):
+            return abort(404, message=str(data))
+        else:
+            return flask.jsonify(**{'success': True, 'data': data})
+
+
 appapi.add_resource(ResourceAdd, '/api/v2/resource/add', endpoint='api_resource_add')
+appapi.add_resource(ResourceGet, '/api/v2/resource/get', endpoint='api_resource_get')

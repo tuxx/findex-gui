@@ -1,12 +1,13 @@
 import os
 from flask import render_template, session
-
-from flaskext.auth import get_current_user_data
+from flask.ext.auth import get_current_user_data
+from findex_gui.controllers.user.user import UserController
 
 from findex_gui import app
 from findex_gui.controllers.options.options import OptionsController
 from findex_gui.orm.models import User
 from findex_common import utils
+from findex_common.exceptions import FindexException
 
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
@@ -52,18 +53,17 @@ class ThemeController:
         kwargs['env'] = {z: app.config[z] for z in app.config if z.islower()}
         kwargs['env']['application_root'] = app.config['APPLICATION_ROOT']
 
+        user = UserController.get_current_user()
         user_context = get_current_user_data()
-        if user_context:
-            user = User.query.filter(User.id == user_context['id']).one()
 
+        if user_context:
             if not session.get('locale'):
                 session['locale'] = user.locale
 
             elif session['locale'] != user.locale:
                 session['locale'] = user.locale
 
-            kwargs['user'] = user
-
+        kwargs['user'] = user
         return render_template('%s/templates/%s.html' % (theme, template_path), **kwargs), status_code
 
     def get_active(self):

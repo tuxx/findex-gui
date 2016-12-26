@@ -1,8 +1,10 @@
 import six
 import sqlalchemy
 import json
+from flask import request
 
 from sqlalchemy_utils.types.json import JSONType, has_postgres_json
+
 from findex_common.exceptions import RoleException
 
 
@@ -38,7 +40,7 @@ role_mapping = {
         "id": 6
     },
     7: {
-        "name": "REGISTERED",
+        "name": "USER_REGISTERED",
         "info": "User must be registered",
         "id": 7
     }
@@ -81,6 +83,13 @@ class Role:
         elif isinstance(other, (str, unicode)):
             return self.name == other.upper()
 
+    def to_json(self):
+        return {
+            "rid": self.rid,
+            "name": self.name,
+            "info": self.info
+        }
+
 
 class RolesType(JSONType):
     impl = sqlalchemy.UnicodeText
@@ -113,3 +122,35 @@ class RolesType(JSONType):
 
 
 default_anon_roles = [Role("RESOURCE_VIEW"), Role("USER_CREATE")]
+default_registered_roles = [
+    Role("USER_REGISTERED"),
+    Role("RESOURCE_VIEW"),
+    Role("RESOURCE_CREATE"),
+    Role("USER_CREATE")
+]
+
+
+def check_role(requirements, **kwargs):
+    """Raises exception on bad role"""
+    from findex_gui.controllers.user.user import UserController
+    if "skip_authorization" in kwargs:
+        return
+
+    def check_requirements(user):
+        for requirement in requirements:
+            roles = [r.name for r in user.roles]
+            if requirement not in roles:
+                raise RoleException("current user does not have the required role \"%s\"" % requirement)
+
+    user = UserController.get_current_user(apply_timeout=False)
+    if user:
+        return check_requirements(user)
+
+
+def role_req(*requirements):
+    def wrap(f):
+        def wrapped_f(*args, **kwargs):
+            check_role(requirements, **kwargs)
+            return f(*args, **kwargs)
+        return wrapped_f
+    return wrap

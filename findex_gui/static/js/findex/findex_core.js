@@ -159,3 +159,23 @@ function gets(){
     console.log($('#form_filter').serialize);
 
 }
+
+$.fn.serializeObject = function()
+{
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || 'x2');
+        } else {
+            if(this.value){
+                o[this.name] = this.value;
+            }
+
+        }
+    });
+    return o;
+};

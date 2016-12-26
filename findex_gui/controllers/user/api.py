@@ -39,7 +39,7 @@ def api_user_locale_set():
                 return flask.jsonify(**{'success': True}), 201
 
         UserController.locale_set(locale=request.form['lang'])
-        return flask.jsonify(**{'success': True}), 201
+        return flask.jsonify(**{'status': True}), 201
     except Exception as ex:
         return flask.jsonify(**{'fail': str(ex)}), 400
 
@@ -59,7 +59,7 @@ class UserRegister(Resource):
         if isinstance(user, Exception):
             return abort(404, message=str(user))
         else:
-            return flask.jsonify(**{'success': True})
+            return flask.jsonify(**{'status': True})
 
 
 class UserDelete(Resource):

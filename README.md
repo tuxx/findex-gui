@@ -14,7 +14,7 @@ Findex is a platform for finding and indexing files over multiple protocols. The
   - Bootstrap 3.1.1 file browser.
 
 ## Status
-Still in development, don't bother trying to get it to run.
+Still in development, don't bother trying to get this to run.
 
 
 **Backend**

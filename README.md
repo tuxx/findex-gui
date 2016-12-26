@@ -13,8 +13,8 @@ Findex is a platform for finding and indexing files over multiple protocols. The
   - Distributed crawling with RabbitMQ AMQP messaging
   - Bootstrap 3.1.1 file browser.
 
-### Status
-**warning:** It is not recommended you clone this repository as it is still in development.
+## Status
+Still in development, don't bother trying to get it to run.
 
 
 **Backend**
@@ -28,7 +28,7 @@ Findex is a platform for finding and indexing files over multiple protocols. The
  Admin Panel  | :clock2: | In development
  I18n Translations | :white_check_mark: | Supported: English, Dutch
  In-App Crawling  | :clock2: | In development
- RAW/JSON Interface | :x: | Not yet
+ RAW/JSON Interface | :clock2: | In development
  WebDav Interface  | :x: | Not yet
 
 
@@ -39,7 +39,6 @@ Findex is a platform for finding and indexing files over multiple protocols. The
 Themes  | :white_check_mark:  |  Custom themes supported
 Bootstrap | :white_check_mark:  |  v3
 jQuery  | :white_check_mark:  |  v1.11.3
-ES6 Transpilers | :clock2:  |  In development
 Grunt | :x: | Not yet
 SCSS/Sass | :x: | Not yet
 
@@ -66,7 +65,7 @@ Document Metadata|:x:| Not yet
 DB Pools|:white_check_mark:| Supported
 Memcached|:clock2:| In development
 ES backend|:x:| Not yet
-SQLite backend|:x:|Not yet
+SQLite backend|:x:| Maybe works
 
 
 ### Example

@@ -18,11 +18,18 @@ def console_log(msg):
 
 
 class Db:
+    def __init__(self):
+        self.db = None
+
     def connect(self):
         from findex_gui.orm.connect import Postgres
         db = Postgres(app=None, **settings.__dict__)
         db.connect(init=False)
-        return db
+        self.db = db
+
+    def disconnect(self):
+        self.db.session.close()
+        self.db.engine.dispose()
 
 class Pika:
     def __init__(self):
@@ -92,8 +99,11 @@ class TaskLoop:
         pass
 
     def blocking_loop(self):
+        postgres = Db()
         while True:
-            db = Db().connect()
+            postgres.connect()
+            db = postgres.db
+
             from findex_gui.orm.models import ResourceGroup, Resource, ResourceMeta, ResourceStatus, Task
             resources = []
 
@@ -107,7 +117,7 @@ class TaskLoop:
                                 continue
 
                         # check busy
-                        if not resource.meta.status == 0:  # not busy - ResourceStatus().name_by_id
+                        if resource.meta.status != 0:  # not busy - ResourceStatus().name_by_id
                             continue
 
                         resources.append(resource)
@@ -116,11 +126,13 @@ class TaskLoop:
 
             if resources:
                 db.session.commit()
+                db.session.flush()
                 p = Pika()
                 p.send_tasks(resources)
                 console_log("done sending")
 
             console_log("looped")
-            time.sleep(5)
+            postgres.disconnect()
+            time.sleep(1)
 
 TaskLoop().blocking_loop()

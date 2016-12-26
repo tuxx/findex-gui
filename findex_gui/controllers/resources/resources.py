@@ -9,6 +9,19 @@ from findex_common import static_variables
 
 class ResourceController:
     @staticmethod
+    @role_req("RESOURCE_VIEW")
+    def get_resource():
+        pass
+        # query = db.session.query(Resource)
+        #
+        # if by_owner:
+        #     query = query.filter(Resource.id == by_owner)
+        #
+        # all = query.all()
+        # return all
+
+    @staticmethod
+    @role_req("RESOURCE_VIEW")
     def get_resources(by_owner=None):
         query = db.session.query(Resource)
 
@@ -86,7 +99,6 @@ class ResourceController:
 
         resource.created_by = current_user
 
-        print "yay"
         db.session.add(resource)
         db.session.commit()
 
@@ -96,6 +108,47 @@ class ResourceController:
         return True
 
     @staticmethod
+    @role_req("USER_REGISTERED", "RESOURCE_REMOVE", "RESOURCE_CREATE")
+    def remove_resource(resource_id, auto_remove_server=True, **kwargs):
+        """
+        Removes a resource from the database.
+        :param resource_id: The resource ID
+        :param auto_remove_server: removes the server this resource
+        has a relationship with, but only when that server does not
+        have any other existing resource members/childs
+        :param kwargs:
+        :return:
+        """
+        user = UserController.get_current_user()
+
+        if not user.admin:
+            resources = ResourceController.get_resources(by_owner=user.id)
+            resource = [r for r in resources if r.id == resource_id]
+            if not resource or isinstance(resource, Exception):
+                raise FindexException("Could not fetch resource id \"%d\"" % resource_id)
+            else:
+                resource = resource[0]
+        else:
+            resource = db.session.query(Resource).filter(Resource.id==resource_id).first()
+            if not resource:
+                raise FindexException("Could not fetch resource id \"%d\"" % resource_id)
+
+        if auto_remove_server:
+            # check for other server resource members before trying to delete
+            server = resource.server
+            if [z for z in server.parents if z.id != resource_id]:
+                # cant remove server, it still has one or more member(s)
+                db.session.delete(resource)
+            else:
+                db.session.delete(resource)
+                db.session.delete(server)
+        else:
+            db.session.delete(resource)
+
+        db.session.commit()
+
+    @staticmethod
+    @role_req("USER_REGISTERED", "RESOURCE_CREATE")
     def add_server(name=None, ipv4_address=None, hostname=None, verify_hostname=True,
                    use_resolved_hostname=False, description=""):
         """
@@ -131,7 +184,8 @@ class ResourceController:
         return srv
 
     @staticmethod
-    def add_resource_group(name, removable=True, description=None):
+    @role_req("USER_REGISTERED", "RESOURCE_CREATE")
+    def add_resource_group(name, removable=True, description=None, **kwargs):
         try:
             rg = ResourceGroup(name=name,
                                removable=removable,

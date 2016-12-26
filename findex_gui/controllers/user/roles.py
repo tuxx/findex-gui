@@ -144,6 +144,8 @@ def check_role(requirements, **kwargs):
 
     user = UserController.get_current_user(apply_timeout=False)
     if user:
+        if user.admin:
+            return
         return check_requirements(user)
 
 

@@ -17,9 +17,9 @@
                     <img height="70px" src="/static/img/default_thumbnail2.png"/>
                 </div>
                 <div class="description">
-                    <b style="color: #5D5D5D">{{ resource.name }}</b>
+                    <b style="color: #5D5D5D">{{ resource.server.name[:4] }}</b>
 
-                    <p style="font-size:12px;color: #969696">{{ resource.file_count }} {{ _('files') }}</p>
+                    <p style="font-size:12px;color: #969696">{{ resource.meta.file_count }} {{ _('files') }}</p>
                 </div>
                 <div class="hide_sidebar">
                     <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -42,10 +42,17 @@
 
         <hr>
 
+{#        <li>#}
+{#            <a href="#">#}
+{#                <i class="fa fa-info-circle">#}
+{#                    <span>{{ _('Report Offline') }}</span>#}
+{#                </i>#}
+{#            </a>#}
+{#        </li>#}
         <li>
-            <a href="#">
+            <a href="/search">
                 <i class="fa fa-info-circle">
-                    <span>{{ _('Report Offline') }}</span>
+                    <span>{{ _('Search') }}</span>
                 </i>
             </a>
         </li>
@@ -135,7 +142,7 @@
                                     <td>{{f.file_modified_human}}</td>
                                     <td>
                                         {% if not f.file_isdir %}
-                                            <a href="{{ f.path_direct }}">Link</a>
+                                            <a target="_blank" href="{{ f.path_direct }}">src</a>
                                         {% endif %}
                                     </td>
                                 </tr>

@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import pool
 
+import settings
 from findex_gui.orm.models import base, Options, Roles, UserGroup, User
 from findex_common.exceptions import DatabaseException
 
@@ -13,32 +14,54 @@ from findex_common.exceptions import DatabaseException
 
 
 class Orm(object):
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
         self.app = app
         self.engine = None
         self.session = None
 
-        self._db_hosts = app.config['DB_HOSTS']
-        self._db_port = app.config['DB_PORT']
-        self._db_database = app.config['DB_DB']
-        self._db_user = app.config['DB_USER']
-        self._db_pass = app.config['DB_PASS']
+        if "db_hosts" in kwargs:
+            self._db_hosts = kwargs["db_hosts"]
+        else:
+            self._db_hosts = app.config['DB_HOSTS']
+        if "db_port" in kwargs:
+            self._db_port = kwargs["db_port"]
+        else:
+            self._db_port = app.config['DB_PORT']
+        if "db_db" in kwargs:
+            self._db_database = kwargs["db_db"]
+        else:
+            self._db_database = app.config['DB_DB']
+        if "db_user" in kwargs:
+            self._db_user = kwargs["db_user"]
+        else:
+            self._db_user = app.config['DB_USER']
+        if "db_pass" in kwargs:
+            self._db_pass = kwargs["db_pass"]
+        else:
+            self._db_pass = app.config['DB_PASS']
 
     def init(self):
         base.metadata.create_all(bind=self.engine)
-        self._init_users()
+        self._init_default_structure()
 
-    def _init_users(self):
+    def _init_default_structure(self):
         from findex_gui.controllers.user.user import UserController
+        from findex_gui.controllers.user.roles import default_anon_roles
         from findex_gui.controllers.resources.resources import ResourceController
-        UserController.user_add(username="root", password="root", removeable=False, admin=True, skip_authorization=True)
-        UserController.user_add(username="anon", password="anonymous", removeable=False, skip_authorization=True)
-        ResourceController.add_resource_group(name="Default", description="Default group", removable=False)
+        from findex_gui.controllers.tasks.tasks import TaskController
+        UserController.user_add(username="root", password=settings.default_root_pw, removeable=False, admin=True, skip_authorization=True)
+        UserController.user_add(username="anon", password=settings.default_anon_pw, privileges=default_anon_roles, removeable=False, skip_authorization=True)
+        ResourceController.add_resource_group(name="Default", description="Default group", removable=False, skip_authorization=True)
+        TaskController.add_task(name="Default", owner_id=1, skip_authorization=True)
+        try:
+            TaskController.assign_resource_group(task_id=1, resourcegroup_id=1, skip_authorization=True)
+        except:
+            pass
 
 
 class Postgres(Orm):
-    def __init__(self, app):
-        super(Postgres, self).__init__(app)
+    def __init__(self, app, **kwargs):
+        super(Postgres, self).__init__(app, **kwargs)
 
         if not isinstance(self._db_hosts, list):
             self._db_hosts = [self._db_hosts]
@@ -49,7 +72,7 @@ class Postgres(Orm):
         self.pool = pool.QueuePool(
             creator=self._getconn, max_overflow=1, pool_size=20, echo=True)
 
-    def connect(self):
+    def connect(self, init=True):
         self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=True)
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=True,
@@ -80,7 +103,8 @@ class Postgres(Orm):
                                             "pg_trgm: `CREATE EXTENSION pg_trgm;`")
                 else:
                     logging.debug("Enabled database extension \"pg_trgm\"")
-        self.init()
+        if init:
+            self.init()
 
     def _getconn(self):
         random.shuffle(self._db_hosts)

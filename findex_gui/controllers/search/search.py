@@ -149,13 +149,12 @@ class DatabaseSearchController:
         results = q.all()
 
         resource_ids = set([z.resource_id for z in results])
-        resource_obs = {z.id: z for z in Resources.query.filter(Resources.id.in_(resource_ids)).all()}
+        resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
 
         for result in results:
             setattr(result, 'resource', resource_obs[result.resource_id])
 
         results = [result.fancify() for result in results]
-
         return results
 
     @staticmethod

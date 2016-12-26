@@ -163,8 +163,8 @@ class Search {
         let key = params['key'];
         delete params['key'];
 
-        let _url = `search/${key}`;
-        let _data = JSON.stringify(params);
+        let _url = `/search/${key}`;
+        let _data = params;
 
         FindexGui.api(_url, "POST", _data).then(function(data){
             this.parse_results(data);

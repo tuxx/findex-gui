@@ -111,7 +111,7 @@ class UserController:
             if not user:
                 raise AuthenticationException("bad username/password combination")
         except:
-            return
+            raise AuthenticationException("bad username/password combination")
 
         password += user.salt
         if auth.hash_algorithm(password).hexdigest() == user.password:
@@ -160,16 +160,13 @@ class UserController:
                 raise e
             except Exception as e:
                 pass
-
             if user is None:
                 # user not logged in; assign the default anonymous role
                 user = UserController.user_view(username="anon")
                 if not user:
                     raise RoleException("User anon not found")
-
         if isinstance(user, DatabaseException):
             raise user
-
         return user
 
     @staticmethod

@@ -48,7 +48,6 @@ class SearchAPI(Resource):
     def post(self, key):
         # ---- make decorator of this with try catch oin parse_args (it can fail)
         args = self.reqparse.parse_args()
-
         args = {k: v for k, v in args.items() if v is not None}
         # ----
 

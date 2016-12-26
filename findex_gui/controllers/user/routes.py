@@ -65,6 +65,44 @@ def user_cp_resources():
 
 @app.route('/user/cp/services/add', methods=['GET'])
 @login_required
-def user_cp_resources_add():
+def user_cp_resource_add():
     form = ResourceForm(request.form)
     return themes.render('main/user_cp/_service_add', form=form)
+
+
+@app.route('/user/cp/services/<path:resource_id>', methods=['GET'])
+@login_required
+def user_cp_resource_detail(resource_id):
+    # @TODO redo
+    from findex_gui.controllers.resources.resources import ResourceController
+    from findex_gui.orm.models import Resource
+    from findex_gui import db
+    try:
+        resource = db.session.query(Resource).filter(Resource.id == resource_id).first()
+    except:
+        db.session.rollback()
+        return "error"
+
+    if not resource or isinstance(resource, Exception):
+        raise Exception("None found")
+    return themes.render('main/user_cp/_service_detail', resource=resource)
+
+
+@app.route('/user/cp/services/<path:resource_id>/delete', methods=['GET'])
+@login_required
+def user_cp_resource_remove(resource_id):
+    # @TODO redo
+    from findex_gui.orm.models import Resource
+    from findex_gui import db
+    try:
+        resource = db.session.query(Resource).filter(Resource.id == resource_id).first()
+    except:
+        db.session.rollback()
+        return "error"
+
+    if not resource or isinstance(resource, Exception):
+        raise Exception("None found")
+
+    from findex_gui.controllers.resources.resources import ResourceController
+    ResourceController.remove_resource(resource_id=resource.id)
+    return "nice"

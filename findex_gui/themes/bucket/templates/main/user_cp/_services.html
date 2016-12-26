@@ -28,6 +28,7 @@
         <table id="resource_table" class="table table-striped">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Server</th>
                     <th>Address</th>
                     <th>Path</th>
@@ -51,21 +52,33 @@
                 return;
             }
 
+            resource_table.clear().draw();
             data.data.forEach(function(obj, i){
                 let address = `${obj['server']['address']}:${obj['port']}`;
                 resource_table.row.add(
-                    [obj.server.name, address, obj.basepath, obj.protocol_human, obj.group.name]
+                    [obj.id, obj.server.name, address, obj.basepath, obj.protocol_human, obj.group.name], {"test": "vagina"}
                 ).draw(false);
             });
         }
 
-{#        setInterval(function () {#}
-{#            $.getJSON("/api/bot/list", callback);#}
-{#        }, 3000);#}
+        $(document).on("click", "#resource_table tbody tr",  function(){
+            let data = resource_table.row( this ).data();
+            let id = data[0];
 
-        FindexGui.api("/resource/get", "POST", {
-            "user_id": user_id
-        }).then(_resource_table_callback);
+            goto_uri("/user/cp/services/" + id);
+        });
+
+        function fetch(){
+            FindexGui.api("/resource/get", "POST", {
+                "user_id": user_id
+            }).then(_resource_table_callback);
+        }
+
+        setInterval(function () {
+            fetch();
+        }, 3000);
+
+        fetch();
     });
 </script>
 

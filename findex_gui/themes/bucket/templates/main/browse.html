@@ -7,8 +7,49 @@
             <div class="row">
                 <div class="col-lg-12">
                     <h3>{{ _('Browse Servers') }}</h3>
+                    <hr>
+                    <div class="col-md-8">
+                        <style>
+                            tr{
+                                cursor:pointer;
+                            }
+                        </style>
+                        <table id="service_table" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Files</th>
+                                    <th>Address</th>
+                                    <th>Protocol</th>
+                                    <th>Updated</th>
+                                    <th>Group</th>
+                                    <th>Owner</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in resources %}
+                                    <tr data-name="{{ r.server.name }}">
+                                        <td>{{ r.meta.file_count }}</td>
+                                        <td>{{ r.server.address }}:{{ r.port }}</td>
+                                        <td>{{ r.protocol_human }}</td>
+                                        <td>{{ r.ago }}</td>
+                                        <td>{{ r.group.name }}</td>
+                                        <td>{{ r.created_by.username }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+    $(document).ready(function(){
+        $(document).on("click", "#service_table tbody tr",  function(){
+            var name = $(this).attr("data-name");
+            goto_uri("/browse/" + name + "/");
+        });
+    });
+    </script>
 {% endblock %}

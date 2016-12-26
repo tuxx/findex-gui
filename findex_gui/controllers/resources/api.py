@@ -77,5 +77,23 @@ class ResourceGet(Resource):
             return flask.jsonify(**{'success': True, 'data': data})
 
 
+class ResourceRemove(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('resource_id', location='json', type=int, required=False,
+                                   help='The resource ID')
+        super(ResourceRemove, self).__init__()
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        args = {k: v for k, v in args.items() if v is not None}
+
+        data = ResourceController.remove_resource(**args)
+        if isinstance(data, Exception):
+            return abort(404, message=str(data))
+        else:
+            return flask.jsonify(**{'success': True, 'data': data})
+
 appapi.add_resource(ResourceAdd, '/api/v2/resource/add', endpoint='api_resource_add')
 appapi.add_resource(ResourceGet, '/api/v2/resource/get', endpoint='api_resource_get')
+appapi.add_resource(ResourceRemove, '/api/v2/resource/remove', endpoint='api_resource_remove')

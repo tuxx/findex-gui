@@ -22,7 +22,7 @@ class Browse:
 
         resource = self.findex.get_resources(name=resource_id, limit=1)
         if resource:
-            return resource
+            return resource[0]
 
         raise Exception(gettext('No resource could be found for ') + resource_id)
 
@@ -33,6 +33,8 @@ class Browse:
             resource_id=resource.id,
             file_path=data['path']
         )
+
+        return files
 
     def browse(self, data):
         resource = self.get_resource(data['resource_id'])

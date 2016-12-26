@@ -1,7 +1,7 @@
 from urllib import quote
 
 from sqlalchemy import and_, asc, desc
-from findex_gui.orm.models import Files, Resource
+from findex_gui.orm.models import Files, Resource, Server
 from sqlalchemy.dialects import mysql, postgresql
 # from findex_common.utils import DataObjectManipulation
 
@@ -31,7 +31,7 @@ class Findex(object):
         else:
             self._cache[key][item.id] = item
 
-    def get_resource(self, id=None, name=None, address=None, port=None, limit=None):
+    def get_resources(self, id=None, name=None, address=None, port=None, limit=None):
         query = Resource.query
 
         if isinstance(id, (int, long)):
@@ -46,13 +46,22 @@ class Findex(object):
             if cached:
                 return cached
 
-            query = query.filter(Resources.address == address)
+            qs = Server.query
+            server = qs.filter(Server.address == address).first()
+            if not server:
+                raise Exception("Could not find server")
+            query = query.filter(Resource.server_id == server.id)
 
         if isinstance(port, (int, long)):
-            query = query.filter(Resources.port == port)
+            query = query.filter(Resource.port == port)
 
         if isinstance(name, (str, unicode)):
-            query = query.filter(Resources.name == name)
+            qs = Server.query
+            server = qs.filter(Server.name == name).first()
+            if not server:
+                raise Exception("Could not find server")
+
+            query = query.filter(Resource.server_id == server.id)
 
         if limit and isinstance(limit, (int, long)):
             query = query.limit(limit)
@@ -73,12 +82,12 @@ class Findex(object):
         """
         query = Files.query
 
-        self.resource = self.get_resources(id=resource_id)
+        self.resource = self.get_resources(id=resource_id)[0]
 
         if not file_path:
             file_path = '/'
 
-        if self.resource.protocol in [4,5]:
+        if self.resource.protocol in [4, 5]:
             file_path = quote(file_path)
 
             if isinstance(file_name, (str, unicode)):
@@ -111,7 +120,7 @@ class Findex(object):
         if results:
             # @TODO make relationship
             resource_ids = set([z.resource_id for z in results])
-            resource_obs = {z.id: z for z in Resources.query.filter(Resources.id.in_(resource_ids)).all()}
+            resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
 
             for result in results:
                 setattr(result, 'resource', resource_obs[result.resource_id])

@@ -117,7 +117,7 @@ class ResourceMeta(base):
 
     id = Column(Integer, primary_key=True)
     file_count = Column(Integer(), nullable=False, default=0)
-    busy = Column(Boolean, nullable=False, default=False)
+    status = Column(Integer, nullable=False, default=0)
 
     auth_user = Column(String, nullable=True)
     auth_pass = Column(String, nullable=True)
@@ -165,7 +165,7 @@ class ResourceGroup(base):
     removable = Column(Boolean, nullable=False, default=True)
 
     parents = relationship("Resource", back_populates="group")
-    tasks = relationship("Task", back_populates="group")
+    #tasks = relationship("Task", back_populates="group")
 
     def __init__(self, name, description, removable=True):
         self.name = self.make_valid_groupname(name)
@@ -197,32 +197,35 @@ task_crawlers = Table(
     Column('id', Integer(), ForeignKey('crawlers.id'))
 )
 
+task_groups = Table(
+    '_task_groups',
+    base.metadata,
+    Column('task_id', Integer(), ForeignKey('tasks.id')),
+    Column('id', Integer(), ForeignKey('resource_group.id'))
+)
+
 
 class Task(base):
     __tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer(), primary_key=True)
 
-    name = Column(String, nullable=False, unique=True)
-    added = Column(DateTime(), default=datetime.utcnow)
-    description = Column(String, nullable=False)
-    uid_frontend = Column(String, nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"))
-    data = Column(String, nullable=False)
-
-    group_id = Column(Integer, ForeignKey("resource_group.id"), nullable=False)
-    group = relationship("ResourceGroup", back_populates="tasks")
+    name = Column(String(), nullable=False, unique=True)
+    added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    description = Column(String(), nullable=True)
+    uid_frontend = Column(String(), nullable=True)  # @TODO change to false?
+    owner_id = Column(Integer(), ForeignKey("users.id"))
+    options = Column(JSONType())
 
     crawlers = relationship("Crawler", secondary=task_crawlers)
+    groups = relationship("ResourceGroup", secondary=task_groups)
 
     ix_name = Index("ix_tasks_name", name)
     ix_uid_frontend = Index("ix_tasks_uid_frontend", uid_frontend)
 
-    def __init__(self, name, desc, data, owner):
+    def __init__(self, name, owner):
         self.name = name
-        self.description = desc
-        self.data = data
-        self.owner = owner
+        self.owner_id = owner.id
 
     def to_json(self):
         out = {
@@ -233,6 +236,7 @@ class Task(base):
             "group_id": self.group_id
         }
         return out
+
 
 class Crawler(base):
     __tablename__ = "crawlers"
@@ -454,6 +458,7 @@ class Files(base):
     })
 
     def fancify(self):
+        from findex_common.static_variables import FileProtocols
         obj = Sanitize(self).humanize(humandates=True, humansizes=True,  dateformat="%d %b %Y")
 
         file_url = "%s%s" % (obj.file_path, obj.file_name)
@@ -461,9 +466,13 @@ class Files(base):
         if display_url.endswith("/"):
             display_url = display_url[:-1]
 
-        setattr(obj, "path_dir", "/browse/%s%s" % (obj.resource.name, obj.file_path))
-        setattr(obj, "path_file", "/browse/%s%s%s%s" % (obj.resource.name, obj.file_path, obj.file_name, "/" if obj.file_isdir else ""))
-        setattr(obj, "path_direct", display_url + file_url)
+        setattr(obj, "path_dir", "/browse/%s%s" % (obj.resource.server.name, obj.file_path))
+        setattr(obj, "path_file", "/browse/%s%s%s%s" % (obj.resource.server.name, obj.file_path, obj.file_name, "/" if obj.file_isdir else ""))
+        if display_url:
+            setattr(obj, "path_direct", display_url + file_url)
+        else:
+            setattr(obj, "path_direct", "%s://%s:%s%s%s" % (FileProtocols().name_by_id(
+                obj.resource.protocol), obj.resource.server.address, obj.resource.port, obj.resource.basepath, file_url))
 
         return obj
 
@@ -471,7 +480,7 @@ class Files(base):
         blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith("_") and not issubclass(v.__class__, base)}
 
         blob["resource"] = {
-            "address": self.resource.address
+            "address": self.resource.server.address
         }
 
         return blob

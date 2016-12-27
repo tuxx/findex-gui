@@ -37,3 +37,8 @@ def browse(parsed):
         The file browser has a 'src' link in the table.
         <a href="javascript:history.back()">Please click here</a> to go back.
         """
+
+
+@app.route("/research")
+def research():
+    return themes.render('main/research')

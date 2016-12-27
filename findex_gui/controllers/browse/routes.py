@@ -18,6 +18,7 @@ def browse_home():
         setattr(r, "ago", TimeMagic().ago_dt(r.date_crawl_end))
         setattr(r, "status_human", ResourceStatus().name_by_id(r.meta.status))
 
+    resources = sorted(resources, key=lambda r: r.meta.file_count, reverse=True)
     return themes.render('main/browse', resources=resources)
 
 

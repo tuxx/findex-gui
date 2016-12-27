@@ -20,6 +20,7 @@
                     <b style="color: #5D5D5D">{{ resource.server.address }}</b>
 
                     <p style="font-size:12px;color: #969696">{{ resource.meta.file_count }} {{ _('files') }}
+                    size: {{ resource.meta.}}
                     <br>
                     id: {{ resource.id }}
                     </p>
@@ -90,20 +91,36 @@
                 <div class="btn-group">
                     <button type="button" class="btn btn-default">Raw</button>
                     <button type="button" class="btn btn-default">JSON</button>
+                    <script>
+                        $(document).on('click', '.dropdown-menu', function (e) {
+                          e.stopPropagation();
+                        });
+                    </script>
                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">{{ _('Fetch') }}
                         <span class="caret"></span>
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
-                    <ul class="dropdown-menu">
-                        <div class="fetch_container">
+                    <ul class="dropdown-menu" style="width:500px;">
+                        <style>
+                            .fetch_container textarea{
+                                font-size: 14px;
+                                min-height: 80px;
+                                background-color: #e9e9e9;
+                                color: #989898;
+                                font-weight: bold;
+                                padding-top: 10px;
+                            }
+                        </style>
+                        <div class="fetch_container" style="width:500px !important;">
                             <p style="margin-bottom:20px;">
                                 {{ _('Copy/paste to recursively download this directory.') }}
                             </p>
+                            {% set dir = resource.protocol_human + "://" + resource.server.address + "/" + "/".join(breadcrumbs[1:]) %}
                             <h4>wget</h4>
-                            <textarea>wget</textarea>
+                            <textarea style="font-size: 14px;min-height: 80px;">wget --user=anonymous password='33c3@l0l.ru' -r -nH -nd -np "{{dir}}"</textarea>
                             <h4>lftp</h4>
-                            <textarea>lftp</textarea>
+                            <textarea style="font-size: 14px;min-height: 80px;">lftp -u anonymous,33c3@l0l.ru -e 'mirror' '{{dir}}'</textarea>
                         </div>
                     </ul>
                 </div>
@@ -152,7 +169,6 @@
                             {% endfor %}
                         </tbody>
                     </table>
-
                 {% else %}
                     {{ _('no files') }}
                 {% endif %}

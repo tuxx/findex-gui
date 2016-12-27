@@ -19,5 +19,5 @@ def run_asynchronous():
     http_server.serve_forever()
 
 
-if __name__ == '__main__':
-    run_synchronous()
+#if __name__ == '__main__':
+run_synchronous()

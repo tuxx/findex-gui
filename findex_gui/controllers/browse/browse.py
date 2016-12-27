@@ -4,6 +4,8 @@ from datetime import datetime
 
 from findex_gui.orm.queries import Findex
 from findex_gui.orm.models import Files
+from findex_common.utils_time import TimeMagic
+from findex_common.static_variables import FileProtocols, ResourceStatus
 
 
 class Browse:
@@ -19,11 +21,9 @@ class Browse:
             return self.findex.get_resources(id=int(resource_id), limit=1)
         except:
             pass
-
         resource = self.findex.get_resources(name=resource_id, limit=1)
         if resource:
             return resource[0]
-
         raise Exception(gettext('No resource could be found for ') + resource_id)
 
     def inspect(self, data):
@@ -70,6 +70,10 @@ class Browse:
             file_distribution = OrderedDict(sorted(resource.meta.file_distribution.items(), key=lambda t: t[0]))
         else:
             file_distribution = {}
+
+        setattr(resource, "protocol_human", FileProtocols().name_by_id(resource.protocol))
+        setattr(resource, "ago", TimeMagic().ago_dt(resource.date_crawl_end))
+        setattr(resource, "status_human", ResourceStatus().name_by_id(resource.meta.status))
 
         return {
             'files': files,

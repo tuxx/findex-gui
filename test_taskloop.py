@@ -111,10 +111,10 @@ class TaskLoop:
                 for group in task.groups:
                     for resource in group.parents:
                         # check last crawl time
-                        last = resource.date_crawl_end
-                        if last:
-                            if (datetime.now() - last).total_seconds() <= task.options["interval"]:
-                                continue
+                        # last = resource.date_crawl_end
+                        # if last:
+                        #     if (datetime.now() - last).total_seconds() <= task.options["interval"]:
+                        #         continue
 
                         # check busy
                         if resource.meta.status != 0:  # not busy - ResourceStatus().name_by_id
@@ -133,6 +133,7 @@ class TaskLoop:
 
             console_log("looped")
             postgres.disconnect()
+            sys.exit()
             time.sleep(1)
 
 TaskLoop().blocking_loop()

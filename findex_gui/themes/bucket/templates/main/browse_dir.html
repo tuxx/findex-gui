@@ -118,13 +118,12 @@
                             <h4>wget</h4>
                             <textarea style="font-size: 14px;min-height: 80px;">wget --user=anonymous password='33c3@l0l.ru' -r -nH -nd -np "{{dir}}"</textarea>
                             <h4>lftp</h4>
-                            <textarea style="font-size: 14px;min-height: 80px;">lftp -u anonymous,33c3@l0l.ru -e 'mirror' '{{dir}}'</textarea>
+                            <textarea style="font-size: 14px;min-height: 80px;">lftp -u anonymous,33c3@l0l.ru -e 'mirror -c' '{{dir}}'</textarea>
                         </div>
                     </ul>
                 </div>
 
                 {% if files %}
-
                     <table class="browser table">
                         <thead>
                             <tr>

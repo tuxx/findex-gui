@@ -1,4 +1,75 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
-    test
+    <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
+
+    <style>
+        html,body{
+            height: 100%;
+        }
+        div.bg_container{
+            z-index:-1;
+            margin-top:0;
+            margin-bottom:0;
+            height: 100%;
+            width: 100%;
+            position:fixed;
+            top:41px;
+            background-color: #bcd3e6;
+        }
+        div.bg_lower_container{
+            position: fixed;
+            width:100%;
+            height:478px;
+            bottom:0;
+        }
+        div.bg_repeat{
+            background-image: url('/static/themes/bucket/static/img/login_bg_repeat.png');
+            background-position: right center;
+            height: 478px;
+            width: auto;
+            overflow: hidden;
+        }
+        div.bg_leftcorner{
+            background-image: url('/static/themes/bucket/static/img/login_bg_leftcorner_33c3.png');
+            width:792px;
+            height: 478px;
+            bottom:0;
+            right:0;
+            float:right;
+        }
+
+        div.political_message{
+            position:fixed;
+            top:60px;
+            left:60px;
+            font-family: 'Space Mono', monospace;
+            font-weight:bold;
+        }
+    </style>
+    <div class="bg_container">
+        <div class="bg_lower_container">
+            <div class="bg_leftcorner">
+
+            </div>
+            <div class="bg_repeat">
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="political_message">
+        <h1>eYE PuMP 10Gbit 4 bR34kf4st :o)</h1>
+        <h4><a target="_blank" href="http://ced.pwned.systems">CED</a> @ #33C3 WISHES YOU A HAPPY 2017!</h4>
+        <br>
+        <div style="width:400px;">
+            <img width="20px" src="https://1.bp.blogspot.com/-dBigEH9XcNo/VvbIZf8EFiI/AAAAAAAABt0/JZIVat2a0pUy1zpeVb12d3pI8cvqmA6Eg/s1600/4312.png">
+            <br>
+            <small>
+                P.S: shout0ut to teh dutch posse, +31 represent. r3sp3ct 2 d0nnie & poopfinger, Ic u - raise up teh club m4te | Dfficult timez where indexing pubs getz j00 LOCKED UP,
+                fak BREIN/MPAA 0_0 '16 - Still ballin' in the indexing game using merely relational databases,
+                Where j00 at?? NodeJS using, docker running, elasticsearch cluster sharding MongoDB lamers.
+            </small>
+        </div>
+    </div>
 {% endblock %}

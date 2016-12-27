@@ -23,6 +23,7 @@
                                     <th>Updated</th>
                                     <th>Group</th>
                                     <th>Owner</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -34,6 +35,7 @@
                                         <td>{{ r.ago }}</td>
                                         <td>{{ r.group.name }}</td>
                                         <td>{{ r.created_by.username }}</td>
+                                        <td>{{ r.status_human }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

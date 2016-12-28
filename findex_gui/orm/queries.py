@@ -31,58 +31,15 @@ class Findex(object):
         else:
             self._cache[key][item.id] = item
 
-    def get_resources(self, id=None, name=None, address=None, port=None, limit=None):
-        query = Resource.query
-
-        if isinstance(id, (int, long)):
-            cached = self._get_cache('resources', id)
-            if cached:
-                return cached
-
-            query = query.filter(Resource.id == id)
-
-        if isinstance(address, (str, unicode)):
-            cached = self._get_cache('resources', address)
-            if cached:
-                return cached
-
-            qs = Server.query
-            server = qs.filter(Server.address == address).first()
-            if not server:
-                raise Exception("Could not find server")
-            query = query.filter(Resource.server_id == server.id)
-
-        if isinstance(port, (int, long)):
-            query = query.filter(Resource.port == port)
-
-        if isinstance(name, (str, unicode)):
-            qs = Server.query
-            server = qs.filter(Server.name == name).first()
-            if not server:
-                raise Exception("Could not find server")
-
-            query = query.filter(Resource.server_id == server.id)
-
-        if limit and isinstance(limit, (int, long)):
-            query = query.limit(limit)
-
-        results = query.all()
-
-        for result in results:
-            #setattr(result, 'identifier', '%s:%s' % (result.address, int(result.port)))
-            # wtf is this identifier shit
-            self._set_cache(result)
-
-        return results
-
     def get_files(self, resource_id, id=None, file_name=None, file_path=None, total_count=None, offset=None):
         """
             total_count: number of results to fetch
             offset: the offset in db
         """
+        from findex_gui.controllers.resources.resources import ResourceController
         query = Files.query
 
-        self.resource = self.get_resources(id=resource_id)[0]
+        self.resource = ResourceController.get_resources(uid=resource_id)[0]
 
         if not file_path:
             file_path = '/'

@@ -4,8 +4,7 @@ from datetime import datetime
 
 from findex_gui.orm.queries import Findex
 from findex_gui.orm.models import Files
-from findex_common.utils_time import TimeMagic
-from findex_common.static_variables import FileProtocols, ResourceStatus
+from findex_gui.controllers.resources.resources import ResourceController
 
 
 class Browse:
@@ -14,17 +13,24 @@ class Browse:
 
     def get_resource(self, resource_id):
         """
-        :param resource_id: Can either be a `Resources.id` or `Resources.name`
-        :return: `Resource`
+        :param resource_id: Should be a concat of `server.address:resource.port`
+        :return: `Resource`, raise exception when non found
         """
+        spl = resource_id.split(":", 1)
+        if not spl[0] or not spl[1]:
+            raise Exception("faulty resource uid")
+
         try:
-            return self.findex.get_resources(id=int(resource_id), limit=1)
+            int(spl[1])
         except:
-            pass
-        resource = self.findex.get_resources(name=resource_id, limit=1)
-        if resource:
-            return resource[0]
-        raise Exception(gettext('No resource could be found for ') + resource_id)
+            raise Exception("faulty resource uid (port not integer)")
+
+        resource = ResourceController.get_resources(address=spl[0], port=spl[1], limit=1)
+        if not resource:
+            raise Exception(gettext('No resource could be found for ') + resource_id)
+
+        resource = resource[0]
+        return resource
 
     def inspect(self, data):
         resource = self.get_resource(data['resource_id'])
@@ -70,10 +76,6 @@ class Browse:
             file_distribution = OrderedDict(sorted(resource.meta.file_distribution.items(), key=lambda t: t[0]))
         else:
             file_distribution = {}
-
-        setattr(resource, "protocol_human", FileProtocols().name_by_id(resource.protocol))
-        setattr(resource, "ago", TimeMagic().ago_dt(resource.date_crawl_end))
-        setattr(resource, "status_human", ResourceStatus().name_by_id(resource.meta.status))
 
         return {
             'files': files,

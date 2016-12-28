@@ -28,7 +28,7 @@
                             </thead>
                             <tbody>
                                 {% for r in resources %}
-                                    <tr data-name="{{ r.server.name }}">
+                                    <tr data-name="{{ r.resource_id }}">
                                         <td>{{ r.meta.file_count }}</td>
                                         <td>{{ r.server.address }}</td>
                                         <td>{{ r.protocol_human }}</td>

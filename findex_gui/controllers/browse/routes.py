@@ -28,11 +28,10 @@ def browse_home():
 
 @app.route('/browse/<browse:parsed>')
 def browse(parsed):
-    if not parsed:
-        return 'w0w debug diz'
+    if isinstance(parsed, Exception):
+        return str(parsed)
 
     browse = Browse()
-
     if parsed['path'].endswith('/'):
         data = browse.browse(parsed)
         return themes.render('main/browse_dir', **data)

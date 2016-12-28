@@ -18,6 +18,8 @@ from findex_gui import locales, app
 from findex_gui.controllers.user.roles import RolesType
 from findex_common.static_variables import ResourceStatus, FileProtocols
 from findex_common.utils import Sanitize, rand_str
+from findex_common.utils_time import TimeMagic
+from findex_common import static_variables
 
 base = declarative_base(name="Model")
 force_auto_coercion()
@@ -93,11 +95,18 @@ class Resource(base):
         self.basepath = basepath
 
     def to_json(self):
+        # @TODO: once  here, once in the resourcecontroller.. no need for duplicate code
+        tm = TimeMagic()
+        fp = static_variables.FileProtocols()
+        rs = static_variables.ResourceStatus()
+
         out = {
             "server": self.server.to_json(),
             "meta": self.meta.to_json(),
             "group": self.group.to_json(),
-            "protocol_human": FileProtocols().name_by_id(self.protocol)
+            "ago": tm.ago_dt(self.date_crawl_end),
+            "status_human": rs.name_by_id(self.meta.status),
+            "protocol_human": fp.name_by_id(self.protocol)
         }
 
         for k, v in self.__dict__.iteritems():
@@ -458,6 +467,7 @@ class Files(base):
     })
 
     def fancify(self):
+        # @TODO: remove this shit
         from findex_common.static_variables import FileProtocols
         obj = Sanitize(self).humanize(humandates=True, humansizes=True,  dateformat="%d %b %Y")
 
@@ -466,8 +476,16 @@ class Files(base):
         if display_url.endswith("/"):
             display_url = display_url[:-1]
 
-        setattr(obj, "path_dir", "/browse/%s%s" % (obj.resource.server.name, obj.file_path))
-        setattr(obj, "path_file", "/browse/%s%s%s%s" % (obj.resource.server.name, obj.file_path, obj.file_name, "/" if obj.file_isdir else ""))
+        setattr(obj, "path_dir", "/browse/%s:%d%s" % (
+            obj.resource.server.address,
+            obj.resource.port,
+            obj.file_path))
+        setattr(obj, "path_file", "/browse/%s:%d%s%s%s" % (
+            obj.resource.server.address,
+            obj.resource.port,
+            obj.file_path,
+            obj.file_name,
+            "/" if obj.file_isdir else ""))
         if display_url:
             setattr(obj, "path_direct", display_url + file_url)
         else:

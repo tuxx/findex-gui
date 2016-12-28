@@ -10,7 +10,7 @@ class BrowseUrlConverter(BaseConverter):
     def to_python(self, value):
         value = value.split('/')
         if not len(value) >= 2:
-            return
+            return Exception("faulty path")
 
         data = {
             'resource_id': value[0],
@@ -19,6 +19,9 @@ class BrowseUrlConverter(BaseConverter):
 
         if not data['path'].startswith('/'):
             data['path'] = '/' + data['path']
+
+        if ":" not in data['resource_id']:
+            return Exception("faulty resource uid")
 
         return data
 

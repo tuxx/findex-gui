@@ -70,7 +70,7 @@ class Postgres(Orm):
                 self._db_hosts = self._db_hosts.split(',')
 
         self.pool = pool.QueuePool(
-            creator=self._getconn, max_overflow=1, pool_size=20, echo=False)
+            creator=self._getconn, max_overflow=1, pool_size=300, echo=False)
 
     def connect(self, init=True):
         self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=False)

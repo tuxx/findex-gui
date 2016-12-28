@@ -87,8 +87,9 @@
                 <h3>{{ _('Files') }}</h3>
 
                 <div class="btn-group">
-                    <button type="button" class="btn btn-default">Raw</button>
-                    <button type="button" class="btn btn-default">JSON</button>
+                    <a class="btn btn-default">Raw</a>
+                    <a class="btn btn-default">JSON</a>
+                    <a href="/index_as_csv/{{ resource.name }}" class="btn btn-default">Index as CSV</a>
                     <script>
                         $(document).on('click', '.dropdown-menu', function (e) {
                           e.stopPropagation();
@@ -112,7 +113,7 @@
                         </style>
                         <div class="fetch_container" style="width:500px !important;">
                             <p style="margin-bottom:20px;">
-                                {{ _('Copy/paste to recursively download this directory.') }}
+                                {{ _('Copy/paste to recursively download the current directory.') }}
                             </p>
                             {% set dir = resource.protocol_human + "://" + resource.server.address + "/" + "/".join(breadcrumbs[1:]) %}
                             <h4>wget</h4>

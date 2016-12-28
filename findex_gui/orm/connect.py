@@ -70,10 +70,10 @@ class Postgres(Orm):
                 self._db_hosts = self._db_hosts.split(',')
 
         self.pool = pool.QueuePool(
-            creator=self._getconn, max_overflow=1, pool_size=20, echo=True)
+            creator=self._getconn, max_overflow=1, pool_size=20, echo=False)
 
     def connect(self, init=True):
-        self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=True)
+        self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=False)
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=True,
                                                    bind=self.engine))

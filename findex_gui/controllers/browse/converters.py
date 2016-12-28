@@ -9,7 +9,7 @@ class BrowseUrlConverter(BaseConverter):
 
     def to_python(self, value):
         value = value.split('/')
-        if not len(value) >= 2:
+        if not len(value) >= 1:
             return Exception("faulty path")
 
         data = {

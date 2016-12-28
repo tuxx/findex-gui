@@ -30,7 +30,6 @@ def browse_home():
 def browse(parsed):
     if isinstance(parsed, Exception):
         return str(parsed)
-
     browse = Browse()
     if parsed['path'].endswith('/'):
         data = browse.browse(parsed)
@@ -42,7 +41,7 @@ def browse(parsed):
         """
 
 
-@app.route('/index_as_csv/<browse:parsed>')
+@app.route('/index_as_csv/<browse:parsed>/')
 def index_as_csv(parsed):
     resource = Browse().get_resource(resource_id=parsed["resource_id"])
 

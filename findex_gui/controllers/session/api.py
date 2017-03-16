@@ -1,8 +1,7 @@
 import flask
 from flask import session
 
-from flask_restful import reqparse, abort
-from flask.ext.restful import Resource
+from flask_restful import reqparse, abort, Resource
 
 from findex_gui import appapi
 

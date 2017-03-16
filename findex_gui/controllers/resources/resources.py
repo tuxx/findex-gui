@@ -11,15 +11,13 @@ from findex_common.utils_time import TimeMagic
 class ResourceController:
     @staticmethod
     @role_req("RESOURCE_VIEW")
-    def get_resource():
-        pass
-        # query = db.session.query(Resource)
-        #
-        # if by_owner:
-        #     query = query.filter(Resource.id == by_owner)
-        #
-        # all = query.all()
-        # return all
+    def get_resource(resource_id):
+        query = db.session.query(Resource)
+
+        if resource_id:
+            query = query.filter(Resource.id == resource_id)
+
+        return query.first()
 
     @staticmethod
     @role_req("RESOURCE_VIEW")
@@ -110,6 +108,11 @@ class ResourceController:
                 if parent.port == resource_port and parent.protocol == resource_protocol \
                         and parent.basepath == basepath:
                     raise FindexException("Duplicate resource previously defined with resource id: %d" % parent.id)
+
+        if basepath.endswith("/"):
+            basepath = basepath[:-1]
+        elif not basepath.startswith("/") and len(basepath) > 1:
+            basepath = "/%s" % basepath
 
         resource = Resource(server=_server,
                             protocol=resource_protocol,
@@ -218,7 +221,7 @@ class ResourceController:
 
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_CREATE")
-    def add_resource_group(name, removable=True, description=None, **kwargs):
+    def add_resource_group(name, removable=True, description=None, log_error=True, **kwargs):
         try:
             rg = ResourceGroup(name=name,
                                removable=removable,
@@ -228,4 +231,27 @@ class ResourceController:
             return rg
         except Exception as ex:
             db.session.rollback()
-            return DatabaseException(ex)
+            return DatabaseException(ex, log_error)
+
+    @staticmethod
+    @role_req("USER_REGISTERED", "RESOURCE_VIEW")
+    def get_resource_group(uid=None, name=None):
+        query = db.session.query(ResourceGroup)
+
+        if not uid and not name:
+            raise FindexException("invalid parameters")
+
+        if uid and not isinstance(uid, int):
+            raise FindexException("invalid parameters")
+
+        if name and not isinstance(name, (str, unicode)):
+            raise FindexException("invalid parameters")
+
+        if uid:
+            query = query.filter(ResourceGroup.id == id)
+
+        if name:
+            query = query.filter(ResourceGroup.name == name)
+
+        return query.first()
+

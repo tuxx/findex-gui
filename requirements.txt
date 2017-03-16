@@ -8,8 +8,9 @@ sqlalchemy
 jinja2
 psycopg2
 sqlalchemy-utils
-ipaddr
 furl
 flask-babel
 parse-torrent-name==1.1.1
 ipaddr
+humanfriendly
+IPy

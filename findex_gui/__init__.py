@@ -3,7 +3,7 @@ import settings
 import inspect
 from flask import Flask
 from flask_restful import Api
-from flask.ext.babel import Babel
+from flask_babel import Babel
 
 app = Flask(import_name=__name__,
             static_folder=None,

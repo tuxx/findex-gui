@@ -42,21 +42,57 @@ class Orm(object):
 
     def init(self):
         base.metadata.create_all(bind=self.engine)
-        self._init_default_structure()
+        Orm.fixtures()
 
-    def _init_default_structure(self):
+    @staticmethod
+    def fixtures():
         from findex_gui.controllers.user.user import UserController
         from findex_gui.controllers.user.roles import default_anon_roles
         from findex_gui.controllers.resources.resources import ResourceController
         from findex_gui.controllers.tasks.tasks import TaskController
-        UserController.user_add(username="root", password=settings.default_root_pw, removeable=False, admin=True, skip_authorization=True)
-        UserController.user_add(username="anon", password=settings.default_anon_pw, privileges=default_anon_roles, removeable=False, skip_authorization=True)
-        ResourceController.add_resource_group(name="Default", description="Default group", removable=False, skip_authorization=True)
-        TaskController.add_task(name="Default", owner_id=1, skip_authorization=True)
-        try:
-            TaskController.assign_resource_group(task_id=1, resourcegroup_id=1, skip_authorization=True)
-        except:
-            pass
+
+        # add some default users, groups and tasks to the database
+        if not UserController.user_view(username="root"):
+            UserController.user_add(
+                username="root",
+                password=settings.default_root_pw,
+                removeable=False,
+                admin=True,
+                skip_authorization=True)
+
+        if not UserController.user_view(username="anon"):
+            UserController.user_add(
+                username="anon",
+                password=settings.default_anon_pw,
+                privileges=default_anon_roles,
+                removeable=False,
+                skip_authorization=True)
+
+        if not ResourceController.get_resource_group(name="Default"):
+            ResourceController.add_resource_group(
+                name="Default",
+                description="Default group",
+                removable=False,
+                skip_authorization=True,
+                log_error=False,
+                ignore_constraint_conflict=True)
+
+        def_task = TaskController.get_task(name="Default")
+        if not def_task:
+            def_task = TaskController.add_task(
+                name="Default",
+                owner_id=1,
+                skip_authorization=True,
+                log_error=False,
+                ignore_constraint_conflict=True)
+
+        if not def_task.groups:
+            TaskController.assign_resource_group(
+                task_id=1,
+                resourcegroup_id=1,
+                skip_authorization=True,
+                log_error=False,
+                ignore_constraint_conflict=True)
 
 
 class Postgres(Orm):

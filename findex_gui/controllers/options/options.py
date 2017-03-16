@@ -1,5 +1,5 @@
 from json import loads
-from flask.ext.babel import gettext
+from flask_babel import gettext
 
 from findex_gui import app, db
 from findex_gui.orm.models import Options

@@ -5,8 +5,6 @@ from findex_gui.controllers.search.search import SearchController
 from flask_restful import reqparse, abort, Api, Resource
 from findex_common.static_variables import FileCategories
 
-from flask.ext.restful import Resource
-
 
 class SearchAPI(Resource):
     def __init__(self):

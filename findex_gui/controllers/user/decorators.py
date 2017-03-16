@@ -1,7 +1,7 @@
 from flask import abort, request
 from functools import wraps
 
-from flask.ext.babel import gettext
+from flask_babel import gettext
 from flaskext.auth import get_current_user_data
 from flaskext.auth.auth import not_logged_in
 

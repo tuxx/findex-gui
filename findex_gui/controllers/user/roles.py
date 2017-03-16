@@ -142,7 +142,11 @@ def check_role(requirements, **kwargs):
             if requirement not in roles:
                 raise RoleException("current user does not have the required role \"%s\"" % requirement)
 
-    user = UserController.get_current_user(apply_timeout=False)
+    try:
+        user = UserController.get_current_user(apply_timeout=False)
+    except RuntimeError:
+        return
+
     if user:
         if user.admin:
             return

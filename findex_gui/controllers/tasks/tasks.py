@@ -1,14 +1,15 @@
-from findex_gui import db
+from findex_gui import db, app
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.user.roles import role_req, check_role
 from findex_gui.orm.models import Task, ResourceGroup
+from findex_gui.orm.connect import Postgres
 from findex_common.exceptions import FindexException, DatabaseException
 
 
 class TaskController:
     @staticmethod
     @role_req("ADMIN")
-    def add_task(name, owner_id=None, options={}, **kwargs):
+    def add_task(name, owner_id=None, options={}, log_error=True, **kwargs):
         if not isinstance(owner_id, int):
             owner = UserController.get_current_user()
         else:
@@ -34,9 +35,34 @@ class TaskController:
         try:
             db.session.add(task)
             db.session.commit()
+            return task
         except Exception as ex:
             db.session.rollback()
-            return DatabaseException(ex)
+            return DatabaseException(ex, log_error)
+
+    @staticmethod
+    def get_task(uid=None, name=None, log_error=True):
+        """
+        :param uid: task id
+        :param name: task name
+        :param log_error: log errors to stderr
+        :return:
+        """
+        if not uid and not name:
+            raise FindexException("faulty parameters", log_error)
+
+        if uid and not isinstance(uid, int):
+            raise FindexException("faulty parameters", log_error)
+
+        if name and not isinstance(name, (str, unicode)):
+            raise FindexException("faulty parameters", log_error)
+
+        task = None
+        if uid:
+            return db.session.query(Task).filter(Task.id == uid).first()
+
+        if name:
+            return db.session.query(Task).filter(Task.name == name).first()
 
     @staticmethod
     def get_tasks(by_owner=None):
@@ -48,27 +74,33 @@ class TaskController:
 
     @staticmethod
     @role_req("ADMIN")
-    def assign_resource_group(task_id, resourcegroup_id, **kwargs):
-        if not isinstance(task_id, int) or not isinstance(resourcegroup_id, int):
-            raise FindexException("faulty parameters")
+    def assign_resource_group(task_id, resourcegroup_id, log_error=True, **kwargs):
+        """
+        :param task_id: task id
+        :param resourcegroup_id: resource group id
+        :param ignore_constraint_conflict: ignores database constraint errors (postgres only)
+        :param log_error: log errors to stderr
+        :param kwargs:
+        :return:
+        """
+        if not isinstance(resourcegroup_id, int):
+            raise FindexException("faulty parameters", log_error)
 
-        task = db.session.query(Task).filter(Task.id == task_id).first()
-        if not task or isinstance(task, Exception):
-            raise FindexException("Could not fetch task id \"%d\"" % task_id)
+        task = TaskController.get_task(uid=task_id)
 
         group = db.session.query(ResourceGroup).filter(ResourceGroup.id == resourcegroup_id).first()
         if not group or isinstance(group, Exception):
-            raise FindexException("Could not fetch resource id \"%d\"" % resourcegroup_id)
+            raise FindexException("Could not fetch resource id \"%d\"" % resourcegroup_id, log_error)
 
         # check if group is already present in task
         if [z for z in task.groups if z.id == group.id]:
-            raise FindexException("Group \"%d\" is already a member of task id \"%d\"" % (resourcegroup_id, task_id))
+            raise FindexException("Group \"%d\" is already a member of task id \"%d\"" % (resourcegroup_id, task_id), log_error)
         try:
             task.groups.append(group)
             db.session.commit()
         except Exception as ex:
             db.session.rollback()
-            return DatabaseException(ex)
+            raise DatabaseException(ex, log_error)
 
     @staticmethod
     @role_req("ADMIN")

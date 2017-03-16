@@ -455,6 +455,7 @@ class Files(base):
     # regular indexes
     ix_file_ext = Index("ix_file_ext", file_ext)
     ix_file_size = Index("ix_file_size", file_size)
+    ix_resource_id = Index("ix_resource_id", resource_id)
 
     # multi column indexes
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)

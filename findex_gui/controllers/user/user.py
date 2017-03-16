@@ -9,11 +9,12 @@ from findex_common.exceptions import DatabaseException, FindexException, RoleExc
 
 class UserController:
     @staticmethod
-    def user_view(uid=None, username=None):
+    def user_view(uid=None, username=None, log_error=True):
         """
         Returns an user
         :param uid: user id
         :param username: username
+        :param log_error: to stderr on exception
         :return: user
         """
         if uid:
@@ -25,14 +26,15 @@ class UserController:
             return db.session.query(User).filter_by(**_filter).first()
         except Exception as ex:
             db.session.rollback()
-            return DatabaseException(ex)
+            raise DatabaseException(ex, log_error)
 
     @staticmethod
     @role_req("USER_REGISTERED", "USER_DELETE")
-    def user_delete(username):
+    def user_delete(username, log_error=True):
         """
         Deletes an user
         :param username: username
+        :param log_error: to stderr on exception
         :return: returns True if successful
         """
         try:
@@ -46,12 +48,13 @@ class UserController:
             return True
         except Exception as ex:
             db.session.rollback()
-            return DatabaseException(ex)
+            raise DatabaseException(ex, log_error)
 
     @staticmethod
     @role_req("USER_CREATE")
     def user_add(username, password, admin=False, removable=True,
-                 privileges=default_registered_roles, create_session=False, **kwargs):
+                 privileges=default_registered_roles, create_session=False,
+                 log_error=True, ignore_constraint_conflict=False, **kwargs):
         """
         Adds an user
         :param username: username
@@ -60,6 +63,8 @@ class UserController:
         :param removable: persistent user or not
         :param privileges:
         :param create_session: registers this login with a web session
+        :param log_error: to stderr on exception
+        :param ignore_constraint_conflict: ignores database constraint errors (postgres only)
         :return: returns the newly added user
         """
         user = User(username=username, password=password)
@@ -77,7 +82,7 @@ class UserController:
             return user
         except Exception as ex:
             db.session.rollback()
-            return DatabaseException(ex)
+            raise DatabaseException(ex, log_error)
 
     @staticmethod
     @role_req("USER_REGISTERED", "CREATE_USER_GROUP")

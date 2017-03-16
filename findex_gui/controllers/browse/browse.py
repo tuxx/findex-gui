@@ -1,4 +1,4 @@
-from flask.ext.babel import gettext
+from flask_babel import gettext
 from collections import OrderedDict
 from datetime import datetime
 

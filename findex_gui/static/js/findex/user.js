@@ -19,4 +19,12 @@ class UserController extends FindexGui {
 
         return FindexGui.api("/user/delete", "POST", data);
     }
+
+    static locale_set(lang){
+        let data = {
+            "lang": lang
+        };
+
+        return FindexGui.api("/user/locale/set", "POST", data);
+    }
 }

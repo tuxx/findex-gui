@@ -1,6 +1,6 @@
 from flask import request, redirect, flash, url_for
 from flaskext.auth.auth import get_current_user_data
-from flask_babel import gettext
+from flask_babel import gettext, lazy_gettext
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, SelectField, IntegerField
 
 from findex_gui import app, themes, locales
@@ -36,15 +36,15 @@ def login():
 @app.route('/user/logout', methods=['GET'])
 def logout():
     if not get_current_user_data():
-        return redirect_url('login')
+        return redirect_url(url_for('login'))
 
     UserController.logout()
 
-    return redirect('/', 302)
+    return redirect(url_for('root'), 302)
 
 
 class LocalizationForm(Form):
-    language = SelectField('Language', choices=[], coerce=str)
+    language = SelectField(lazy_gettext('Language'), choices=[], coerce=str)
 
 
 @app.route('/user/cp')

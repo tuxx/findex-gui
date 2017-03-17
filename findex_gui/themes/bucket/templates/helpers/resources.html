@@ -6,51 +6,110 @@
 
     <title>Findex</title>
 
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery.ba-throttle-debounce.min.js"></script>
-    <script src="/static/js/jquery-ui.min.js"></script>
+    <link href="{{ url_for("static", filename="css/bootstrap.min.css") }}" rel="stylesheet">
+    <script src="{{ url_for("static", filename="js/jquery.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/bootstrap.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/jquery.ba-throttle-debounce.min.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/jquery-ui.min.js") }}"></script>
 
     <!-- jQuery dropdown enhancement -->
-    <script src="/static/js/dropdowns-enhancement.js"></script>
-    <link href="/static/css/dropdowns-enhancement.min.css" rel="stylesheet" type="text/css">
+    <script src="{{ url_for("static", filename="js/dropdowns-enhancement.js") }}"></script>
+    <link href="{{ url_for("static", filename="css/dropdowns-enhancement.min.css") }}" rel="stylesheet" type="text/css">
 
     <!-- nouislider -->
-    <script src="/static/js/nouislider.js"></script>
-    <link href="/static/css/nouislider.min.css" rel="stylesheet" type="text/css">
+    <script src="{{ url_for("static", filename="js/nouislider.js") }}"></script>
+    <link href="{{ url_for("static", filename="css/nouislider.min.css") }}" rel="stylesheet" type="text/css">
 
     <!-- FileSize -->
-    <script src="/static/js/filesize.min.js"></script>
+    <script src="{{ url_for("static", filename="js/filesize.min.js") }}"></script>
 
     <!-- jQuery Tags Input -->
-    <script src="/static/js/jquery.tagsinput.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/jquery.tagsinput.css">
+    <script src="{{ url_for("static", filename="js/jquery.tagsinput.min.js") }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="css/jquery.tagsinput.css") }}">
 
     <!-- jQuery highlight -->
-    <script src="/static/js/jquery.highlight.js"></script>
+    <script src="{{ url_for("static", filename="js/jquery.highlight.js") }}"></script>
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link href="/static/css/jquery-ui-bootstrap/jquery-ui-1.10.0.custom.css" rel="stylesheet" type="text/css">
+
+    <link href="{{ url_for("static", filename="css/jquery-ui-bootstrap/jquery-ui-1.10.0.custom.css") }}" rel="stylesheet" type="text/css">
 
     <!-- FontAwesome -->
-    <link href="/static/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ url_for("static", filename="css/font-awesome.min.css") }}" rel="stylesheet" type="text/css">
 
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css" rel="stylesheet">
     <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
 
     <!-- Tooltipster -->
-    <link rel="stylesheet" type="text/css" href="/static/css/tooltipster.bundle.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/tooltipster-sideTip-light.min.css" />
-    <script type="text/javascript" src="/static/js/tooltipster.bundle.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="css/tooltipster.bundle.css") }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="css/tooltipster-sideTip-light.min.css") }}" />
+    <script type="text/javascript" src="{{ url_for("static", filename="js/tooltipster.bundle.js") }}"></script>
 
     <!-- Findex -->
-    <script src="/static/js/findex/findex_core.js"></script>
-    <script src="/static/js/findex/app.js"></script>
-    <script src="/static/js/findex/resources.js"></script>
-    <script src="/static/js/findex/user.js"></script>
-    <script src="/static/themes/bucket/static/js/bucket.js"></script>
-    <link href="/static/css/findex.css" rel="stylesheet">
-    <link href="/static/themes/bucket/static/css/bucket.css" rel="stylesheet">
+    <script src="{{ url_for("static", filename="js/findex/findex_core.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/findex/app.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/findex/resources.js") }}"></script>
+    <script src="{{ url_for("static", filename="js/findex/user.js") }}"></script>
+    <script src="{{ url_for("static", filename="themes/bucket/static/js/bucket.js") }}"></script>
+    <link href="{{ url_for("static", filename="css/findex.css") }}" rel="stylesheet">
+    <link href="{{ url_for("static", filename="themes/bucket/static/css/bucket.css") }}" rel="stylesheet">
+
+    <style>
+        /* cyrillic-ext */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/K88pR3goAWT7BTt32Z01mxJtnKITppOI_IvcXXDNrsc.woff2") }}") format('woff2');
+          unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F;
+        }
+        /* cyrillic */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/RjgO7rYTmqiVp7vzi-Q5URJtnKITppOI_IvcXXDNrsc.woff2") }}") format('woff2');
+          unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+        }
+        /* greek-ext */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/LWCjsQkB6EMdfHrEVqA1KRJtnKITppOI_IvcXXDNrsc.woff2") }}") format('woff2');
+          unicode-range: U+1F00-1FFF;
+        }
+        /* greek */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/xozscpT2726on7jbcb_pAhJtnKITppOI_IvcXXDNrsc.woff2") }}") format('woff2');
+          unicode-range: U+0370-03FF;
+        }
+        /* vietnamese */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/59ZRklaO5bWGqF5A9baEERJtnKITppOI_IvcXXDNrsc.woff2") }}") format('woff2');
+          unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+        }
+        /* latin-ext */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/u-WUoqrET9fUeobQW7jkRRJtnKITppOI_IvcXXDNrsc.woff2") }}") format('woff2');
+          unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+        }
+        /* latin */
+        @font-face {
+          font-family: 'Open Sans';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Open Sans'), local('OpenSans'), url("{{ url_for("static", filename="fonts/opensans/cJZKeOuBrn4kERxqtaUH3VtXRa8TVwTICgirnJhmVJw.woff2") }}") format('woff2');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+        }
+    </style>

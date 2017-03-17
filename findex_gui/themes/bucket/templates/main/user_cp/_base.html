@@ -69,7 +69,7 @@
 
     <div class="cp_header">
         <div class="inner">
-            <span>User Control Panel</span>
+            <span>{{ _("User Control Panel") }}</span>
             <span>{{ user.username }}</span>
         </div>
     </div>
@@ -81,10 +81,10 @@
                 color: #707070;
                 padding: 20px 20px 10px;
                 font-family: monospace;
-            ">Options</strong>
+            ">{{ _("Options") }}</strong>
 
-            <li><a href="/user/cp"><i class="fa fa-wrench"><span>Miscellaneous</span></i></a></li>
-            <li><a href="/user/cp/services"><i class="fa fa-globe"><span>Services</span></i></a></li>
+            <li><a href="{{ url_for("user_cp") }}"><i class="fa fa-wrench"><span>Miscellaneous</span></i></a></li>
+            <li><a href="{{ url_for("user_cp_resources") }}"><i class="fa fa-globe"><span>Services</span></i></a></li>
         </ul>
     </div>
 

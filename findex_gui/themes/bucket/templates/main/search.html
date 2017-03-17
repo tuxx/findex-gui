@@ -1,8 +1,8 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
-    <link href="/static/themes/bucket/static/css/search.css" rel="stylesheet">
-    <script src="/static/js/findex/search.js"></script>
-    <script src="/static/themes/bucket/static/js/search.js"></script>
+    <link href="{{ url_for("static", filename="themes/bucket/static/css/search.css") }}" rel="stylesheet">
+    <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
+    <script src="{{ url_for("static", filename="themes/bucket/static/js/search.js") }}"></script>
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
@@ -106,7 +106,6 @@
         var search_results = {};
         var search_display_view;
         var exhausted_results = false;
-        var application_root = '{{ env['application_root'] }}';
 
         $( document ).ready(function() {
             var sel_sidebar = $('#sidebar');
@@ -169,10 +168,10 @@
             });
 
             /* sidebar->filter->extensions - init and search on change */
-            $('#tag1').tagsInput({
-                width:'auto',
-                'defaultText': 'Add ext',
-                'onChange': function(){
+            $("#tag1").tagsInput({
+                width:"auto",
+                "defaultText": "{{ _("Add ext") }}",
+                "onChange": function(){
                     if(Object.keys(search_results).length !== 0 && search_results.constructor === Object){
                         search_controller.search();
                     }
@@ -230,6 +229,7 @@
                 session_set('search_display_view', 'table');
             });
 
+            // move to FindexGui.api
             $('input#search').autocomplete({
                 minLength: 4,
                 delay: 350,
@@ -237,7 +237,7 @@
                     $.ajax({
                         type: 'post',
                         contentType: 'application/json',
-                        url: `${application_root}api/v2/search/` + $('input#search').val(),
+                        url: `${APPLICATION_ROOT}api/v2/search/` + $('input#search').val(),
                         dataType: 'json',
                         data: JSON.stringify({
                             'autocomplete': true,
@@ -280,7 +280,7 @@
             };
 
             /* init search class */
-            search_controller = new bucket_search(application_root, false, 50, {
+            search_controller = new bucket_search(APPLICATION_ROOT, false, 50, {
                 'search_input': 'input#search',
                 'search_results': 'ol#search_results'
             });
@@ -296,7 +296,7 @@
                 $.ajax({
                     type: 'post',
                     contentType: 'application/json',
-                    url: `${application_root}api/v2/session/set`,
+                    url: `${APPLICATION_ROOT}api/v2/session/set`,
                     async: false,
                     dataType: 'json',
                     data: JSON.stringify({
@@ -313,7 +313,7 @@
                 $.ajax({
                     type: 'post',
                     contentType: 'application/json',
-                    url: `${application_root}api/v2/session/get`,
+                    url: `${APPLICATION_ROOT}api/v2/session/get`,
                     dataType: 'json',
                     data: JSON.stringify({
                         'key': key

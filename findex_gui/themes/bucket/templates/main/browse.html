@@ -50,7 +50,7 @@
     $(document).ready(function(){
         $(document).on("click", "#service_table tbody tr",  function(){
             var name = $(this).attr("data-name");
-            goto_uri("/browse/" + name + "/");
+            goto_uri(url_for("/browse/" + name + "/"));
         });
 
         $("#service_table").DataTable({

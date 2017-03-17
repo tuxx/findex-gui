@@ -1,5 +1,5 @@
 import os
-from flask import render_template, session
+from flask import render_template, session, url_for
 from flask.ext.auth import get_current_user_data
 from findex_gui.controllers.user.user import UserController
 
@@ -64,7 +64,7 @@ class ThemeController:
                 session['locale'] = user.locale
 
         kwargs['user'] = user
-        return render_template('%s/templates/%s.html' % (theme, template_path), **kwargs), status_code
+        return render_template('%s/templates/%s.html' % (theme, template_path), url_for=url_for, **kwargs), status_code
 
     def get_active(self):
         return OptionsController.theme_get_active()

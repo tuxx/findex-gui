@@ -1,9 +1,24 @@
 import os
 import settings
 import inspect
+import flask
+
 from flask import Flask
 from flask_restful import Api
 from flask_babel import Babel
+
+# remove this ~ setup a proper Jinja2 environment
+# patch flask.url_for(), prepend APPLICATION_ROOT
+# https://github.com/pallets/flask/issues/1714
+from flask import url_for as _url_for
+from flask import redirect as _redirect
+flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1],
+                                                  _url_for(*args, **kwargs))
+def redirect(*args, **kwargs):
+    __redirect = _redirect(*args, **kwargs)
+    __redirect.autocorrect_location_header = False
+    return __redirect
+flask.redirect = redirect
 
 app = Flask(import_name=__name__,
             static_folder=None,
@@ -12,10 +27,11 @@ app = Flask(import_name=__name__,
 app.config['SECRET_KEY'] = settings.app_secret
 app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
 app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
-app.config['APPLICATION_ROOT'] = settings.bind_route
+app.config['APPLICATION_ROOT'] = settings.application_root
 app.config['TEMPLATES_AUTO_RELOAD'] = settings.app_debug
 
 SECRET_KEY = settings.app_secret
+
 
 appapi = Api(app)
 babel = Babel(app)

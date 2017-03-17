@@ -3,12 +3,12 @@ class bucket_search extends Search {
         super(application_root, autocomplete, per_page, selectors);
 
         this.icons = {
-            'd': '/static/themes/bucket/static/img/icons/folder-128.png',
-            '0': '/static/themes/bucket/static/img/icons/file-128.png',
-            '1': '/static/themes/bucket/static/img/icons/document-128.png',
-            '2': '/static/themes/bucket/static/img/icons/film-128.png',
-            '3': '/static/themes/bucket/static/img/icons/music-128.png',
-            '4': '/static/themes/bucket/static/img/icons/picture-128.png'
+            "d": url_for("/static/themes/bucket/static/img/icons/folder-128.png"),
+            "0": url_for("/static/themes/bucket/static/img/icons/file-128.png"),
+            "1": url_for("/static/themes/bucket/static/img/icons/document-128.png"),
+            "2": url_for("/static/themes/bucket/static/img/icons/film-128.png"),
+            "3": url_for("/static/themes/bucket/static/img/icons/music-128.png"),
+            "4": url_for("/static/themes/bucket/static/img/icons/picture-128.png")
         };
 
         this.key = '';
@@ -80,7 +80,7 @@ class bucket_search extends Search {
                         <article class="summary">
                             <a class="avatar-link" href="/"> <span class="avatar avatar-medium">
                               <span class="avatar-inner">
-                                <img src="/static/img/default_thumbnail.png" data-file_isdir="${result['file_isdir']}" data-file_format="${result['file_format']}" title="">
+                                <img src="${url_for("/static/img/default_thumbnail.png")}" data-file_isdir="${result['file_isdir']}" data-file_format="${result['file_format']}" title="">
                               </span> </span>
                             </a>
 
@@ -154,14 +154,14 @@ class bucket_search extends Search {
                 buffer += `
                 <tr class="clickable" data-id="" data-href="${result['file_name']}" rel="popover" title="">
                     <td>
-                        <img id="file_icon" src="/static/img/default_thumbnail.png" data-file_isdir="${result['file_isdir']}" data-file_format="${result['file_format']}" title="">
-                        <a href="${result['path_file']}">
+                        <img id="file_icon" src="${url_for("/static/img/default_thumbnail.png")}" data-file_isdir="${result['file_isdir']}" data-file_format="${result['file_format']}" title="">
+                        <a href="${url_for(result['path_file'])}">
                             ${file_name}
                         </a>
                     </td>
 
                     <td>
-                        <a href="${result['path_dir']}">
+                        <a href="${url_for(result['path_dir'])}">
                             ${file_path}
                         </a>
                     </td>

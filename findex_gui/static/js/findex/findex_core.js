@@ -179,3 +179,8 @@ $.fn.serializeObject = function()
     });
     return o;
 };
+
+function url_for(inp){
+    if(inp.startsWith("/")) inp = inp.slice(1);
+    return `${APPLICATION_ROOT}${inp}`;
+}

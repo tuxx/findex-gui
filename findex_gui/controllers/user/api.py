@@ -23,7 +23,11 @@ def api_user_locale_available():
 
 @app.route('/api/v2/user/locale/set', methods=['POST'])
 def api_user_locale_set():
-    if 'lang' not in request.form:
+    if "lang" in request.form:
+        lang = request.form["lang"]
+    elif "lang" in request.json:
+        lang = request.json["lang"]
+    else:
         return flask.jsonify(**{'fail': 'parameter \'lang\' not given'}), 400
 
     try:
@@ -35,7 +39,7 @@ def api_user_locale_set():
                     User.id == get_current_user_data()['id']).one()
             if user:
                 UserController.locale_set(
-                    locale=request.form['lang'], user=user)
+                    locale=lang, user=user)
                 return flask.jsonify(**{'success': True}), 201
 
         UserController.locale_set(locale=request.form['lang'])

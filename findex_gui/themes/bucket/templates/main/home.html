@@ -1,7 +1,5 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
-    <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
-
     <style>
         html,body{
             height: 100%;
@@ -23,14 +21,14 @@
             bottom:0;
         }
         div.bg_repeat{
-            background-image: url('/static/themes/bucket/static/img/login_bg_repeat.png');
+            background-image: url({{ url_for("static", filename="themes/bucket/static/img/login_bg_repeat.png") }});
             background-position: right center;
             height: 478px;
             width: auto;
             overflow: hidden;
         }
         div.bg_leftcorner{
-            background-image: url('/static/themes/bucket/static/img/login_bg_leftcorner_33c3.png');
+            background-image: url({{ url_for("static", filename="themes/bucket/static/img/login_bg_leftcorner_33c3.png") }});
             width:792px;
             height: 478px;
             bottom:0;
@@ -42,7 +40,6 @@
             position:fixed;
             top:60px;
             left:60px;
-            font-family: 'Space Mono', monospace;
             font-weight:bold;
         }
     </style>
@@ -59,7 +56,6 @@
     </div>
 
     <div class="political_message">
-        <h1>eYE PuMP 10Gbit 4 bR34kf4st :o)</h1>
-        <h4><a target="_blank" href="http://ced.pwned.systems">CED</a> @ #33C3 WISHES YOU A HAPPY 2017!</h4>
+
     </div>
 {% endblock %}

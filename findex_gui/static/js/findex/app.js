@@ -2,10 +2,10 @@ class FindexGui {
     constructor(){
 
     }
-
+    
     static api(url, method, data) {
         let _data = {
-            url: `/api/v2${url}`,
+            url: `${APPLICATION_ROOT}api/v2${url}`,
             type: method,
             contentType: 'application/json',
             timeout: 15500

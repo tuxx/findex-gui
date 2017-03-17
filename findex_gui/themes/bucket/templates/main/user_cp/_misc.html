@@ -18,8 +18,9 @@
     {% endif %}
 {% endmacro %}
 
-<h3>Localization</h3>
+<h3>{{ _("Localization") }}</h3>
 <div class="panel-body form-horizontal">
+    <!-- @TODO: make abstract select box jquery to api thingy (like angular2) -->
     <div class="col-md-6">
         <fieldset>
             {{ render_field(form.language) }}
@@ -29,15 +30,19 @@
 
 <script>
     $(document).ready(function() {
-        function test(data){
-            Object.keys(data).forEach(function(key) {
-                $('#locale').prepend(`<option value=${key}>${data[key]}</option>`);
-            });
-        }
+        //FindexGui.api('/user/locale/all', 'GET', null).then(function(data){
+        //    test(data);
+        //});
 
-        FindexGui.api('/user/locale/all', 'GET', null).then(function(data){
-            console.log(data);
+        $("select#language").on('change', function (e) {
+            var language = $("option:selected", this).val();
+            UserController.locale_set(language).then(function(data){
+                if(data.success){
+                    location.reload();
+                }
+            })
         });
+
     });
 </script>
 

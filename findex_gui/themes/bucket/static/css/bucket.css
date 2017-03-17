@@ -318,7 +318,6 @@ ul.navbar-nav .file_counter{
     list-style: none;
     margin: 0;
     padding: 0;
-	padding-top:20px;
 	padding-bottom:10px;
 }
 
@@ -333,7 +332,11 @@ ul.navbar-nav .file_counter{
 
 /* browser table */
 table.browser{
-    margin-top:20px;
+    margin-top:0px;
+}
+
+table.browser>tbody>tr>td{
+    padding: 4px;
 }
 
 table.browser>tbody>tr>td>i.fa{

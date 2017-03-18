@@ -76,6 +76,7 @@ import main
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.search import routes
 from findex_gui.controllers.browse import routes
+from findex_gui.controllers.relay import routes
 from findex_gui.controllers.user import routes
 
 from findex_gui.controllers.search import api

@@ -134,6 +134,10 @@ class ResourceMeta(base):
 
     web_user_agent = Column(String, nullable=True)
 
+    relay_user_agent = Column(String, nullable=True)
+    relay_proxy = Column(String, nullable=True)
+    relay_enabled = Column(Boolean, default=False, nullable=False)
+
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(JSONType, nullable=True)
     throttle_connections = Column(Boolean, nullable=False, default=False)

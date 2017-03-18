@@ -32,6 +32,15 @@ class Browse:
         resource = resource[0]
         return resource
 
+    def get_file(self, resource_id, file_path, file_name):
+        resource = self.get_resource(resource_id)
+
+        f = self.findex.get_files(resource_id=resource.id, file_path=file_path, file_name=file_name)
+        try:
+            return f[0]
+        except:
+            raise Exception("file could not be found")
+
     def inspect(self, data):
         resource = self.get_resource(data['resource_id'])
 

@@ -1,17 +1,20 @@
-from flask import Response, send_file
+import ntpath
 import tarfile
-import io
-import sys
 from StringIO import StringIO
 
-from findex_gui import app, themes, db
+from requests import get
+from flask import Response, send_file, request
+from flask_babel import gettext
+
 import findex_gui.controllers.browse.converters
+from findex_gui import app, themes, db
 from findex_gui.controllers.browse.browse import Browse
 from findex_gui.controllers.resources.resources import ResourceController
 from findex_common.static_variables import FileProtocols, ResourceStatus
 from findex_common.utils_time import TimeMagic
 
-@app.route('/browse')
+
+@app.route("/browse")
 def browse_home():
     #@TODO replace with API call @ frontend
     from datetime import datetime
@@ -23,26 +26,27 @@ def browse_home():
         setattr(r, "status_human", ResourceStatus().name_by_id(r.meta.status))
 
     resources = sorted(resources, key=lambda r: r.meta.file_count, reverse=True)
-    return themes.render('main/browse', resources=resources)
+    return themes.render("main/browse", resources=resources)
 
 
-@app.route('/browse/<browse:parsed>')
+@app.route("/browse/<browse:parsed>")
 def browse(parsed):
     if isinstance(parsed, Exception):
         return str(parsed)
     browse = Browse()
-    if parsed['path'].endswith('/'):
+    if parsed["path"].endswith("/"):
         data = browse.browse(parsed)
-        return themes.render('main/browse_dir', **data)
+        return themes.render("main/browse_dir", **data)
     else:
         return """
-        The file browser has a 'src' link in the table.
+        The file browser has a "src" link in the table.
         <a href="javascript:history.back()">Please click here</a> to go back.
         """
 
 
-@app.route('/index_as_csv/<browse:parsed>/')
+@app.route("/index_as_csv/<browse:parsed>/")
 def index_as_csv(parsed):
+    # @TODO: sequentially write response if possible
     resource = Browse().get_resource(resource_id=parsed["resource_id"])
 
     plain = StringIO()
@@ -52,36 +56,36 @@ def index_as_csv(parsed):
         SELECT
             concat(r.basepath,
                    files.file_path,
-                   files.file_name,',',
-                   files.file_isdir,',',
+                   files.file_name,",",
+                   files.file_isdir,",",
                    files.file_size)
         FROM files
         INNER JOIN resources r ON files.resource_id=r.id
         INNER JOIN server s ON r.server_id = s.id WHERE r.id=%d;
     """ % resource.id)
     if not res or isinstance(res, Exception):
-        return 'no results', 500
+        return "no results", 500
     for row in res:
         plain.write("%s\n" % row[0].encode("utf8"))
 
     plain.seek(0)
-    tar = tarfile.open(fileobj=compressed, mode='w|gz')
+    tar = tarfile.open(fileobj=compressed, mode="w|gz")
 
     info = tar.tarinfo()
-    info.name = '%s:%d.csv' % (resource.server.address, resource.port)
-    info.uname = 'findex'
-    info.gname = 'findex'
+    info.name = "%s:%d.csv" % (resource.server.address, resource.port)
+    info.uname = "findex"
+    info.gname = "findex"
     info.size = plain.len
 
     tar.addfile(info, plain)
     tar.close()
 
     compressed.seek(0)
-    return send_file(compressed, as_attachment=True, attachment_filename='%s:%d.tar.gz' % (
+    return send_file(compressed, as_attachment=True, attachment_filename="%s:%d.tar.gz" % (
         resource.server.address,
         resource.port))
 
 
 @app.route("/research")
 def research():
-    return themes.render('main/research')
+    return themes.render("main/research")

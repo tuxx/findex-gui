@@ -1,0 +1,42 @@
+<table class="browser table">
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th style="width:80px;">Size</th>
+            <th style="width:80px;">Perm</th>
+            <th style="width:110px;">Modified</th>
+            <th style="width:80px;">Direct</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in browser.files %}
+            {% if f.file_isdir %}
+                {% if f.file_name == ".." %}
+                    {% set icon = "fa-level-up" %}
+                    {% set href = ".." %}
+                {% else %}
+                    {% set icon = "fa-folder" %}
+                    {% set href = f.file_name + "/" %}
+                {% endif %}
+            {% else %}
+                {% set icon = "fa-file-text-o" %}
+                {% set href = f.file_name %}
+            {% endif %}
+
+            <tr class="clickable text-nowrap" data-id="{{f.id}}" data-href="{{href}}" rel="popover" title="">
+                <td><i class="fa {{ icon }}"></i>
+                    <a href="{{ href }}">{{f.file_name}}</a>
+                </td>
+
+                <td><b>{{f.file_size_human}}</b></td>
+                <td>-</td>
+                <td>{{f.file_modified_human}}</td>
+                <td>
+                    {% if not f.file_isdir %}
+                        <a target="_blank" href="{{ f.path_direct }}">src</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

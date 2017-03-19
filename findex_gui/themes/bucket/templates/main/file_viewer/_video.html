@@ -1,0 +1,43 @@
+<style>
+    .plyr--video{
+        margin: 0 auto;
+        margin-bottom: 20px;
+        display: block;
+        width:75%;
+    }
+    .plyr__video-wrapper{
+        -webkit-user-select: none;  /* Chrome all / Safari all */
+        -moz-user-select: none;     /* Firefox all */
+        -ms-user-select: none;      /* IE 10+ */
+        user-select: none;          /* Likely future */
+    }
+</style>
+<div style="background-color:black;">
+    <video poster="{{ url_for("static", filename="img/default_thumbnail3.png") }}" controls crossorigin>
+        <!-- Video files -->
+        <source src="{{ url_for("relay", parsed={}) }}{{ f.path_file }}" type="video/mp4">
+
+        <!-- Text track file -->
+        <!--<track kind="captions" label="English" srclang="en" src="https://cdn.selz.com/plyr/1.5/View_From_A_Blue_Moon_Trailer-HD.en.vtt" default>-->
+
+        <!-- Fallback for browsers that don't support the <video> element -->
+        <a href="{{ url_for("relay", parsed={}) }}{{ f.path_file }}" download>Download</a>
+    </video>
+</div>
+
+<script>
+    $(document).ready(function(){
+        plyr.setup({
+            debug:              true,
+            title:              'Video demo',
+            iconUrl:            '{{ url_for("static", filename="plugins/plyr/plyr.svg") }}',
+            tooltips: {
+                controls:       true
+            },
+            captions: {
+                defaultActive:  true
+            }
+        });
+        plyr.loadSprite('dist/demo.svg');
+    });
+</script>

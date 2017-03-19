@@ -1,0 +1,191 @@
+{% extends "bucket/templates/base.html" %}
+{% block content %}
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+
+            <div class="row" style="">
+                <div class="col-md-12">
+                    <style>
+                        tr{
+                            cursor:pointer;
+                        }
+                        .meta_container{
+                            padding-left: 100px;
+                            padding-right: 100px;
+                            max-width: 1600px;
+                            margin:0 auto;
+                        }
+
+                        .meta_container > div > .well{
+                            background-color:white;
+                            border-radius:0;
+                            border:0;
+
+                        }
+
+                        .viewer{
+                            box-shadow: 0 0px 2px rgba(0,0,0,.1);
+                            -moz-box-sizing: border-box;
+                            margin-bottom:16px;
+                        }
+
+                        .viewer.movie{
+                            background-color:black;
+                        }
+
+                        .viewer.document{
+                            background-color:white;
+                        }
+                    </style>
+
+                    {% set relay_category = get_relay_category_by_extension(f.file_ext) %}
+                    {% if relay_category %}
+                        {% set ext_category, ext_properties = relay_category %}
+                        {% if ext_category == "video" %}
+                            {% include 'bucket/templates/main/file_viewer/_video.html' %}
+                        {% elif ext_category == "document" %}
+                            {% include 'bucket/templates/main/file_viewer/_document.html' %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row" style="display:flex;">
+                <style>
+                    .meta_container .well{
+                        box-shadow: 0 1px 2px rgba(0,0,0,.1);
+                        -moz-box-sizing: border-box;
+                    }
+
+                    .meta_container .main h3.title{
+                        padding-top:0px;
+                        margin-top:0px;
+                        font-size:18px;
+                        margin-bottom: 14px;
+                        word-break: break-all;
+                    }
+
+                    .meta_container .main>.resource{
+                        overflow:hidden;
+                    }
+
+                    .meta_container .main>.resource>.resource_thumbnail{
+                        width:48px;
+                        height:48px;
+                        float:left;
+                    }
+
+                    .meta_container .main>.resource>.resource_subscribe{
+                        float:left;
+                        margin-left:10px;
+                    }
+
+                    .meta_container .main>.resource>.resource_subscribe>.name{
+                        display: inline-block;
+                        height: 22px;
+                        color: #333;
+                        font-weight: 500;
+                        max-width: 315px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        vertical-align: top;
+                        font-size: 12px;
+                        font-weight: bold;
+                        font-family: monospace;
+                    }
+
+                    .btn-secondary{
+                        background-color: #f3f3f3;
+                        border: 1px solid #dedede;
+                    }
+
+                    .btn-xs span{
+                        font-family: sans;
+                    }
+
+                    .btn-xs .fa span{
+                        font-family: sans;
+                        padding-left: 4px;
+                    }
+
+                </style>
+                <div class="col-md-12 meta_container">
+                    <div class="col-md-8">
+                        <div class="well main">
+                            <div style="display:flex;width:100%;">
+                                <div style="width:77%">
+                                    <h3 style="float:left;" class="title">{{ f.file_name }}</h3>
+                                </div>
+                                <div style="width:23%">
+                                    <div style="float:right; display:flex;" class="btn-group">
+                                        <a class="btn btn-xs btn-secondary" href="#">
+                                            <i class="fa fa-info-circle">
+                                                <span>Report Offline</span>
+                                            </i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="resource">
+                                <img class="resource_thumbnail" src="{{ url_for("static", filename="img/default_thumbnail.png") }}">
+                                <div class="resource_subscribe">
+                                    <span class="name">{{ f.resource.server.name }}</span>
+
+                                    <br>
+
+                                    <div style="float:right; display:flex;" class="btn-group">
+                                        <a class="btn btn-xs btn-primary" href="{{ url_for("browse", parsed={}) }}{{ f.path_dir }}">Browse</a>
+                                        <div style="cursor:default;color:#a8a8a8;" class="btn btn-xs btn-secondary" href="#">{{ ('{:,}').format(f.resource.meta.file_count) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="well browser">
+                            {% include 'bucket/templates/main/_file_browser.html' %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="well sidebar">
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <td>Direct Link</td>
+                                        <td><a href="{{ f.path_direct }}">Download</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Size</td>
+                                        <td>{{ f.file_size_human }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Modified</td>
+                                        <td>{{ f.file_modified_human }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Extension</td>
+                                        <td>{{ f.file_ext }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Category</td>
+                                        <td>{{ f.file_format_human.capitalize() }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <hr>
+
+                            <pre style="color: grey;font-size:10px;white-space: pre-line;">wget --user=anonymous --password='anonymous' '{{ f.path_direct }}'</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+
+    <script>
+    $(document).ready(function(){
+
+    });
+    </script>
+{% endblock %}

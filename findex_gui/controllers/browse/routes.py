@@ -10,6 +10,7 @@ import findex_gui.controllers.browse.converters
 from findex_gui import app, themes, db
 from findex_gui.controllers.browse.browse import Browse
 from findex_gui.controllers.resources.resources import ResourceController
+from findex_gui.controllers.relay.routes import get_relay_category_by_extension
 from findex_common.static_variables import FileProtocols, ResourceStatus
 from findex_common.utils_time import TimeMagic
 
@@ -35,13 +36,24 @@ def browse(parsed):
         return str(parsed)
     browse = Browse()
     if parsed["path"].endswith("/"):
-        data = browse.browse(parsed)
-        return themes.render("main/browse_dir", **data)
+        browser = browse.browse(parsed)
+        return themes.render("main/browse_dir", browser=browser)
     else:
-        return """
-        The file browser has a "src" link in the table.
-        <a href="javascript:history.back()">Please click here</a> to go back.
-        """
+        filename = ntpath.basename(parsed["path"])
+        path = "%s/" % "/".join(parsed["path"].split("/")[:-1])
+
+        try:
+            f = Browse().get_file(resource_id=parsed["resource_id"],
+                                  file_name=filename,
+                                  file_path=path)
+        except:
+            return gettext("error")
+
+        parsed["path"] = f.path_dir[len(parsed["resource_id"]):]
+        browser = browse.browse(parsed)
+
+        return themes.render("main/file_viewer/viewer", f=f, browser=browser,
+                             get_relay_category_by_extension=get_relay_category_by_extension)
 
 
 @app.route("/index_as_csv/<browse:parsed>/")

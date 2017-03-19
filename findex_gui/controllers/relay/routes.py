@@ -1,3 +1,4 @@
+import string
 import ntpath
 
 from flask import request, Response, make_response, stream_with_context
@@ -23,18 +24,26 @@ EXTENSIONS_AND_CONSTRAINTS = {
         "max_backend_response": 59055800320,  # 55GB
         "exts": ["ogg", "mp4", "webm"],
     },
-    "documents": {
+    "document": {
         "stream": False,
         "buffer_size": 750000,  # 1MB : 8 Mbps
-        "max_backend_response": 750000,  # 750KB
+        "max_backend_response": 120000,  # 120KB
         "exts": ["txt", "nfo", "ascii", "py",
                  "js", "css", "md", "html",
-                 "html", "conf", "cfg"],
+                 "html", "conf", "cfg", "srt",
+                 "sub"],
     }
 }
 
 
-@app.route("/relay/<browse:parsed>/")
+def get_relay_category_by_extension(ext):
+    extension = {cat: v for cat, v in EXTENSIONS_AND_CONSTRAINTS.iteritems() if ext in v["exts"]}
+    if not extension:
+        return {}
+    return next(extension.iteritems())
+
+
+@app.route("/relay/<browse:parsed>")
 def relay(parsed):
     """Relay a file - must be in `EXTENSIONS_AND_CONSTRAINTS`"""
 
@@ -57,10 +66,10 @@ def relay(parsed):
         return gettext("error: was directory; file needed"), 500
 
     # file is in the allowed extensions
-    extension = {cat: v for cat, v in EXTENSIONS_AND_CONSTRAINTS.iteritems() if f.file_ext in v["exts"]}
+    extension = get_relay_category_by_extension(f.file_ext)
     if not extension:
         return gettext("error: file not in allowed extensions"), 500
-    ext_category, ext_properties = next(extension.iteritems())
+    ext_category, ext_properties = extension
 
     # @TODO: validate address
     if "://" not in f.path_direct:
@@ -106,9 +115,10 @@ def relay(parsed):
     response_bufsize = ext_properties["buffer_size"]
 
     if not ext_properties["stream"]:
-        import string
-        content = response_backend.content.encode("UTF-8", errors="ignore")
+        content = response_backend.content.decode("ascii", errors="ignore")
         content = filter(lambda x: x in string.printable, content)
+        content = content.replace("\r\n", "\n")
+        content = "\n".join(content.split("\n")[:512])
 
         r = make_response(content, 200)
         r.headers.set("Content-Type", "text/plain; charset=UTF-8")

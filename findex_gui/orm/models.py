@@ -473,7 +473,7 @@ class Files(base):
 
     def fancify(self):
         # @TODO: remove this shit
-        from findex_common.static_variables import FileProtocols
+        from findex_common.static_variables import FileProtocols, FileCategories
         obj = Sanitize(self).humanize(humandates=True, humansizes=True,  dateformat="%d %b %Y")
 
         file_url = "%s%s" % (obj.file_path, obj.file_name)
@@ -481,16 +481,17 @@ class Files(base):
         if display_url.endswith("/"):
             display_url = display_url[:-1]
 
-        setattr(obj, "path_dir", "/browse/%s:%d%s" % (
+        setattr(obj, "path_dir", "%s:%d%s" % (
             obj.resource.server.address,
             obj.resource.port,
             obj.file_path))
-        setattr(obj, "path_file", "/browse/%s:%d%s%s%s" % (
+        setattr(obj, "path_file", "%s:%d%s%s%s" % (
             obj.resource.server.address,
             obj.resource.port,
             obj.file_path,
             obj.file_name,
             "/" if obj.file_isdir else ""))
+        setattr(obj, "file_format_human", FileCategories().name_by_id(obj.file_format))
         if display_url:
             setattr(obj, "path_direct", display_url + file_url)
         else:

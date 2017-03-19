@@ -1,10 +1,8 @@
-/*!
- * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
- * Code licensed under the Apache License v2.0.
- * For details, see http://www.apache.org/licenses/LICENSE-2.0.
- */
-
 /* General */
+
+body{
+    background-color:#f8f8f8;
+}
 
 a{
 	color: #3572b0;

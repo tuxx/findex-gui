@@ -46,6 +46,16 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="css/tooltipster-sideTip-light.min.css") }}" />
     <script type="text/javascript" src="{{ url_for("static", filename="js/tooltipster.bundle.js") }}"></script>
 
+    <!-- Plyr video player -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for("static", filename="plugins/plyr/plyr.css") }}" />
+    <script type="text/javascript" src="{{ url_for("static", filename="plugins/plyr/plyr.js") }}"></script>
+
+    <!-- highlight.js -->
+
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/default.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+    <script type="text/javascript" src="{{ url_for("static", filename="js/highlightjs-line-numbers.js") }}"></script>
+
     <!-- Findex -->
     <script src="{{ url_for("static", filename="js/findex/findex_core.js") }}"></script>
     <script src="{{ url_for("static", filename="js/findex/app.js") }}"></script>
@@ -54,7 +64,7 @@
     <script src="{{ url_for("static", filename="themes/bucket/static/js/bucket.js") }}"></script>
     <link href="{{ url_for("static", filename="css/findex.css") }}" rel="stylesheet">
     <link href="{{ url_for("static", filename="themes/bucket/static/css/bucket.css") }}" rel="stylesheet">
-
+    <link href="{{ url_for("static", filename="themes/bucket/static/css/browse.css") }}" rel="stylesheet">
     <style>
         /* cyrillic-ext */
         @font-face {

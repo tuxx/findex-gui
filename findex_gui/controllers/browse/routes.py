@@ -46,7 +46,7 @@ def browse(parsed):
             f = Browse().get_file(resource_id=parsed["resource_id"],
                                   file_name=filename,
                                   file_path=path)
-        except:
+        except Exception:
             return gettext("error")
 
         parsed["path"] = f.path_dir[len(parsed["resource_id"]):]

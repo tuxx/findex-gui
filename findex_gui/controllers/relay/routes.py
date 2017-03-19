@@ -30,8 +30,8 @@ EXTENSIONS_AND_CONSTRAINTS = {
         "max_backend_response": 120000,  # 120KB
         "exts": ["txt", "nfo", "ascii", "py",
                  "js", "css", "md", "html",
-                 "html", "conf", "cfg", "srt",
-                 "sub"],
+                 "htm", "conf", "cfg", "srt",
+                 "sub", "sh", "pl", "php"],
     }
 }
 

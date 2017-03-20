@@ -456,19 +456,8 @@ class Files(base):
 
     searchable = Column(String(23))
 
-    # regular indexes
-    ix_file_ext = Index("ix_file_ext", file_ext)
-    ix_file_size = Index("ix_file_size", file_size)
     ix_resource_id = Index("ix_resource_id", resource_id)
-
-    # multi column indexes
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
-    ix_file_format_searchable = Index("ix_file_format_searchable", file_format, searchable)
-
-    # full text search LIKE "%needle%"
-    ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
-        "searchable": "gin_trgm_ops"
-    })
 
     def fancify(self):
         # @TODO: remove this shit

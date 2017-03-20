@@ -454,7 +454,8 @@ class Files(base):
 
     file_perm = Column(Integer())
 
-    searchable = Column(String(23))
+    # @TODO: should be an array so we can do ES phrases
+    searchable = Column(String(41))
 
     ix_resource_id = Index("ix_resource_id", resource_id)
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)

@@ -67,7 +67,7 @@ class DatabaseSearchController:
         q = Files.query
 
         # only find files that are not in 'temp' mode
-        q = q.filter(Files.resource_id >= 1)
+        # q = q.filter(Files.resource_id >= 1)
 
         # ignores certain filters
         ignore_filters = []
@@ -84,7 +84,7 @@ class DatabaseSearchController:
             q = q.filter(Files.file_isdir == False)
 
         # size
-        if kwargs['file_size'] and not 'file_size' in ignore_filters:
+        if kwargs['file_size'] and 'file_size' not in ignore_filters:
             try:
                 file_size = kwargs['file_size'].split('-')
 
@@ -119,7 +119,7 @@ class DatabaseSearchController:
             file_categories = filecategories.get_names()
 
         # filter extensions
-        if kwargs['file_extensions'] and not 'file_extensions' in ignore_filters:
+        if kwargs['file_extensions'] and 'file_extensions' not in ignore_filters:
             exts = []
 
             for ext in kwargs['file_extensions']:

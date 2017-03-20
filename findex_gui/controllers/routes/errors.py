@@ -1,3 +1,5 @@
+from flask import Response
+
 import settings
 from findex_gui import app
 
@@ -13,6 +15,13 @@ def all_exception_handler(error):
     rtn = 'Error'
 
     if settings.app_debug:
-        rtn += ': %s' % str(error)
+        if hasattr(error, "message"):
+            rtn += ': %s' % error.message
+        else:
+            rtn += ': %s' % str(error)
+    else:
+        rtn += "Error"
+
+    rtn = Response(rtn, content_type="text/plain")
 
     return rtn, 500

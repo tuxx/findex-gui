@@ -465,7 +465,6 @@ class Files(base):
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
     ix_file_format_searchable = Index("ix_file_format_searchable", file_format, searchable)
 
-    # @TODO: support more than postgres type indexes
     # full text search LIKE "%needle%"
     ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
         "searchable": "gin_trgm_ops"

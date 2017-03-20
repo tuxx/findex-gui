@@ -84,11 +84,11 @@ class bucket_search extends Search {
                               </span> </span>
                             </a>
 
-                            <h1><a class="result-link" href="${result['path_file']}">${result['file_name']}</a></h1>
+                            <h1><a class="result-link" href="${"/browse/"+result['path_file']}">${result['file_name']}</a></h1>
 
-                            <p> Path: <a href="${result['path_dir']}" rel="nofollow"> ${result['file_path']} </a></p>
+                            <p> Path: <a href="${"/browse/"+result['path_dir']}" rel="nofollow"> ${result['file_path']} </a></p>
                             <ul class="result-metadata clearfix">
-                                <li><a href="/">${result['resource']['address']}</a></li>
+                                <li><a href="http://${result['resource']['address']}">${result['resource']['address']}</a></li>
                                 <li><a href="${result['path_direct']}"> direct link </a></li>
                                 <li>
                                     <span style="margin-right:6px">${result['file_size_human']}</span>
@@ -152,16 +152,16 @@ class bucket_search extends Search {
                 file_modified_human = `${file_modified_human[1]} ${file_modified_human[2]}`;
 
                 buffer += `
-                <tr class="clickable" data-id="" data-href="${result['file_name']}" rel="popover" title="">
+                <tr class="clickable" data-id="" data-href="/browse/${result['file_name']}" rel="popover" title="">
                     <td>
                         <img id="file_icon" src="${url_for("/static/img/default_thumbnail.png")}" data-file_isdir="${result['file_isdir']}" data-file_format="${result['file_format']}" title="">
-                        <a href="${url_for(result['path_file'])}">
+                        <a href="${url_for("/browse/"+result['path_file'])}">
                             ${file_name}
                         </a>
                     </td>
 
                     <td>
-                        <a href="${url_for(result['path_dir'])}">
+                        <a href="${url_for("/browse/"+result['path_dir'])}">
                             ${file_path}
                         </a>
                     </td>

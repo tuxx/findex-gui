@@ -68,8 +68,8 @@ def index_as_csv(parsed):
         SELECT
             concat(r.basepath,
                    files.file_path,
-                   files.file_name,",",
-                   files.file_isdir,",",
+                   files.file_name,',',
+                   files.file_isdir,',',
                    files.file_size)
         FROM files
         INNER JOIN resources r ON files.resource_id=r.id

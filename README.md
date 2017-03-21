@@ -58,14 +58,9 @@ SSH|:x:| Not yet
 
 | Feature  | Status  | Details  |
 |---|---|---|
-Movie Metadata|:clock2:| In development
-Image Metadata|:clock2:| In development
-Music Metadata|:x:| Not yet
-Document Metadata|:x:| Not yet
+Metadata|:clock2:| Not yet
 DB Pools|:white_check_mark:| Supported
-Memcached|:clock2:| In development
-ES backend|:x:| Not yet
-SQLite backend|:x:| Maybe works
+ES backend|:clock2:| In development
 
 
 ### Example
@@ -73,10 +68,10 @@ SQLite backend|:x:| Maybe works
 
 ### Requirements:
   - Linux (Debian >= **7** | Ubuntu >= **11** | CentOS >= **6**)
-  - Python >= **2.7.3**
-  - Postgres >= **9.5**
+  - Python == ** 2.7.* **
+  - Postgres == **9.5**
   - RabbitMQ >= **3.5.4** (optional)
-  - `findex-common` >= **0.3.2**
+  - `findex-common` >= **0.3.4**
 
 ### Installation
 Not yet available.

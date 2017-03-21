@@ -2,7 +2,7 @@ from flask_babel import gettext
 from sqlalchemy_utils import escape_like
 from sqlalchemy import func
 
-from findex_gui import app
+from findex_gui import app, db
 from findex_gui.orm.models import Files, Resource
 from findex_common.static_variables import FileCategories, FileProtocols
 
@@ -23,12 +23,12 @@ class SearchResult:
 
 
 class SearchController:
-    # @TODO: should call this instead, let it determine what class to use
     def __init__(self):
         self._iface = self._get_iface()
 
     def _get_iface(self):
-        return DatabaseSearchController
+        #return DatabaseSearchController
+        return ElasticSearchController
 
     def search(self, key, file_categories=[], file_extensions=[], file_size=[], file_type='both', page=0, per_page=30,
                autocomplete=False, lazy_search=False, **kwargs):
@@ -56,6 +56,54 @@ class SearchController:
         }
 
         return result_obj
+
+
+class ElasticSearchController:
+    @staticmethod
+    def search(**kwargs):
+        # @TODO: filter by protocols / hosts
+        # @TODO: replace by sqla - instead of a sqli-prone query builder
+        kwargs['key'] = DatabaseSearchController.make_valid_key(kwargs['key'])
+
+        _safe = lambda k: ''.join(ch for ch in k if ch.isalnum())
+        columns = [m.key for m in Files.__table__.columns]
+        sql = """SELECT %s FROM files WHERE zdb('files', files.ctid) ==>""" % ", ".join(columns)
+        sql += """'(searchable:"*%s*")""" % kwargs["key"]
+
+        if kwargs.get('file_categories'):
+            _formats = [str(FileCategories().id_by_name(z)) for z in kwargs['file_categories']]
+            if _formats:
+                sql += " and file_format=(%s)" % ",".join(_formats)
+
+        if kwargs.get("file_extensions"):
+            _extensions = [_safe(z) for z in kwargs['file_extensions'] if _safe(z)]
+            if _extensions:
+                sql += " and file_ext=(%s)" % ",".join(_extensions)
+
+        sql += "';"
+
+        try:
+            results = db.session.execute(sql)
+        except Exception as ex:
+            print "ES search exception"
+            return []
+
+        data = []
+        for res in results:
+            z = Files()
+            for c in columns:
+                setattr(z, c, res[c])
+            data.append(z)
+
+        results = data
+        resource_ids = set([z.resource_id for z in results])
+        resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
+
+        for result in results:
+            setattr(result, 'resource', resource_obs[result.resource_id])
+
+        results = [result.fancify() for result in results]
+        return results
 
 
 class DatabaseSearchController:

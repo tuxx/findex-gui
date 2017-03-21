@@ -26,7 +26,7 @@ class Search {
 
         if(params['key'] == '') return;
 
-        this._search_post({
+        return this._search_post({
             'params': params
         });
     }
@@ -166,7 +166,7 @@ class Search {
         let _url = `/search/${key}`;
         let _data = params;
 
-        FindexGui.api(_url, "POST", _data).then(function(data){
+        return FindexGui.api(_url, "POST", _data).then(function(data){
             this.parse_results(data);
         }.bind(this));
     }

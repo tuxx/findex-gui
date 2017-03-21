@@ -96,6 +96,21 @@
                 </div>
             </div>
             <!--/row-->
+            <div id="loading" style="
+                text-align: center;
+                position: fixed;
+                font-size: 22px;
+                padding: 6px;
+                z-index: 7000;
+                color: grey;
+                top: 50%;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.75);
+                border-top: 2px solid rgba(141, 171, 226, 0.56);
+                border-bottom: 2px solid rgba(141, 171, 226, 0.55);
+                display: none;
+            ">Fetching more results</div>
         </div>
     </div>
 
@@ -355,9 +370,12 @@
 
             // Detect end of page scroll
             $(window).scroll(function() {
-               if($(window).scrollTop() + $(window).height() == $(document).height()) {
+               if ((window.innerHeight + window.scrollY) == document.body.offsetHeight) {
                     if(!exhausted_results && Object.keys(search_results).length !== 0 && search_results.constructor === Object && search_results['results'].length > 0){
-                        search_controller.search(search_results['results'].length);
+                        $("#loading").show();
+                        search_controller.search(search_results['results'].length).then(function(){
+                            $("#loading").fadeOut();
+                        });
                     }
                }
             });

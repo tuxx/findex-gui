@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_babel import gettext
 from sqlalchemy_utils import escape_like
 from sqlalchemy import func
@@ -87,6 +89,18 @@ class ElasticSearchController:
 
         if kwargs.get("autocomplete") and kwargs.get("autocomplete"):
             sql += " limit 5"
+        else:
+            if kwargs.get('per_page'):
+                _per_page = kwargs['per_page']
+                if isinstance(_per_page, int):
+                    sql += " limit %d" % _per_page
+
+            if kwargs.get("page"):
+                _page = kwargs.get("page")
+                if isinstance(_page, int):
+                    sql += " offset %d" % _page
+
+        now = datetime.now()
 
         sql += ";"
 
@@ -95,7 +109,7 @@ class ElasticSearchController:
         except Exception as ex:
             print "ES search exception"
             return []
-
+        print (datetime.now() - now).total_seconds()
         data = []
         for res in results:
             z = Files()
@@ -111,6 +125,9 @@ class ElasticSearchController:
             setattr(result, 'resource', resource_obs[result.resource_id])
 
         results = [result.fancify() for result in results]
+
+        print (datetime.now() - now).total_seconds()
+
         return results
 
 

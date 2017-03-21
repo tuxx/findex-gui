@@ -63,14 +63,16 @@ class ElasticSearchController:
     def search(**kwargs):
         # @TODO: filter by protocols / hosts
         # @TODO: replace by sqla - instead of a sqli-prone query builder
-        kwargs['key'] = DatabaseSearchController.make_valid_key(kwargs['key'])
+        kwargs["key"] = DatabaseSearchController.make_valid_key(kwargs['key'])
 
-        _safe = lambda k: ''.join(ch for ch in k if ch.isalnum())
+        _safe = lambda k: "".join(ch for ch in k if ch.isalnum())
         columns = [m.key for m in Files.__table__.columns]
+
+        # start ZomboDB query
         sql = """SELECT %s FROM files WHERE zdb('files', files.ctid) ==>""" % ", ".join(columns)
         sql += """'(searchable:"*%s*")""" % kwargs["key"]
 
-        if kwargs.get('file_categories'):
+        if kwargs.get("file_categories"):
             _formats = [str(FileCategories().id_by_name(z)) for z in kwargs['file_categories']]
             if _formats:
                 sql += " and file_format=(%s)" % ",".join(_formats)
@@ -80,7 +82,13 @@ class ElasticSearchController:
             if _extensions:
                 sql += " and file_ext=(%s)" % ",".join(_extensions)
 
-        sql += "';"
+        sql += "'"
+        # end ZomboDB query
+
+        if kwargs.get("autocomplete") and kwargs.get("autocomplete"):
+            sql += " limit 5"
+
+        sql += ";"
 
         try:
             results = db.session.execute(sql)

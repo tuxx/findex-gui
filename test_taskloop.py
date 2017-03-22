@@ -14,7 +14,7 @@ from findex_common.static_variables import FileProtocols
 
 
 def console_log(msg):
-    print "[%s] %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg)
+    print("[%s] %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
 
 
 class Db:
@@ -90,7 +90,7 @@ class Pika:
                                            delivery_mode=2
                                        ))
 
-        print " [x] Sent %s tasks to queue %s" % (str(len(tasks)), self.amqp_queue_name)
+        print(" [x] Sent %s tasks to queue %s" % (str(len(tasks)), self.amqp_queue_name))
         self.connection.close()
 
 

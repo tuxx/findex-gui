@@ -37,10 +37,10 @@ EXTENSIONS_AND_CONSTRAINTS = {
 
 
 def get_relay_category_by_extension(ext):
-    extension = {cat: v for cat, v in EXTENSIONS_AND_CONSTRAINTS.iteritems() if ext in v["exts"]}
+    extension = {cat: v for cat, v in EXTENSIONS_AND_CONSTRAINTS.items() if ext in v["exts"]}
     if not extension:
         return {}
-    return next(extension.iteritems())
+    return next(iter(extension.items()))
 
 
 @app.route("/relay/<browse:parsed>")
@@ -116,7 +116,7 @@ def relay(parsed):
 
     if not ext_properties["stream"]:
         content = response_backend.content.decode("ascii", errors="ignore")
-        content = filter(lambda x: x in string.printable, content)
+        content = [x for x in content if x in string.printable]
         content = content.replace("\r\n", "\n")
         content = "\n".join(content.split("\n")[:512])
 
@@ -133,9 +133,9 @@ def relay(parsed):
         direct_passthrough=False)
 
     # @TODO: leaks unnecessary backend response headers - use a whitelist of headers
-    for header, val in response_backend.raw.headers.iteritems():
+    for header, val in response_backend.raw.headers.items():
         response.headers[header] = val
-        print "added: " + header
+        print("added: " + header)
     response.headers['Cache-Control'] = 'no-cache'
 
     return response

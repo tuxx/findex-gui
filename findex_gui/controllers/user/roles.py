@@ -54,7 +54,7 @@ class Role:
         self.info = None
         if isinstance(arg[0], int):
             role = self.by_id(arg[0])
-        elif isinstance(arg[0], (str, unicode)):
+        elif isinstance(arg[0], str):
             role = self.by_name(arg[0])
         else:
             raise RoleException("unknown arg")
@@ -72,7 +72,7 @@ class Role:
 
     @staticmethod
     def by_name(r_name):
-        for k, v in role_mapping.iteritems():
+        for k, v in role_mapping.items():
             if v["name"] == r_name:
                 return v
         raise RoleException("unknown role name \"%s\"" % r_name)
@@ -80,7 +80,7 @@ class Role:
     def __eq__(self, other):
         if isinstance(other, int):
             return self.rid == other
-        elif isinstance(other, (str, unicode)):
+        elif isinstance(other, str):
             return self.name == other.upper()
 
     def to_json(self):

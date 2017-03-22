@@ -17,7 +17,7 @@ class SearchUrlConverter(BaseConverter):
 
         data = {}
 
-        for k, v in furl('/?key='+value).args.iteritems():
+        for k, v in furl('/?key='+value).args.items():
             kk = lookup.id_by_name(k)
             if kk:
                 k = kk

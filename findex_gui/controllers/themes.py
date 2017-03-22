@@ -36,7 +36,7 @@ class Theme:
             if not option in data:
                 raise Exception("Theme error for \"%s\". Option \"%s\" not found in theme configuration file but should be present." % (self.name, option))
 
-        for k, v in data.iteritems():
+        for k, v in data.items():
             self.options[k] = v
 
 

@@ -41,7 +41,7 @@ locales = {
     'nl': 'Nederlands'
 }
 
-from bin.config import Config
+from .bin.config import Config
 settings = Config()
 
 if not settings.local:
@@ -57,22 +57,22 @@ auth = Auth(app)
 auth.user_timeout = 604800
 auth.hash_algorithm = hashlib.sha256
 
-import orm.connect as db_connect
-db_types = {k.lower(): v for k, v in vars(db_connect).items() if inspect.isclass(v) and issubclass(v, db_connect.Orm)}
+from findex_gui.orm import connect as db_connect
+db_types = {k.lower(): v for k, v in list(vars(db_connect).items()) if inspect.isclass(v) and issubclass(v, db_connect.Orm)}
 
 if not app.config['DB_TYPE'] in db_types:
     raise Exception('Unsupported database type \"%s\". Supported: %s' % (
         app.config['DB_TYPE'],
-        ','.join([z.lower() for z in db_types.keys() if not z == 'Orm'])))
+        ','.join([z.lower() for z in list(db_types.keys()) if not z == 'Orm'])))
 
 db = db_types[app.config['DB_TYPE']](app)
 db.connect()
 
-from controllers.themes import ThemeController
+from .controllers.themes import ThemeController
 themes = ThemeController()
 
 # init routes
-import main
+from . import main
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.search import routes
 from findex_gui.controllers.browse import routes

@@ -27,20 +27,20 @@ class ResourceController:
         if isinstance(by_owner, int):
             query = query.filter(Resource.created_by_id == by_owner)
 
-        if isinstance(uid, (int, long)):
+        if isinstance(uid, int):
             query = query.filter(Resource.id == uid)
 
-        if isinstance(address, (str, unicode)):
+        if isinstance(address, str):
             qs = Server.query
             server = qs.filter(Server.address == address).first()
             if not server:
                 raise Exception("Could not find server")
             query = query.filter(Resource.server_id == server.id)
 
-        if isinstance(port, (int, long)):
+        if isinstance(port, int):
             query = query.filter(Resource.port == port)
 
-        if isinstance(name, (str, unicode)):
+        if isinstance(name, str):
             qs = Server.query
             server = qs.filter(Server.name == name).first()
             if not server:
@@ -48,7 +48,7 @@ class ResourceController:
 
             query = query.filter(Resource.server_id == server.id)
 
-        if limit and isinstance(limit, (int, long)):
+        if limit and isinstance(limit, int):
             query = query.limit(limit)
 
         results = query.all()
@@ -95,7 +95,7 @@ class ResourceController:
                                   "object or supply a valid `server_name`, `server_port` "
                                   "and/or `server_address` parameters.")
         if not _server:
-            if not isinstance(server_address, (str, unicode)) or not \
+            if not isinstance(server_address, str) or not \
                     isinstance(resource_port, int) or not isinstance(resource_protocol, int):
                 raise FindexException("Could not auto-add server for resource - requires "
                                       "`resource_port`, `resource_protocol` and `server_address`")
@@ -211,7 +211,7 @@ class ResourceController:
             _address = hostname
         srv = Server(_address)
         if name:
-            if not isinstance(name, (str, unicode)):
+            if not isinstance(name, str):
                 raise FindexException("invalid parameters")
             srv.set_valid_name(name)
         srv.description = description
@@ -244,7 +244,7 @@ class ResourceController:
         if uid and not isinstance(uid, int):
             raise FindexException("invalid parameters")
 
-        if name and not isinstance(name, (str, unicode)):
+        if name and not isinstance(name, str):
             raise FindexException("invalid parameters")
 
         if uid:

@@ -107,9 +107,9 @@ class ElasticSearchController:
         try:
             results = db.session.execute(sql)
         except Exception as ex:
-            print "ES search exception"
+            print("ES search exception: %s" % str(ex) )
             return []
-        print (datetime.now() - now).total_seconds()
+        print((datetime.now() - now).total_seconds())
         data = []
         for res in results:
             z = Files()
@@ -126,7 +126,7 @@ class ElasticSearchController:
 
         results = [result.fancify() for result in results]
 
-        print (datetime.now() - now).total_seconds()
+        print((datetime.now() - now).total_seconds())
 
         return results
 

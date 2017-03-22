@@ -20,7 +20,7 @@ class SessionGet(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         if not args['key'] in keys:
             return abort(404, message="key \"%s\" doesn't exist" % args['key'])
@@ -44,7 +44,7 @@ class SessionSet(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         if not args['key'] in keys:
             return abort(404, message="key \"%s\" doesn't exist" % args['key'])
@@ -53,7 +53,7 @@ class SessionSet(Resource):
             return abort(404, message="could not set val \"%s\" - doesn't exist" % args['val'])
 
         session[args['key']] = args['val']
-        print session[args['key']]
+        print(session[args['key']])
 
         return flask.jsonify(**{
             'message': 'ok'

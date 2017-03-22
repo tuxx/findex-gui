@@ -150,5 +150,5 @@ class Postgres(Orm):
                                         dbname=self._db_database, password=self._db_pass,
                                         port=self._db_port)
             except psycopg2.OperationalError as e:
-                print 'Failed to connect to %s: %s' % (host, e)
+                print('Failed to connect to %s: %s' % (host, e))
         raise psycopg2.OperationalError("Ran out of database servers - exiting")

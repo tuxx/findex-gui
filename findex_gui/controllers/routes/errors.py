@@ -6,7 +6,7 @@ from findex_gui import app
 
 @app.errorhandler(404)
 def page_not_found(e):
-    print e
+    print(e)
     return '404', 404
 
 

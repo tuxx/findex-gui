@@ -30,4 +30,4 @@ def get_locale():
     if 'locale' in session:
         return session['locale']
     else:
-        return request.accept_languages.best_match(locales.keys())
+        return request.accept_languages.best_match(list(locales.keys()))

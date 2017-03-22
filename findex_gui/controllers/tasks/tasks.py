@@ -17,7 +17,7 @@ class TaskController:
             if not owner:
                 raise FindexException("faulty owner_id")
 
-        if not isinstance(name, (str, unicode)):
+        if not isinstance(name, str):
             raise FindexException("faulty parameters")
 
         task = Task(name=name, owner=owner)
@@ -27,7 +27,7 @@ class TaskController:
             "retry": 5,  # times
         }
 
-        for k, v in options.iteritems():
+        for k, v in options.items():
             default_options[k] = v
 
         task.options = default_options
@@ -54,7 +54,7 @@ class TaskController:
         if uid and not isinstance(uid, int):
             raise FindexException("faulty parameters", log_error)
 
-        if name and not isinstance(name, (str, unicode)):
+        if name and not isinstance(name, str):
             raise FindexException("faulty parameters", log_error)
 
         task = None

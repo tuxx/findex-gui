@@ -50,7 +50,7 @@ class ResourceAdd(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         resource = ResourceController.add_resource(**args)
         if isinstance(resource, Exception):
@@ -68,7 +68,7 @@ class ResourceGet(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         data = ResourceController.get_resources(**args)
         if isinstance(data, Exception):
@@ -86,7 +86,7 @@ class ResourceRemove(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         data = ResourceController.remove_resource(**args)
         if isinstance(data, Exception):

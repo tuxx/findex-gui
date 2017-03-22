@@ -137,7 +137,7 @@ class UserController:
     @staticmethod
     def locale_set(locale='en', user=None):
         if not locale in locales:
-            raise Exception('Locale %s not found. Locales available: %s' % (locale, ', '.join(locales.keys())))
+            raise Exception('Locale %s not found. Locales available: %s' % (locale, ', '.join(list(locales.keys()))))
 
         session['locale'] = locale
         if user:

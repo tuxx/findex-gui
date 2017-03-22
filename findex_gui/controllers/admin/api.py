@@ -49,7 +49,7 @@ class OptionsPostAPI(Resource):
         global keys
 
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         if not args['key'] in keys:
             return abort(404, message='Unknown key \'%s\'' % args['key'])

@@ -7,7 +7,7 @@ class ResourceForm(Form):
     description = StringField("Description")
     server_address = StringField("Address/Hostname")
     resource_port = IntegerField("Port")
-    resource_protocol = SelectField("Protocol", choices=[(v, k) for k, v in FileProtocols().data.iteritems()])
+    resource_protocol = SelectField("Protocol", choices=[(v, k) for k, v in FileProtocols().data.items()])
     basepath = StringField("Basepath", default="/")
     display_url = StringField("Display URL", default="")
 

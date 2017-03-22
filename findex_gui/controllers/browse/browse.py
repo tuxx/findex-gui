@@ -82,7 +82,7 @@ class Browse:
             files.insert(0, cdup)
 
         if hasattr(resource, 'meta') and resource.meta.file_distribution:
-            file_distribution = OrderedDict(sorted(resource.meta.file_distribution.items(), key=lambda t: t[0]))
+            file_distribution = OrderedDict(sorted(list(resource.meta.file_distribution.items()), key=lambda t: t[0]))
         else:
             file_distribution = {}
 

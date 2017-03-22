@@ -109,7 +109,7 @@ class Resource(base):
             "protocol_human": fp.name_by_id(self.protocol)
         }
 
-        for k, v in self.__dict__.iteritems():
+        for k, v in self.__dict__.items():
             if not k.startswith("_"):
                 if not issubclass(v.__class__, base):
                     out[k] = v
@@ -396,7 +396,7 @@ class User(base, AuthUser):
         password = kwargs.get("password")
         if password and not self.id:
             if request:
-                self.locale = request.accept_languages.best_match(locales.keys())
+                self.locale = request.accept_languages.best_match(list(locales.keys()))
             else:
                 self.locale = "en"
             with app.app_context():
@@ -490,7 +490,7 @@ class Files(base):
         return obj
 
     def to_json(self):
-        blob = {k: v for k, v in self.__dict__.iteritems() if not k.startswith("_") and not issubclass(v.__class__, base)}
+        blob = {k: v for k, v in self.__dict__.items() if not k.startswith("_") and not issubclass(v.__class__, base)}
 
         blob["resource"] = {
             "address": self.resource.server.address

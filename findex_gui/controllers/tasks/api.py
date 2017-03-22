@@ -19,7 +19,7 @@ class TaskAdd(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         resource = TaskController.add_task(**args)
         if isinstance(resource, Exception):
@@ -37,7 +37,7 @@ class TaskGet(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         data = TaskController.get_tasks(**args)
         if isinstance(data, Exception):
@@ -57,7 +57,7 @@ class TaskAssignResourceGroup(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         data = TaskController.assign_resource_group(**args)
         if isinstance(data, Exception):
@@ -77,7 +77,7 @@ class TaskRemoveResourceGroup(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         data = TaskController.remove_resource_group(**args)
         if isinstance(data, Exception):

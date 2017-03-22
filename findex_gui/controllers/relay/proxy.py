@@ -12,7 +12,7 @@ class ReverseProxyController:
         :return:
         """
         headers_out = {}
-        for k, v in headers_in.iteritems():
+        for k, v in headers_in.items():
             headers_out[k] = v
 
         for pop in ["host", "referer", "connection"]:

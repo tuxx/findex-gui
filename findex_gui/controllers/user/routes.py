@@ -51,7 +51,7 @@ class LocalizationForm(Form):
 @login_required
 def user_cp():
     form = LocalizationForm(request.form)
-    form.language.choices = locales.items()
+    form.language.choices = list(locales.items())
     form.language.data = UserController.locale_get()
     return themes.render('main/user_cp/_misc', form=form)
 

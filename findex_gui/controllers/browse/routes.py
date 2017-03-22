@@ -1,6 +1,6 @@
 import ntpath
 import tarfile
-from StringIO import StringIO
+from io import StringIO
 
 from requests import get
 from flask import Response, send_file, request

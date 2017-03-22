@@ -1,4 +1,4 @@
-from urllib import quote
+from urllib.parse import quote
 
 from sqlalchemy import and_, asc, desc
 from findex_gui.orm.models import Files, Resource, Server
@@ -47,29 +47,29 @@ class Findex(object):
         if self.resource.protocol in [4, 5]:
             file_path = quote(file_path)
 
-            if isinstance(file_name, (str, unicode)):
+            if isinstance(file_name, str):
                 file_name = quote(file_name)
 
         if id:
             _and = and_()
             _and.append(Files.id == id)
             query = query.filter(_and)
-        elif isinstance(resource_id, (int, long)):
+        elif isinstance(resource_id, int):
             _and = and_()
             _and.append(Files.resource_id == resource_id)
             query = query.filter(_and)
 
-        if isinstance(file_path, (str, unicode)):
+        if isinstance(file_path, str):
             _and = and_()
             _and.append(Files.file_path == file_path)
             query = query.filter(_and)
 
-        if isinstance(file_name, (str, unicode)):
+        if isinstance(file_name, str):
             _and = and_()
             _and.append(Files.file_name == file_name)
             query = query.filter(_and)
 
-        if isinstance(total_count, (long, int)):
+        if isinstance(total_count, int):
             query = query.limit(total_count)
 
         results = query.all()

@@ -57,7 +57,7 @@ class UserRegister(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         user = UserController.user_add(username=args['username'], password=args['password'])
         if isinstance(user, Exception):
@@ -74,7 +74,7 @@ class UserDelete(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args = {k: v for k, v in args.items() if v is not None}
+        args = {k: v for k, v in list(args.items()) if v is not None}
 
         user = UserController.user_delete(username=args['username'])
         if isinstance(user, Exception):

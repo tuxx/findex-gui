@@ -11,7 +11,6 @@ sqlalchemy-utils
 furl
 flask-babel
 parse-torrent-name==1.1.1
-ipaddr
 humanfriendly
 IPy
 pysocks

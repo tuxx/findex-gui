@@ -21,7 +21,7 @@ class Browse:
             raise Exception("faulty resource uid")
 
         try:
-            int(spl[1])
+            spl[1] = int(spl[1])
         except:
             raise Exception("faulty resource uid (port not integer)")
 
@@ -43,7 +43,6 @@ class Browse:
 
     def inspect(self, data):
         resource = self.get_resource(data['resource_id'])
-
         files = self.findex.get_files(
             resource_id=resource.id,
             file_path=data['path']
@@ -51,12 +50,10 @@ class Browse:
 
         return files
 
-    def browse(self, data):
-        resource = self.get_resource(data['resource_id'])
-
+    def browse(self, resource, path, filename):
         files = self.findex.get_files(
             resource_id=resource.id,
-            file_path=data['path']
+            file_path=path
         )
 
         # sort files
@@ -64,7 +61,7 @@ class Browse:
         files = sorted(files, key=lambda f: f.file_isdir, reverse=True)  # folders always on top
 
         # insert CDUP
-        if data['path'] != '/':
+        if path != '/':
             cdup = Files(
                 file_name='..',
                 file_path='../',
@@ -88,8 +85,8 @@ class Browse:
 
         return {
             'files': files,
-            'path': data['path'],
+            'path': path,
             'resource': resource,
-            'breadcrumbs': [data['resource_id']] + data['path'].split('/')[1:],
+            'breadcrumbs': [resource.server.name] + path.split('/')[1:],
             'file_distribution': file_distribution
         }

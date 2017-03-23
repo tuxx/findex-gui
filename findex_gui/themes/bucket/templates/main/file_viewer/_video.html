@@ -15,13 +15,13 @@
 <div style="background-color:black;">
     <video poster="{{ url_for("static", filename="img/default_thumbnail3.png") }}" controls crossorigin>
         <!-- Video files -->
-        <source src="{{ url_for("relay", parsed={}) }}{{ f.path_file }}" type="video/mp4">
+        <source src="{{ url_for("relay", args={}) }}{{ f.path_file }}" type="video/mp4">
 
         <!-- Text track file -->
         <!--<track kind="captions" label="English" srclang="en" src="https://cdn.selz.com/plyr/1.5/View_From_A_Blue_Moon_Trailer-HD.en.vtt" default>-->
 
         <!-- Fallback for browsers that don't support the <video> element -->
-        <a href="{{ url_for("relay", parsed={}) }}{{ f.path_file }}" download>Download</a>
+        <a href="{{ url_for("relay", args={}) }}{{ f.path_file }}" download>Download</a>
     </video>
 </div>
 

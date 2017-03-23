@@ -56,7 +56,7 @@
 
 <script>
     $(document).ready(function(){
-        var relay_url = "{{ url_for("relay", parsed={}) }}{{ f.path_file }}";
+        var relay_url = "{{ url_for("relay", args={}) }}{{ f.path_file }}";
         $.get(relay_url, function(data){
             $("#viewer").html(`
                 <div class="viewer document">

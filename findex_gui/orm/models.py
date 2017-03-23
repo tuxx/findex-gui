@@ -40,9 +40,7 @@ class Server(base):
     ix_name = Index("ix_resource_name", name)
 
     def __init__(self, address):
-        m = hashlib.md5()
-        m.update(str(uuid.uuid1()))
-        self.name = m.hexdigest()
+        self.name = uuid.uuid1().hex
         self.address = address
 
     def set_valid_name(self, name):

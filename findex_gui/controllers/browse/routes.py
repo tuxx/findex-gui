@@ -18,7 +18,6 @@ from findex_common.utils_time import TimeMagic
 @app.route("/browse")
 def browse_home():
     #@TODO replace with API call @ frontend
-    from datetime import datetime
 
     resources = ResourceController.get_resources()
     for r in resources:
@@ -26,40 +25,40 @@ def browse_home():
         setattr(r, "ago", TimeMagic().ago_dt(r.date_crawl_end))
         setattr(r, "status_human", ResourceStatus().name_by_id(r.meta.status))
 
-    resources = sorted(resources, key=lambda r: r.meta.file_count, reverse=True)
+    resources = sorted(resources, key=lambda k: k.meta.file_count, reverse=True)
     return themes.render("main/browse", resources=resources)
 
 
-@app.route("/browse/<browse:parsed>")
-def browse(parsed):
-    if isinstance(parsed, Exception):
-        return str(parsed)
+@app.route("/browse/<browse:args>")
+def browse(args):
+    resource, path, filename = args
+
     browse = Browse()
-    if parsed["path"].endswith("/"):
-        browser = browse.browse(parsed)
+    if path.endswith("/"):
+        browser = browse.browse(resource, path, filename)
         return themes.render("main/browse_dir", browser=browser)
     else:
-        filename = ntpath.basename(parsed["path"])
-        path = "%s/" % "/".join(parsed["path"].split("/")[:-1])
+        filename = ntpath.basename(path)
+        path = "%s/" % "/".join(path.split("/")[:-1])
 
         try:
-            f = Browse().get_file(resource_id=parsed["resource_id"],
+            f = Browse().get_file(resource_id=resource.id,
                                   file_name=filename,
                                   file_path=path)
-        except Exception:
+        except:
             return gettext("error")
 
-        parsed["path"] = f.path_dir[len(parsed["resource_id"]):]
-        browser = browse.browse(parsed)
+        path = f.path_dir[len(resource.id):]
+        browser = browse.browse(resource, path, filename)
 
         return themes.render("main/file_viewer/viewer", f=f, browser=browser,
                              get_relay_category_by_extension=get_relay_category_by_extension)
 
 
-@app.route("/index_as_csv/<browse:parsed>/")
-def index_as_csv(parsed):
+@app.route("/index_as_csv/<browse:args>/")
+def index_as_csv(args):
     # @TODO: sequentially write response if possible
-    resource = Browse().get_resource(resource_id=parsed["resource_id"])
+    resource, path, filename = args
 
     plain = StringIO()
     plain.write("path,dir,size\n")

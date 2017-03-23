@@ -1,7 +1,7 @@
 import string
 import ntpath
 
-from flask import request, Response, make_response, stream_with_context
+from flask import request, Response, make_response, stream_with_context, send_file
 from flask_babel import gettext
 
 # from findex_gui.controllers.relay.relay import ReverseProxyController
@@ -26,12 +26,20 @@ EXTENSIONS_AND_CONSTRAINTS = {
     },
     "document": {
         "stream": False,
-        "buffer_size": 750000,  # 1MB : 8 Mbps
+        "buffer_size": 750000,  # 1MB
         "max_backend_response": 120000,  # 120KB
         "exts": ["txt", "nfo", "ascii", "py",
                  "js", "css", "md", "html",
                  "htm", "conf", "cfg", "srt",
                  "sub", "sh", "pl", "php"],
+    },
+    "picture": {
+        "stream": False,
+        "buffer_size": 750000*2,  # 2MB,
+        "max_backend_response": 750000*2,
+        "exts": [
+            "jpg", "png", "jpeg", "svg", "gif"
+        ]
     }
 }
 
@@ -43,15 +51,13 @@ def get_relay_category_by_extension(ext):
     return next(iter(extension.items()))
 
 
-@app.route("/relay/<browse:parsed>")
-def relay(parsed):
+@app.route("/relay/<browse:args>")
+def relay(args):
     """Relay a file - must be in `EXTENSIONS_AND_CONSTRAINTS`"""
-
-    filename = ntpath.basename(parsed["path"])
-    path = "%s/" % "/".join(parsed["path"].split("/")[:-1])
+    resource, path, filename = args
 
     try:
-        f = Browse().get_file(resource_id=parsed["resource_id"],
+        f = Browse().get_file(resource_id=resource.id,
                               file_name=filename,
                               file_path=path)
     except:
@@ -115,15 +121,20 @@ def relay(parsed):
     response_bufsize = ext_properties["buffer_size"]
 
     if not ext_properties["stream"]:
-        content = response_backend.content.decode("ascii", errors="ignore")
-        content = [x for x in content if x in string.printable]
-        content = content.replace("\r\n", "\n")
-        content = "\n".join(content.split("\n")[:512])
+        if ext_category == "picture":
+            mimetype = response_backend.headers.get("content-type")
+            e = ""
+            return send_file(response_backend.content, mimetype=mimetype)
+        elif ext_category == "document":
+            content = response_backend.content.decode("ascii", errors="ignore")
+            content = "".join([x for x in content if x in string.printable])
+            content = content.replace("\r\n", "\n")
+            content = "\n".join(content.split("\n")[:512])
 
-        r = make_response(content, 200)
-        r.headers.set("Content-Type", "text/plain; charset=UTF-8")
-        r.headers.set("Content-Disposition", "inline;filename=%s" % filename)
-        return r
+            r = make_response(content, 200)
+            r.headers.set("Content-Type", "text/plain; charset=UTF-8")
+            r.headers.set("Content-Disposition", "inline;filename=%s" % filename)
+            return r
 
     response = Response(
         response=stream_with_context(

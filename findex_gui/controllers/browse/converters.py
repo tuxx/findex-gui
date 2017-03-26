@@ -1,7 +1,6 @@
 import ntpath
 
 from findex_gui import app
-from findex_gui.controllers.relay.proxy import ReverseProxyController
 from findex_gui.controllers.browse.browse import Browse
 from furl import furl
 from werkzeug.routing import BaseConverter
@@ -31,9 +30,16 @@ class BrowseUrlConverter(BaseConverter):
         try:
             resource = Browse().get_resource(resource_id=resource_id)
         except:
-            return Exception("file not found")
+            return Exception("resource not found")
 
-        return resource, path, filename
+        f = None
+        if path and filename:
+            try:
+                f = Browse().get_file(resource=resource, file_name=filename, file_path=path)
+            except:
+                return Exception("file not found")
+
+        return resource, f, path, filename
 
     def to_url(self, values):
         return "+".join(BaseConverter.to_url(value)

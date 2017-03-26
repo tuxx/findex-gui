@@ -10,7 +10,7 @@ import findex_gui.controllers.browse.converters
 from findex_gui import app, themes, db
 from findex_gui.controllers.browse.browse import Browse
 from findex_gui.controllers.resources.resources import ResourceController
-from findex_gui.controllers.relay.routes import get_relay_category_by_extension
+from findex_gui.controllers.relay.relay import ReverseRelayController
 from findex_common.static_variables import FileProtocols, ResourceStatus
 from findex_common.utils_time import TimeMagic
 
@@ -31,34 +31,22 @@ def browse_home():
 
 @app.route("/browse/<browse:args>")
 def browse(args):
-    resource, path, filename = args
+    resource, f, path, filename = args
 
     browse = Browse()
-    if path.endswith("/"):
+    if not filename:
         browser = browse.browse(resource, path, filename)
         return themes.render("main/browse_dir", browser=browser)
-    else:
-        filename = ntpath.basename(path)
-        path = "%s/" % "/".join(path.split("/")[:-1])
 
-        try:
-            f = Browse().get_file(resource_id=resource.id,
-                                  file_name=filename,
-                                  file_path=path)
-        except:
-            return gettext("error")
-
-        path = f.path_dir[len(resource.id):]
-        browser = browse.browse(resource, path, filename)
-
-        return themes.render("main/file_viewer/viewer", f=f, browser=browser,
-                             get_relay_category_by_extension=get_relay_category_by_extension)
+    browser = browse.browse(resource, path, "")
+    return themes.render("main/file_viewer/viewer", f=f, browser=browser,
+                         get_relay_category_by_extension=ReverseRelayController.get_relay_category)
 
 
 @app.route("/index_as_csv/<browse:args>/")
 def index_as_csv(args):
     # @TODO: sequentially write response if possible
-    resource, path, filename = args
+    resource, f, path, filename = args
 
     plain = StringIO()
     plain.write("path,dir,size\n")

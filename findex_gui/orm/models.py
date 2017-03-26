@@ -1,6 +1,5 @@
 import re
 import uuid
-import hashlib
 from datetime import datetime
 from flask import request
 
@@ -25,7 +24,16 @@ base = declarative_base(name="Model")
 force_auto_coercion()
 
 
-class Server(base):
+class _extend(object):
+    def get(self, column, default=None):
+        if hasattr(self, column):
+            val = getattr(self, column)
+            if val:
+                return val
+        return default
+
+
+class Server(base, _extend):
     __tablename__ = "server"
 
     id = Column(Integer, primary_key=True)
@@ -55,7 +63,7 @@ class Server(base):
         }
 
 
-class Resource(base):
+class Resource(base, _extend):
     __tablename__ = "resources"
 
     id = Column(Integer, primary_key=True)
@@ -119,7 +127,7 @@ class Resource(base):
         return re.sub("[^a-zA-Z0-9_\.]", "", resourcename)
 
 
-class ResourceMeta(base):
+class ResourceMeta(base, _extend):
     __tablename__ = "resource_meta"
 
     id = Column(Integer, primary_key=True)
@@ -165,7 +173,7 @@ class ResourceMeta(base):
         }
 
 
-class ResourceGroup(base):
+class ResourceGroup(base, _extend):
     __tablename__ = "resource_group"
 
     id = Column(Integer, primary_key=True)
@@ -216,7 +224,7 @@ task_groups = Table(
 )
 
 
-class Task(base):
+class Task(base, _extend):
     __tablename__ = "tasks"
 
     id = Column(Integer(), primary_key=True)
@@ -249,7 +257,7 @@ class Task(base):
         return out
 
 
-class Crawler(base):
+class Crawler(base, _extend):
     __tablename__ = "crawlers"
 
     id = Column(Integer, primary_key=True)
@@ -262,7 +270,7 @@ class Crawler(base):
     amqp = relationship("Amqp", back_populates="crawlers")
 
 
-class Amqp(base):
+class Amqp(base, _extend):
     __tablename__ = "amqp"
 
     id = Column(Integer, primary_key=True)
@@ -289,7 +297,7 @@ class Amqp(base):
         self.virtual_host = virtual_host
 
 
-class Options(base):
+class Options(base, _extend):
     __tablename__ = "options"
 
     id = Column(Integer, primary_key=True)
@@ -302,7 +310,7 @@ class Options(base):
         self.val = val
 
 
-class Roles(base):
+class Roles(base, _extend):
     __tablename__ = "user_roles"
 
     id = Column(Integer, primary_key=True)
@@ -337,7 +345,7 @@ user_group_resources = Table(
 )
 
 
-class UserGroup(base):
+class UserGroup(base, _extend):
     __tablename__ = "user_groups"
 
     group_id = Column(Integer, primary_key=True)
@@ -368,7 +376,7 @@ class UserGroup(base):
         return re.sub("[^a-zA-Z0-9_\.]", "", groupname)
 
 
-class User(base, AuthUser):
+class User(base, AuthUser, _extend):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
@@ -434,7 +442,7 @@ class User(base, AuthUser):
         return cls.query.filter(cls.username == data["username"]).one()
 
 
-class Files(base):
+class Files(base, _extend):
     __tablename__ = "files"
 
     id = Column(Integer, primary_key=True)

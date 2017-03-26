@@ -1,10 +1,4 @@
 <style>
-    .penis{
-        margin: 0 auto;
-        margin-bottom: 20px;
-        display: block;
-        width:75%;
-    }
     .plyr__video-wrapper{
         -webkit-user-select: none;  /* Chrome all / Safari all */
         -moz-user-select: none;     /* Firefox all */
@@ -24,7 +18,16 @@
         user-select: none;
     }
 
+    #viewer{
+        background-color: black;
+        padding: 20px;
+    }
+
+    #viewer.picture img{
+        margin: 0 auto;
+        display: block;
+    }
 </style>
-<div id="viewer picture">
+<div id="viewer" class="picture">
     <img src="{{ url_for("relay", args={}) }}{{ f.path_file }}"/>
 </div>

@@ -32,9 +32,7 @@ class Browse:
         resource = resource[0]
         return resource
 
-    def get_file(self, resource_id, file_path, file_name):
-        resource = self.get_resource(resource_id)
-
+    def get_file(self, resource, file_path, file_name):
         f = self.findex.get_files(resource_id=resource.id, file_path=file_path, file_name=file_name)
         try:
             return f[0]

@@ -14,3 +14,4 @@ parse-torrent-name==1.1.1
 humanfriendly
 IPy
 pysocks
+python-magic

@@ -3,17 +3,21 @@ import uuid
 from datetime import datetime
 from flask import request
 
+from findex_gui.orm.zombodb import Fulltext
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
-    Column, Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Sequence, Table
+    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Sequence, Table, event, DDL
 )
+
+from findex_gui.orm.zombodb import Fulltext
 
 from flaskext.auth import AuthUser, get_current_user_data
 
 from findex_gui import locales, app
+from findex_gui.orm.zombodb import Column
 from findex_gui.controllers.user.roles import RolesType
 from findex_common.static_variables import ResourceStatus, FileProtocols
 from findex_common.utils import Sanitize, rand_str
@@ -31,6 +35,29 @@ class _extend(object):
             if val:
                 return val
         return default
+
+    @classmethod
+    def get_columns(cls, zombodb_only=False):
+        """
+        Returns the columns for a given sqlalchemy model
+        :param zombodb_only: only return columns marked for zombodb
+        :return: list of columns
+        """
+        columns = list(cls.__table__.columns)
+        if zombodb_only:
+            columns = [column for column in columns if column.info.get('zombodb')]
+        return columns
+
+    @classmethod
+    def get_columns_as_ddl(cls, zombodb_only=False):
+        """
+        Returns the column(s) DDL for a given sqlalchemy model
+        :param zombodb_only: only return columns marked for zombodb
+        :return:
+        """
+        return ",\n\t".join(
+            ["%s %s" % (column.name,
+                        column.type) for column in cls.get_columns(zombodb_only=zombodb_only)])
 
 
 class Server(base, _extend):
@@ -445,23 +472,22 @@ class User(base, AuthUser, _extend):
 class Files(base, _extend):
     __tablename__ = "files"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True, zombodb=True)
 
-    resource_id = Column(Integer())
+    resource_id = Column(Integer(), zombodb=True)
 
     file_name = Column(String())
     file_path = Column(String())
-    file_ext = Column(String(8))
-    file_format = Column(Integer())
-    file_isdir = Column(Boolean())
-    file_size = Column(BigInteger())
+    file_ext = Column(String(8), zombodb=True)
+    file_format = Column(Integer(), zombodb=True)
+    file_isdir = Column(Boolean(), zombodb=True)
+    file_size = Column(BigInteger(), zombodb=True)
 
     file_modified = Column(DateTime())
 
     file_perm = Column(Integer())
 
-    # @TODO: should be an array so we can do ES phrases
-    searchable = Column(String(41))
+    searchable = Column(Fulltext(41), zombodb=True)
 
     ix_resource_id = Index("ix_resource_id", resource_id)
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)

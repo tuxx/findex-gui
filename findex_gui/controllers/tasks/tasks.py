@@ -2,7 +2,7 @@ from findex_gui import db, app
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.user.roles import role_req, check_role
 from findex_gui.orm.models import Task, ResourceGroup
-from findex_gui.orm.connect import Postgres
+#from findex_gui.orm.connect import Postgres
 from findex_common.exceptions import FindexException, DatabaseException
 
 

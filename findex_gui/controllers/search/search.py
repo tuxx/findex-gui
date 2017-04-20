@@ -6,6 +6,7 @@ from sqlalchemy import func
 
 from findex_gui import app, db
 from findex_gui.orm.models import Files, Resource
+from findex_common.crawl.crawl import CrawlController
 from findex_common.static_variables import FileCategories, FileProtocols
 
 
@@ -25,26 +26,20 @@ class SearchResult:
 
 
 class SearchController:
-    def __init__(self):
-        self._iface = self._get_iface()
-
-    def _get_iface(self):
-        #return DatabaseSearchController
-        return ElasticSearchController
-
     def search(self, key, file_categories=[], file_extensions=[], file_size=[], file_type='both', page=0, per_page=30,
                autocomplete=False, lazy_search=False, **kwargs):
 
         result_obj = SearchResult()
-        result_obj.results = self._iface.search(key=key,
-                                                file_categories=file_categories,
-                                                file_extensions=file_extensions,
-                                                file_type=file_type,
-                                                file_size=file_size,
-                                                page=page,
-                                                per_page=per_page,
-                                                autocomplete=autocomplete,
-                                                lazy_search=lazy_search)
+        result_obj.results = self.search(
+            key=key,
+            file_categories=file_categories,
+            file_extensions=file_extensions,
+            file_type=file_type,
+            file_size=file_size,
+            page=page,
+            per_page=per_page,
+            autocomplete=autocomplete,
+            lazy_search=lazy_search)
 
         result_obj.params = {
             'key': key,
@@ -65,14 +60,14 @@ class ElasticSearchController:
     def search(**kwargs):
         # @TODO: filter by protocols / hosts
         # @TODO: replace by sqla - instead of a sqli-prone query builder
-        kwargs["key"] = DatabaseSearchController.make_valid_key(kwargs['key'])
+        kwargs["key"] = CrawlController.make_valid_key(kwargs['key'])
 
         _safe = lambda k: "".join(ch for ch in k if ch.isalnum())
         columns = [m.key for m in Files.__table__.columns]
 
         # start ZomboDB query
         sql = """SELECT %s FROM files WHERE zdb('files', files.ctid) ==>""" % ", ".join(columns)
-        sql += """'(searchable:"*%s*")""" % kwargs["key"]
+        sql += """'(searchable:"%s")""" % kwargs["key"]
 
         if kwargs.get("file_categories"):
             _formats = [str(FileCategories().id_by_name(z)) for z in kwargs['file_categories']]
@@ -131,10 +126,10 @@ class ElasticSearchController:
         return results
 
 
-class DatabaseSearchController:
+class _DatabaseSearchController:
     @staticmethod
     def search(**kwargs):
-        kwargs['key'] = DatabaseSearchController.make_valid_key(kwargs['key'])
+        kwargs['key'] = _DatabaseSearchController.make_valid_key(kwargs['key'])
 
         # @TODO: filter by protocols / hosts
         q = Files.query
@@ -229,14 +224,3 @@ class DatabaseSearchController:
 
         results = [result.fancify() for result in results]
         return results
-
-    @staticmethod
-    def make_valid_key(key):
-        # `Files.searchable` does not have any of these characters, strip them.
-        for clean in ['-', ',', '+', '_', '%']:
-            key = key.replace(clean, ' ')
-
-        if len(key) <= 1:
-            raise Exception(gettext('Search key too short'))
-
-        return key.lower()

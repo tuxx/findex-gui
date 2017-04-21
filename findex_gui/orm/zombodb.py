@@ -41,6 +41,9 @@ class Phrase( _ZdbDomain):
     def get_col_spec(self):
         return "phrase"
 
+    def is_mutable(self):
+        return True
+
 
 class Fulltext(_ZdbDomain):
     def __init__(self, *args):
@@ -49,6 +52,9 @@ class Fulltext(_ZdbDomain):
     def get_col_spec(self):
         return "fulltext"
 
+    def is_mutable(self):
+        return True
+
 
 class FulltextWithShingles(_ZdbDomain):
     def __init__(self, *args):
@@ -56,6 +62,9 @@ class FulltextWithShingles(_ZdbDomain):
 
     def get_col_spec(self):
         return "fulltext_with_shingles"
+
+    def is_mutable(self):
+        return True
 
 
 class Column(_Column):

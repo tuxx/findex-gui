@@ -74,15 +74,15 @@ class Database(object):
             if not self.check_type(type_name="type_files"):
                 raise DatabaseException("Postgres type `type files` not found. "
                                         "Try the following SQL to rebuild the table:\n"
-                                        "\tDROP TABLE files;\n"
-                                        "\tDROP TYPE type_files;\n")
-
+                                        "\tDROP TYPE type_files CASCADE;\n"
+                                        "\tDROP TABLE files;\n")
             # check if the zombodb index is present
             if not self.check_index(table_name="files", index="zdb_idx_files"):
-                raise DatabaseException("Postgres index `zdb_idx_files` not found. "
+                raise DatabaseException("Postgres index `zdb_idx_files` not found "
+                                        "while settings.es_enabled was ``True``.\n"
                                         "Try the following SQL to rebuild the table:\n"
-                                        "\tDROP TABLE files;\n"
-                                        "\tDROP TYPE type_files;\n")
+                                        "\tDROP TYPE type_files CASCADE;\n"
+                                        "\tDROP TABLE files;\n")
         else:
             if self.check_index(table_name="files", index="zdb_idx_files"):
                 raise DatabaseException("Please remove the index `zdb_idx_files` before "
@@ -147,7 +147,7 @@ class Database(object):
         """
         sql = """
         SELECT schemaname, tablename, indexname, indexdef FROM pg_indexes
-        WHERE tablename = :table_name AND indexname = :postgres_index;
+        WHERE tablename = :table_name AND indexname = :index;
         """
         return self.session.execute(text(sql), params={"table_name": table_name, "index": index}).fetchone()
 
@@ -209,6 +209,21 @@ class Database(object):
                 raise DatabaseException(msg_on_activate_error)
             else:
                 logging.debug("Enabled database extension \"%s\"" % extension)
+
+    @staticmethod
+    def query_to_sql(query):
+        """sqlalchemy query to str"""
+        from sqlalchemy.sql import compiler
+        from psycopg2.extensions import adapt as sqlescape
+
+        dialect = query.session.bind.dialect
+        comp = compiler.SQLCompiler(dialect, query.statement)
+        comp.compile()
+        #enc = dialect.encoding
+        params = {}
+        for k, v in comp.params.items():
+            params[k] = sqlescape(v)
+        return comp.string % params
 
     def _getconn(self):
         random.shuffle(self.hosts)

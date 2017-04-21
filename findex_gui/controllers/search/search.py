@@ -30,7 +30,8 @@ class SearchController:
                autocomplete=False, lazy_search=False, **kwargs):
 
         result_obj = SearchResult()
-        result_obj.results = self.search(
+        now = datetime.now()
+        result_obj.results = _ElasticSearchController.search(
             key=key,
             file_categories=file_categories,
             file_extensions=file_extensions,
@@ -40,6 +41,8 @@ class SearchController:
             per_page=per_page,
             autocomplete=autocomplete,
             lazy_search=lazy_search)
+
+        x = (datetime.now() - now).total_seconds()
 
         result_obj.params = {
             'key': key,
@@ -55,19 +58,22 @@ class SearchController:
         return result_obj
 
 
-class ElasticSearchController:
+class _ElasticSearchController:
     @staticmethod
     def search(**kwargs):
         # @TODO: filter by protocols / hosts
-        # @TODO: replace by sqla - instead of a sqli-prone query builder
+        # @TODO: probably prone to SQLi in ES - switch to zombodb DDL when its done
         kwargs["key"] = CrawlController.make_valid_key(kwargs['key'])
+
+        # ignores certain filters
+        ignore_filters = []
 
         _safe = lambda k: "".join(ch for ch in k if ch.isalnum())
         columns = [m.key for m in Files.__table__.columns]
 
         # start ZomboDB query
         sql = """SELECT %s FROM files WHERE zdb('files', files.ctid) ==>""" % ", ".join(columns)
-        sql += """'(searchable:"%s")""" % kwargs["key"]
+        sql += """'searchable:"%s" """ % kwargs["key"]
 
         if kwargs.get("file_categories"):
             _formats = [str(FileCategories().id_by_name(z)) for z in kwargs['file_categories']]
@@ -78,6 +84,24 @@ class ElasticSearchController:
             _extensions = [_safe(z) for z in kwargs['file_extensions'] if _safe(z)]
             if _extensions:
                 sql += " and file_ext=(%s)" % ",".join(_extensions)
+
+        # size
+        if kwargs['file_size'] and 'file_size' not in ignore_filters:
+            try:
+                file_size = kwargs['file_size'].split('-')
+
+                if not len(file_size) == 2:
+                    raise Exception()
+
+                sql += " and file_size "
+                if file_size[0] == '*':
+                    sql += " <= %d" % int(file_size[1])
+                elif file_size[1] == '*':
+                    sql += " >= %d" % int(file_size[0])
+                else:
+                    sql += " >= %d AND file_size <= %d" % (int(file_size[0]), int(file_size[1]))
+            except:
+                pass
 
         sql += "'"
         # end ZomboDB query
@@ -96,8 +120,8 @@ class ElasticSearchController:
                     sql += " offset %d" % _page
 
         now = datetime.now()
-
         sql += ";"
+        print("%s\n%s\n%s" % ("=" * 10, sql, "=" * 10))
 
         try:
             results = db.session.execute(sql)
@@ -129,7 +153,7 @@ class ElasticSearchController:
 class _DatabaseSearchController:
     @staticmethod
     def search(**kwargs):
-        kwargs['key'] = _DatabaseSearchController.make_valid_key(kwargs['key'])
+        kwargs['key'] = CrawlController.make_valid_key(kwargs['key'])
 
         # @TODO: filter by protocols / hosts
         q = Files.query
@@ -141,15 +165,17 @@ class _DatabaseSearchController:
         ignore_filters = []
 
         # filter only files/dirs, or both
-        if 'folders' in kwargs['file_type'] and 'files' in kwargs['file_type']:
-            pass
-        elif 'folders' in kwargs['file_type']:
-            q = q.filter(Files.file_isdir == True)
-
-            # When searching only for directories, ignore filters that are not relevant
-            ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
-        elif 'files' in kwargs['file_type']:
-            q = q.filter(Files.file_isdir == False)
+        # @TODO: folder search disabled for now
+        # if 'folders' in kwargs['file_type'] and 'files' in kwargs['file_type']:
+        #     pass
+        # elif 'folders' in kwargs['file_type']:
+        #     q = q.filter(Files.file_isdir == True)
+        #
+        #     # When searching only for directories, ignore filters that are not relevant
+        #     ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
+        # elif 'files' in kwargs['file_type']:
+        #     q = q.filter(Files.file_isdir == False)
+        q = q.filter(Files.file_isdir == False)
 
         # size
         if kwargs['file_size'] and 'file_size' not in ignore_filters:

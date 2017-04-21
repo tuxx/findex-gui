@@ -492,6 +492,11 @@ class Files(base, _extend):
     ix_resource_id = Index("ix_resource_id", resource_id)
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
 
+    # CREATE INDEX ix_file_searchable_gin ON files USING gin(searchable gin_trgm_ops);
+    # ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
+    #     "searchable": "gin_trgm_ops"
+    # })
+
     def fancify(self):
         # @TODO: remove this shit
         from findex_common.static_variables import FileProtocols, FileCategories

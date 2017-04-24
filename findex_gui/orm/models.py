@@ -3,21 +3,20 @@ import uuid
 from datetime import datetime
 from flask import request
 
-from findex_gui.orm.zombodb import Fulltext
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy_zdb import ZdbColumn
+from sqlalchemy_zdb.types import FULLTEXT
 from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
+
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
-    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Sequence, Table, event, DDL
+    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column
 )
-
-from findex_gui.orm.zombodb import Fulltext
 
 from flaskext.auth import AuthUser, get_current_user_data
 
 from findex_gui import locales, app
-from findex_gui.orm.zombodb import Column
 from findex_gui.controllers.user.roles import RolesType
 from findex_common.static_variables import ResourceStatus, FileProtocols
 from findex_common.utils import Sanitize, rand_str
@@ -472,22 +471,22 @@ class User(base, AuthUser, _extend):
 class Files(base, _extend):
     __tablename__ = "files"
 
-    id = Column(BigInteger, primary_key=True, zombodb=True)
+    id = Column(BigInteger, primary_key=True)
 
-    resource_id = Column(Integer(), zombodb=True)
+    resource_id = ZdbColumn(Integer())
 
     file_name = Column(String())
     file_path = Column(String())
-    file_ext = Column(String(8), zombodb=True)
-    file_format = Column(Integer(), zombodb=True)
-    file_isdir = Column(Boolean(), zombodb=True)
-    file_size = Column(BigInteger(), zombodb=True)
+    file_ext = ZdbColumn(String(8))
+    file_format = ZdbColumn(Integer())
+    file_isdir = ZdbColumn(Boolean())
+    file_size = ZdbColumn(BigInteger())
 
     file_modified = Column(DateTime())
 
     file_perm = Column(Integer())
 
-    searchable = Column(Fulltext(41), zombodb=True)
+    searchable = ZdbColumn(FULLTEXT(41))
 
     ix_resource_id = Index("ix_resource_id", resource_id)
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)

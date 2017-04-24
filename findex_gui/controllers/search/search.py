@@ -1,8 +1,10 @@
+import settings
 from datetime import datetime
 
 from flask_babel import gettext
 from sqlalchemy_utils import escape_like
 from sqlalchemy import func
+from sqlalchemy_zdb import ZdbQuery
 
 from findex_gui import app, db
 from findex_gui.orm.models import Files, Resource
@@ -10,28 +12,25 @@ from findex_common.crawl.crawl import CrawlController
 from findex_common.static_variables import FileCategories, FileProtocols
 
 
-class SearchResult:
-    def __init__(self):
-        self.results = []
-        self.params = {}
-
-    def to_json(self):
-        blob = {
-            'results': [z.to_json() for z in self.results],
-            'params': self.params,
-            'results_count': len(self.results)
-        }
-
-        return blob
-
-
 class SearchController:
-    def search(self, key, file_categories=[], file_extensions=[], file_size=[], file_type='both', page=0, per_page=30,
-               autocomplete=False, lazy_search=False, **kwargs):
-
-        result_obj = SearchResult()
+    @staticmethod
+    def search(key: str, file_categories: list = [], file_extensions: list = [], file_size: list = [],
+               file_type: str = "both", page: int = 0, per_page: int = 30,
+               autocomplete: bool = False):
+        """
+        Search database.
+        :param key: str
+        :param file_categories: categories by name
+        :param file_extensions: extensions by name
+        :param file_size: [from,to] as bytes
+        :param file_type: set to 'folder' for only folders
+        :param page: offset results
+        :param per_page: limit results
+        :param autocomplete: indicates autocomplete was used
+        :return:
+        """
         now = datetime.now()
-        result_obj.results = _ElasticSearchController.search(
+        results = SearchController._search(
             key=key,
             file_categories=file_categories,
             file_extensions=file_extensions,
@@ -39,12 +38,11 @@ class SearchController:
             file_size=file_size,
             page=page,
             per_page=per_page,
-            autocomplete=autocomplete,
-            lazy_search=lazy_search)
+            autocomplete=autocomplete)
+        db_time = (datetime.now() - now).total_seconds()
 
-        x = (datetime.now() - now).total_seconds()
-
-        result_obj.params = {
+        result = SearchResult(results=results)
+        result.params = {
             'key': key,
             'file_categories': file_categories,
             'file_extensions': file_extensions,
@@ -52,111 +50,19 @@ class SearchController:
             'file_size': file_size,
             'page': page,
             'per_page': per_page,
-            'autocomplete': autocomplete
-        }
+            'autocomplete': autocomplete}
+        result.debug["db_time"] = db_time
+        return result
 
-        return result_obj
-
-
-class _ElasticSearchController:
     @staticmethod
-    def search(**kwargs):
-        # @TODO: filter by protocols / hosts
-        # @TODO: probably prone to SQLi in ES - switch to zombodb DDL when its done
-        kwargs["key"] = CrawlController.make_valid_key(kwargs['key'])
-
-        # ignores certain filters
-        ignore_filters = []
-
-        _safe = lambda k: "".join(ch for ch in k if ch.isalnum())
-        columns = [m.key for m in Files.__table__.columns]
-
-        # start ZomboDB query
-        sql = """SELECT %s FROM files WHERE zdb('files', files.ctid) ==>""" % ", ".join(columns)
-        sql += """'searchable:"%s" """ % kwargs["key"]
-
-        if kwargs.get("file_categories"):
-            _formats = [str(FileCategories().id_by_name(z)) for z in kwargs['file_categories']]
-            if _formats:
-                sql += " and file_format=(%s)" % ",".join(_formats)
-
-        if kwargs.get("file_extensions"):
-            _extensions = [_safe(z) for z in kwargs['file_extensions'] if _safe(z)]
-            if _extensions:
-                sql += " and file_ext=(%s)" % ",".join(_extensions)
-
-        # size
-        if kwargs['file_size'] and 'file_size' not in ignore_filters:
-            try:
-                file_size = kwargs['file_size'].split('-')
-
-                if not len(file_size) == 2:
-                    raise Exception()
-
-                sql += " and file_size "
-                if file_size[0] == '*':
-                    sql += " <= %d" % int(file_size[1])
-                elif file_size[1] == '*':
-                    sql += " >= %d" % int(file_size[0])
-                else:
-                    sql += " >= %d AND file_size <= %d" % (int(file_size[0]), int(file_size[1]))
-            except:
-                pass
-
-        sql += "'"
-        # end ZomboDB query
-
-        if kwargs.get("autocomplete") and kwargs.get("autocomplete"):
-            sql += " limit 5"
-        else:
-            if kwargs.get('per_page'):
-                _per_page = kwargs['per_page']
-                if isinstance(_per_page, int):
-                    sql += " limit %d" % _per_page
-
-            if kwargs.get("page"):
-                _page = kwargs.get("page")
-                if isinstance(_page, int):
-                    sql += " offset %d" % _page
-
-        now = datetime.now()
-        sql += ";"
-        print("%s\n%s\n%s" % ("=" * 10, sql, "=" * 10))
-
-        try:
-            results = db.session.execute(sql)
-        except Exception as ex:
-            print("ES search exception: %s" % str(ex) )
-            return []
-        print((datetime.now() - now).total_seconds())
-        data = []
-        for res in results:
-            z = Files()
-            for c in columns:
-                setattr(z, c, res[c])
-            data.append(z)
-
-        results = data
-        resource_ids = set([z.resource_id for z in results])
-        resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
-
-        for result in results:
-            setattr(result, 'resource', resource_obs[result.resource_id])
-
-        results = [result.fancify() for result in results]
-
-        print((datetime.now() - now).total_seconds())
-
-        return results
-
-
-class _DatabaseSearchController:
-    @staticmethod
-    def search(**kwargs):
+    def _search(**kwargs):
         kwargs['key'] = CrawlController.make_valid_key(kwargs['key'])
 
         # @TODO: filter by protocols / hosts
-        q = Files.query
+        if settings.es_enabled:
+            q = ZdbQuery(Files, session=db.session)
+        else:
+            q = Files.query
 
         # only find files that are not in 'temp' mode
         # q = q.filter(Files.resource_id >= 1)
@@ -164,18 +70,13 @@ class _DatabaseSearchController:
         # ignores certain filters
         ignore_filters = []
 
-        # filter only files/dirs, or both
-        # @TODO: folder search disabled for now
-        # if 'folders' in kwargs['file_type'] and 'files' in kwargs['file_type']:
-        #     pass
-        # elif 'folders' in kwargs['file_type']:
-        #     q = q.filter(Files.file_isdir == True)
-        #
-        #     # When searching only for directories, ignore filters that are not relevant
-        #     ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
-        # elif 'files' in kwargs['file_type']:
-        #     q = q.filter(Files.file_isdir == False)
-        q = q.filter(Files.file_isdir == False)
+        # filter only files/dirs
+        if kwargs.get("file_type"):
+            if 'folders' in kwargs["file_type"]:
+                q = q.filter(Files.file_isdir == True)
+                ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
+            else:
+                q = q.filter(Files.file_isdir == False)
 
         # size
         if kwargs['file_size'] and 'file_size' not in ignore_filters:
@@ -225,10 +126,15 @@ class _DatabaseSearchController:
             q = q.filter(Files.file_ext.in_(exts))
 
         # Search
-        if kwargs['autocomplete'] or kwargs['lazy_search'] or app.config['db_file_count'] > 5000000:
-            q = q.filter(Files.searchable.like(escape_like(kwargs['key']) + '%'))
+        if settings.es_enabled:
+            val = kwargs["key"]
         else:
-            q = q.filter(Files.searchable.like('%' + escape_like(kwargs['key']) + '%'))
+            if kwargs['autocomplete'] or app.config['db_file_count'] > 5000000:
+                print("warning: too many rows, enable ES")
+                val = "%s%%" % escape_like(kwargs['key'])
+            else:
+                val = "%%%s%%" % escape_like(kwargs["key"])
+        q = q.filter(Files.searchable.like(val))
 
         # pagination
         q = q.offset(kwargs['page'])
@@ -250,3 +156,18 @@ class _DatabaseSearchController:
 
         results = [result.fancify() for result in results]
         return results
+
+
+class SearchResult:
+    def __init__(self, results):
+        self.results = results
+        self.params = {}
+        self.debug = {}
+
+    def to_json(self):
+        return {
+            "results": [z.to_json() for z in self.results],
+            "params": self.params,
+            "results_count": len(self.results),
+            "debug": self.debug
+        }

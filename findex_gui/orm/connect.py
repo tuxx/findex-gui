@@ -40,6 +40,7 @@ class Database(object):
         self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=settings.app_debug)
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=True,
+                                                   expire_on_commit=True,
                                                    bind=self.engine))
         base.query = self.session.query_property()
 
@@ -209,21 +210,6 @@ class Database(object):
                 raise DatabaseException(msg_on_activate_error)
             else:
                 logging.debug("Enabled database extension \"%s\"" % extension)
-
-    @staticmethod
-    def query_to_sql(query):
-        """sqlalchemy query to str"""
-        from sqlalchemy.sql import compiler
-        from psycopg2.extensions import adapt as sqlescape
-
-        dialect = query.session.bind.dialect
-        comp = compiler.SQLCompiler(dialect, query.statement)
-        comp.compile()
-        #enc = dialect.encoding
-        params = {}
-        for k, v in comp.params.items():
-            params[k] = sqlescape(v)
-        return comp.string % params
 
     def _getconn(self):
         random.shuffle(self.hosts)

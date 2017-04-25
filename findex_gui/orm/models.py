@@ -44,7 +44,7 @@ class _extend(object):
         """
         columns = list(cls.__table__.columns)
         if zombodb_only:
-            columns = [column for column in columns if column.info.get('zombodb')]
+            columns = [c for c in columns if isinstance(c, ZdbColumn)]
         return columns
 
     @classmethod
@@ -55,8 +55,8 @@ class _extend(object):
         :return:
         """
         return ",\n\t".join(
-            ["%s %s" % (column.name,
-                        column.type) for column in cls.get_columns(zombodb_only=zombodb_only)])
+            ["%s %s" % (c.name,
+                        c.type) for c in cls.get_columns(zombodb_only=zombodb_only)])
 
 
 class Server(base, _extend):

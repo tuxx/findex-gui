@@ -72,10 +72,12 @@ class SearchController:
 
         # filter only files/dirs
         if kwargs.get("file_type"):
+            if 'both'in kwargs["file_type"]:
+                pass
             if 'folders' in kwargs["file_type"]:
                 q = q.filter(Files.file_isdir == True)
                 ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
-            else:
+            elif 'files' in kwargs['file_type']:
                 q = q.filter(Files.file_isdir == False)
 
         # size

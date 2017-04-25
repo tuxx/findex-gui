@@ -269,6 +269,13 @@
                             if(name.endsWith(ext)) name = name.slice(0, -ext.length-1);
                             name = name.toLowerCase();
 
+                            // todo: should not have to do this
+                            // replace with a better autocomplete
+                            // popup thingy.
+                            if(name.length > 36){
+                                name = name.slice(0, 36) + "...";
+                            }
+
                             data.push({
                                 'label': name,
                                 'logo': search_controller.icons[item['file_format']]
@@ -370,7 +377,7 @@
 
             // Detect end of page scroll
             $(window).scroll(function() {
-               if ((window.innerHeight + window.scrollY) == document.body.offsetHeight) {
+               if ($(window).scrollTop() + $(window).height() == $(document).height()) {
                     if(!exhausted_results && Object.keys(search_results).length !== 0 && search_results.constructor === Object && search_results['results'].length > 0){
                         $("#loading").show();
                         search_controller.search(search_results['results'].length).then(function(){

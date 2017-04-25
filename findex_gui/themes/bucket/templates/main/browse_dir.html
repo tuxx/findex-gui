@@ -91,43 +91,54 @@
                 {% if browser.files %}
                     {% include 'bucket/templates/main/_file_browser.html' %}
 
-                        <div class="btn-group">
-                            <a class="btn btn-default">Raw</a>
-                            <a class="btn btn-default">JSON</a>
-                            <a href="{{ url_for("index_as_csv", args={})[:-1] }}{{ browser.resource.resource_id }}/" class="btn btn-default">CSV</a>
-                            <script>
-                                $(document).on('click', '.dropdown-menu', function (e) {
-                                  e.stopPropagation();
-                                });
-                            </script>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">{{ _('Fetch') }}
-                                <span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu" style="width:500px;">
-                                <style>
-                                    .fetch_container textarea{
-                                        font-size: 14px;
-                                        min-height: 80px;
-                                        background-color: #e9e9e9;
-                                        color: #989898;
-                                        font-weight: bold;
-                                        padding-top: 10px;
-                                    }
-                                </style>
-                                <div class="fetch_container" style="width:500px !important;">
-                                    <p style="margin-bottom:20px;">
-                                        {{ _('Recursively fetch the current directory') }}.
-                                    </p>
-                                    {% set dir = browser.resource.protocol_human + "://" + browser.resource.server.address + "/" + "/".join(browser.breadcrumbs[1:]) %}
-                                    <h4>wget</h4>
-                                    <textarea style="font-size: 14px;min-height: 80px;">wget --user=anonymous --password='anonymous' -r -nH -nd -np "{{dir}}"</textarea>
-                                    <h4>lftp</h4>
-                                    <textarea style="font-size: 14px;min-height: 80px;">lftp -u anonymous,anonymous -e 'mirror -c' '{{dir}}'</textarea>
-                                </div>
-                            </ul>
+                    <style>
+                    .download_helpers{
+                        padding-left: 0px;
+                        padding-right: 0px;
+                    }
+                    .download_helpers .container{
+                        width: 100%;
+                        background: #f5f5f5;
+                        text-align: center;
+                        overflow:hidden;
+                        border-top: 1px solid #ccc;
+                        border-bottom: 1px solid #ccc;
+                    }
+
+                    .download_helpers .container .helper{
+                        float:left;
+                        width:50%;
+                        color: #969696;
+                        font-size: 12px;
+                        font-family: monospace;
+                        padding: 14px;
+                    }
+                    </style>
+
+                    <div class="row download_helpers">
+                        {% set dir = browser.resource.protocol_human + "://" + browser.resource.server.address + "/" + "/".join(browser.breadcrumbs[1:]) %}
+                        <div class="container">
+                            <div class="helper">
+                                    wget --user=anonymous --password='anonymous' -r -nH -nd -np "{{dir}}"
+                            </div>
+                            <div class="helper">
+                                    lftp -u anonymous,anonymous -e 'mirror -c' '{{dir}}'
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <br>
+                        <div class="col-md-6 nopadding">
+
+                        </div>
+                        <div class="col-md-6 nopadding">
+
+                            <span style="float:right;">
+                                View as: <a href="#">raw</a> / <a href="#">json</a>
+                            </span>
+                        </div>
+                    </div>
                 {% else %}
                     <div class="alert alert-info alert-xs" style="margin-top:20px;max-width:300px;padding: 8px;">
                         <i class="fa fa-bell-o">

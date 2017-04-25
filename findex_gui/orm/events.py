@@ -29,8 +29,7 @@ event.listen(
         USING zombodb(
             zdb('files', ctid),
             zdb(ROW(%s)::type_files))
-        WITH (url='%s')
-        WHERE file_isdir=false;
+        WITH (url='%s');
     """ % (", ".join([column.name for column in Files.get_columns(zombodb_only=True)]),
            settings.es_host)
     ).execute_if(

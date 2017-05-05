@@ -11,7 +11,8 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
-    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column
+    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column,
+    SMALLINT, ARRAY
 )
 
 from flaskext.auth import AuthUser, get_current_user_data
@@ -54,9 +55,12 @@ class _extend(object):
         :param zombodb_only: only return columns marked for zombodb
         :return:
         """
-        return ",\n\t".join(
-            ["%s %s" % (c.name,
-                        c.type) for c in cls.get_columns(zombodb_only=zombodb_only)])
+        rtn = []
+        for column in cls.get_columns(zombodb_only=zombodb_only):
+            if isinstance(column.type, JSONType): column_type = "JSON"
+            else: column_type = column.type
+            rtn.append("%s %s" % (column.name, column_type))
+        return ",\n\t".join(rtn)
 
 
 class Server(base, _extend):
@@ -468,6 +472,34 @@ class User(base, AuthUser, _extend):
         return cls.query.filter(cls.username == data["username"]).one()
 
 
+class MetaImdb(base, _extend):
+    __tablename__ = "meta_imdb"
+
+    id = Column(SMALLINT, primary_key=True)
+
+    title = ZdbColumn(FULLTEXT(), nullable=False)
+    year = ZdbColumn(SMALLINT(), nullable=False)
+    rating = ZdbColumn(SMALLINT(), nullable=False)
+    director = ZdbColumn(FULLTEXT())
+    genres = ZdbColumn(ARRAY(String(32)))
+    actors = ZdbColumn(ARRAY(String(64)))
+    plot = ZdbColumn(String())
+
+
+class MetaImdbActors(base, _extend):
+    __tablename__ = "meta_imdb_actors"
+
+    id = Column(SMALLINT, primary_key=True)
+    actor = ZdbColumn(FULLTEXT())
+
+
+class MetaImdbDirectors(base, _extend):
+    __tablename__ = "meta_imdb_directors"
+
+    id = Column(SMALLINT, primary_key=True)
+    director = ZdbColumn(FULLTEXT())
+
+
 class Files(base, _extend):
     __tablename__ = "files"
 
@@ -488,6 +520,12 @@ class Files(base, _extend):
 
     searchable = ZdbColumn(FULLTEXT(41))
 
+    meta_info = ZdbColumn(JSONType())
+    meta_imdb_id = ZdbColumn(SMALLINT())
+    meta_imdb = None
+    # meta_imdb_id = ZdbColumn(ForeignKey(MetaImdb.id))
+    # meta_imdb = relationship(MetaImdb)
+
     ix_resource_id = Index("ix_resource_id", resource_id)
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
 
@@ -495,6 +533,13 @@ class Files(base, _extend):
     # ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
     #     "searchable": "gin_trgm_ops"
     # })
+
+    def get_meta_imdb(self):
+        if not self.meta_imdb_id:
+            return
+        from findex_gui import db
+        self.meta_imdb = db.session.query(MetaImdb).filter(MetaImdb.id == self.meta_imdb_id).first()
+        return self.meta_imdb
 
     def fancify(self):
         # @TODO: remove this shit

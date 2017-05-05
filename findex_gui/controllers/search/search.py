@@ -58,12 +58,9 @@ class SearchController:
     def _search(**kwargs):
         kwargs['key'] = CrawlController.make_valid_key(kwargs['key'])
 
-        # @TODO: filter by protocols / hosts
-        if settings.es_enabled:
-            q = ZdbQuery(Files, session=db.session)
-        else:
-            q = Files.query
+        q = ZdbQuery(Files, session=db.session) if settings.es_enabled else Files.query
 
+        # @TODO: filter by protocols / hosts
         # only find files that are not in 'temp' mode
         # q = q.filter(Files.resource_id >= 1)
 
@@ -148,7 +145,10 @@ class SearchController:
             q = q.limit(kwargs['per_page'])
 
         # fetch
-        results = q.all()
+        try:
+            results = q.all()
+        except Exception as ex:
+            e = ""
 
         resource_ids = set([z.resource_id for z in results])
         resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}

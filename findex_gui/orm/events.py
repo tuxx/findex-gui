@@ -25,7 +25,7 @@ event.listen(
     Files.__table__,
     "after_create",
     DDL("""
-        CREATE INDEX zdb_idx_files ON files
+        CREATE INDEX idx_zdb_files ON files
         USING zombodb(
             zdb('files', ctid),
             zdb(ROW(%s)::type_files))
@@ -33,6 +33,6 @@ event.listen(
     """ % (", ".join([column.name for column in Files.get_columns(zombodb_only=True)]),
            settings.es_host)
     ).execute_if(
-        callable_=lambda *args, **kwargs: not db.check_index(table_name="files", index="zdb_idx_files") and settings.es_enabled
+        callable_=lambda *args, **kwargs: not db.check_index(table_name="files", index="idx_zdb_files") and settings.es_enabled
     )
 )

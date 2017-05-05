@@ -62,6 +62,7 @@ from findex_gui.controllers.search import routes
 from findex_gui.controllers.browse import routes
 from findex_gui.controllers.relay import routes
 from findex_gui.controllers.user import routes
+from findex_gui.controllers.meta_imdb import routes
 
 from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api
@@ -69,3 +70,4 @@ from findex_gui.controllers.user import api
 from findex_gui.controllers.browse import api
 from findex_gui.controllers.resources import api
 from findex_gui.controllers.tasks import api
+from findex_gui.controllers.meta_imdb import api

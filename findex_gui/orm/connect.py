@@ -46,12 +46,12 @@ class Database(object):
 
     def bootstrap(self):
         # check if es can be reached
-        if settings.es_enabled:
-            try:
-                r = requests.get(settings.es_host, verify=False, timeout=1)
-                r.raise_for_status()
-            except:
-                raise ElasticSearchException("ElasticSearch is down? (%s)" % settings.es_host)
+        # if settings.es_enabled:
+        #     try:
+        #         r = requests.get(settings.es_host, verify=False, timeout=1)
+        #         r.raise_for_status()
+        #     except:
+        #         raise ElasticSearchException("ElasticSearch is down? (%s)" % settings.es_host)
 
         # check necessary postgres extensions
         self.create_extension(
@@ -78,17 +78,17 @@ class Database(object):
                                         "\tDROP TYPE type_files CASCADE;\n"
                                         "\tDROP TABLE files;\n")
             # check if the zombodb index is present
-            if not self.check_index(table_name="files", index="zdb_idx_files"):
-                raise DatabaseException("Postgres index `zdb_idx_files` not found "
+            if not self.check_index(table_name="files", index="idx_zdb_files"):
+                raise DatabaseException("Postgres index `idx_zdb_files` not found "
                                         "while settings.es_enabled was ``True``.\n"
                                         "Try the following SQL to rebuild the table:\n"
                                         "\tDROP TYPE type_files CASCADE;\n"
                                         "\tDROP TABLE files;\n")
         else:
-            if self.check_index(table_name="files", index="zdb_idx_files"):
-                raise DatabaseException("Please remove the index `zdb_idx_files` before "
+            if self.check_index(table_name="files", index="idx_zdb_files"):
+                raise DatabaseException("Please remove the index `idx_zdb_files` before "
                                         "using findex without ES enabled:\n"
-                                        "\tDROP INDEX zdb_idx_files\n"
+                                        "\tDROP INDEX idx_zdb_files\n"
                                         "\tcurl -XDELETE %sdb.schema.table.index" % settings.es_host)
 
         from findex_gui.controllers.user.user import UserController

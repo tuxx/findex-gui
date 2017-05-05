@@ -81,17 +81,20 @@ class Search {
      * @return {Object} params
      */
     static get_urlbar(){
-        let params = {};
-
         let val = document.location.href.substr(document.location.href.indexOf('/search') + 7);
         if(val == '') return {'key': val};
         else val = val.substr(1);
 
+        return Search.get_urlbar_items(val);
+    }
+
+    static get_urlbar_items(val, has_key=true){
+        let params = {};
         val.split("&").forEach(function (part, index) {
             let item = part.split("=");
             var obj = [decodeURIComponent(item[0]), decodeURIComponent(item[1])];
 
-            if (index == 0) {
+            if (index == 0 && has_key) {
                 params['key'] = obj[0];
             } else {
                 if(obj[1].startsWith('[') && obj[1].endsWith(']')){
@@ -105,7 +108,6 @@ class Search {
                 params[obj[0]] = obj[1];
             }
         });
-
         return params;
     }
 

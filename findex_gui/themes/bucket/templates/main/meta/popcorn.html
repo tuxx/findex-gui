@@ -1,6 +1,6 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
-    <script src="/static/js/findex/search.js"></script>
+    <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
     {% import 'bucket/templates/main/meta/_macros.html' as macros %}
 
     <!-- Page Content -->
@@ -50,7 +50,7 @@
                         <div class="col-md-4 no-padding">
                             <div class="panel panel-default">
                                 <div class="panel-heading">{{ result.meta_imdb.title }} ({{ result.meta_imdb.year }})
-                                    <a target="_blank" class="pull-right" href="/search/{{ result.meta_imdb.title }}&cats=[movies]">
+                                    <a target="_blank" class="pull-right" href="{{ application_root }}search/{{ result.meta_imdb.title }}&cats=[movies]">
                                         <button type="submit" class="btn btn-info btn-sm" >
                                             <i class="fa fa-search fa-fw"></i> Link
                                         </button>
@@ -59,18 +59,15 @@
                                 <div class="panel-body">
                                     <p>
                                         {% set plot = result.meta_imdb.plot[:result.meta_imdb.plot.find("BY:")] %}
-                                        {{ plot[:680] }}
-                                        {% if plot|length > 680 %}
+                                        {{ plot[:500] }}
+                                        {% if plot|length > 500 %}
                                              [...]
                                         {% endif %}
                                     </p>
                                     <p>
-                                        Director: <a href="#">{{ result.meta_imdb.director }}</a><br>
+                                        Director: <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a><br>
                                         Actors:
                                         {{ macros.actors_link(result.meta_imdb.actors) }}
-                                    </p>
-                                    <p>
-
                                     </p>
                                 </div>
                                 <div class="panel-footer">
@@ -97,7 +94,7 @@
             placeholder: "Director",
             ajax: {
                 url: function(term, offset){
-                    return `/api/v2/meta/imdb/director/search/${term.term}`;
+                    return `${APPLICATION_ROOT}api/v2/meta/imdb/director/search/${term.term}`;
                 },
                 minimumInputLength: 3,
                 quietMillis: 250,
@@ -121,7 +118,7 @@
             placeholder: "Cast",
             ajax: {
                 url: function(term, offset){
-                    return `/api/v2/meta/imdb/actor/search/${term.term}`;
+                    return `${APPLICATION_ROOT}api/v2/meta/imdb/actor/search/${term.term}`;
                 },
                 minimumInputLength: 3,
                 quietMillis: 250,
@@ -181,7 +178,7 @@
             }
         });
 
-        let args = window.location.pathname.split("/").slice(3).join("/");
+        let args = window.location.pathname.split("/").slice(-1)[0];
         args = Search.get_urlbar_items(args, false);
 
         if(args.hasOwnProperty("year")){
@@ -247,11 +244,12 @@
                     }
                 }
             });
+
             if(url){
                 url = url.slice(0, - 1);
-                window.location.href = `/meta/popcorn/${url}`;
+                window.location.href = `${APPLICATION_ROOT}meta/popcorn/${url}`;
             } else {
-                window.location.href = "/meta/popcorn";
+                window.location.href = `${APPLICATION_ROOT}meta/popcorn`;
             }
         });
     });

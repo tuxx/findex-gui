@@ -11,7 +11,7 @@ from findex_common.exceptions import FindexException
 
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
-
+app.jinja_env.globals['application_root'] = app.config["APPLICATION_ROOT"]
 
 class Theme:
     def __init__(self, name, data):

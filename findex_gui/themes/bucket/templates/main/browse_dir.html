@@ -122,7 +122,7 @@
                                     wget --user=anonymous --password='anonymous' -r -nH -nd -np "{{dir}}"
                             </div>
                             <div class="helper">
-                                    lftp -u anonymous,anonymous -e 'mirror -c' '{{dir}}'
+                                    lftp -u anonymous,anonymous -e 'mirror -c' "{{dir}}"
                             </div>
                         </div>
                     </div>

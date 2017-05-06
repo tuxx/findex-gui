@@ -61,12 +61,23 @@ class MetaImdbController:
         q = ZdbQuery(Files, session=db.session)
         q = q.filter(Files.meta_imdb_id.in_(ids))
         q = q.filter(Files.file_size >= 134217728)
-        q = q.distinct(Files.id)
         results_local = q.all()
+        # @TODO: migrate `meta_info` to JSONB so we get the #> operator
+        # with that we can DISTINCT on nested json key 'title'
+        # e.g: SELECT DISTINCT ON (files.meta_info#>'{ptn, title}')
+        # to prevent from returning duplicates in popcorn view.
+        # for now, lets just do this:
+        _names = []
+        _rtn = []
         for result in results_local:
             result.get_meta_imdb()
+            if result.meta_imdb.title not in _names:
+                _rtn.append(result)
+                _names.append(result.meta_imdb.title)
+        _rtn = sorted(_rtn, key=lambda x: x.meta_imdb.title, reverse=True)
+
         return {
-            "local": results_local,
+            "local": _rtn,
             "imdb": results_imdb
         }
 
@@ -91,10 +102,21 @@ class MetaImdbController:
         q = q.filter(Files.file_size >= 134217728)
 
         results_local = q.all()
+        # @TODO: migrate `meta_info` to JSONB so we get the #> operator
+        # with that we can DISTINCT on nested json key 'title'
+        # e.g: SELECT DISTINCT ON (files.meta_info#>'{ptn, title}')
+        # to prevent from returning duplicates in popcorn view.
+        # for now, lets just do this:
+        _names = []
+        _rtn = []
         for result in results_local:
             result.get_meta_imdb()
+            if result.meta_imdb.title not in _names:
+                _rtn.append(result)
+                _names.append(result.meta_imdb.title)
+        _rtn = sorted(_rtn, key=lambda x: x.meta_imdb.title, reverse=True)
         return {
-            "local": results_local,
+            "local": _rtn,
             "imdb": results_imdb
         }
 

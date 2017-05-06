@@ -18,6 +18,6 @@
 
 {% macro actors_link(actors) %}
     {% for name in actors %}
-        <a target="_blank" href="/meta/popcorn/cast/{{ name }}">{{ name }}</a>,
+        <a target="_blank" href="{{ application_root }}meta/popcorn/cast/{{ name }}">{{ name }}</a>,
     {% endfor %}
 {% endmacro %}

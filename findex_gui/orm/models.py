@@ -535,7 +535,7 @@ class Files(base, _extend):
     # })
 
     def get_meta_imdb(self):
-        if not self.meta_imdb_id:
+        if self.meta_imdb_id is None:
             return
         from findex_gui import db
         self.meta_imdb = db.session.query(MetaImdb).filter(MetaImdb.id == self.meta_imdb_id).first()

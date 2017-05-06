@@ -35,14 +35,14 @@
                         <tr class="clickable text-nowrap" data-id="1" data-href="hi/" rel="popover" title="">
                             <td>
                                 <i class="fa fa-film"></i>
-                                <a href="/search/{{ result.meta_imdb.title }}&cats=[movies]">
+                                <a href="{{ application_root }}search/{{ result.meta_imdb.title }}&cats=[movies]">
                                 {{ result.meta_imdb.title }} ({{ result.meta_imdb.year }})
                                 </a>
                             </td>
 
                             <td><b>{{ result.meta_imdb.rating/10 }}</b></td>
                             <td>{{ macros.actors_link(result.meta_imdb.actors) }}</td>
-                            <td><a href="/meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a></td>
+                            <td><a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a></td>
                             <td>
                             </td>
                         </tr>
@@ -73,7 +73,7 @@
 
                             <td><b>{{ result.rating/10 }}</b></td>
                             <td>{{ macros.actors_link(result.actors) }}</td>
-                            <td><a target="_blank" href="/meta/popcorn/director/{{ result.director }}">{{ result.director }}</a></td>
+                            <td><a target="_blank" href="{{ application_root }}meta/popcorn/director/{{ result.director }}">{{ result.director }}</a></td>
                             <td>
                             </td>
                         </tr>
@@ -87,7 +87,7 @@
             </div>
             <div class="row">
                 <div class="col-md-2 col-md-offset-2 no-padding">
-                    <a href="/meta/popcorn">
+                    <a href="{{ application_root }}meta/popcorn">
                     <button type="submit" class="btn btn-md" style="width:100%;background: #f5f5f5;border: 1px solid #ddd;">
                         <i class="fa fa-chevron-left fa-fw"></i> Popcorn Page
                     </button>

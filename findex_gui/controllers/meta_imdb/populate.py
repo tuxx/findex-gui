@@ -653,7 +653,6 @@ def update(tmp_folder="/tmp/", download_files=True, relink_files=True):
             f.write(file_content)
             f.close()
             print("Saved as %s%s" % (tmp_folder, name))
-            sys.exit()
 
     ratings = Ratings.get(min_votes=10000,
                           min_year=1960,
@@ -716,4 +715,4 @@ def relink():
 if not hasattr(sys, "pypy_translation_info"):
     raise Exception("requires pypy3 to run, not cPython")
 
-update(**CREDS, download_files=True, relink_files=True)
+update(download_files=True, relink_files=True)

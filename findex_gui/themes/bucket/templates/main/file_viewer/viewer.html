@@ -40,7 +40,7 @@
                     </style>
 
                     {% set relay_category = get_relay_category_by_extension(f.file_ext) %}
-                    {% if relay_category %}
+                    {% if relay_category and resource.meta.relay_enabled %}
                         {% set ext_category, ext_properties = relay_category %}
                         {% if ext_category == "video" %}
                             {% include 'bucket/templates/main/file_viewer/_video.html' %}
@@ -92,7 +92,7 @@
                         text-overflow: ellipsis;
                         vertical-align: top;
                         font-size: 12px;
-                        font-weight: bold;
+                        font-weight: normal;
                         font-family: monospace;
                     }
 
@@ -136,13 +136,26 @@
 
                                     <br>
 
-                                    <div style="float:right; display:flex;" class="btn-group">
+                                    <div style="float:left; display:flex;" class="btn-group">
                                         <a class="btn btn-xs btn-primary" href="{{ url_for("browse", args={}) }}{{ f.path_dir }}">Browse</a>
                                         <div style="cursor:default;color:#a8a8a8;" class="btn btn-xs btn-secondary" href="#">{{ ('{:,}').format(f.resource.meta.file_count) }}</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        {% if imdb %}
+                        <div class="well main">
+                            <h3>{{ imdb.title }} ({{ imdb.year }})</h3>
+                            <hr>
+                            Director: <a href="#">{{ imdb.director }}</a>
+                            <br>
+                            Actors:
+                            {% for name in imdb.actors %}
+                                <a href="#">{{ name }}</a>,
+                            {% endfor %}
+                        </div>
+                        {% endif %}
 
                         <div class="well browser">
                             {% include 'bucket/templates/main/_file_browser.html' %}

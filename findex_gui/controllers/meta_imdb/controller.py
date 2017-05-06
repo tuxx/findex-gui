@@ -4,6 +4,7 @@ from findex_gui import db
 from findex_gui.orm.models import MetaImdb, MetaImdbActors, MetaImdbDirectors, Files
 from findex_common.exceptions import SearchException
 
+from sqlalchemy import desc
 from sqlalchemy_zdb import ZdbQuery
 from sqlalchemy_zdb.types import ZdbLiteral
 
@@ -40,6 +41,62 @@ class MetaImdbController:
             q = q.filter(MetaImdbActors.actor.like(ZdbLiteral("%s*" % search)))
         results = q.all()
         return results
+
+    @staticmethod
+    def get_actor_played_in(actor):
+        """Returns a list of movies given an actor/actress"""
+
+        q = ZdbQuery(MetaImdb, session=db.session)
+        q = q.filter(MetaImdb.actors.like(actor))
+        results_imdb = q.all()
+        if not results_imdb:
+            return {
+                "local": [],
+                "imdb": []
+            }
+
+        ids = [z.id for z in results_imdb]
+        results_imdb = sorted(results_imdb, key=lambda x: x.rating, reverse=True)
+
+        q = ZdbQuery(Files, session=db.session)
+        q = q.filter(Files.meta_imdb_id.in_(ids))
+        q = q.filter(Files.file_size >= 134217728)
+        q = q.distinct(Files.id)
+        results_local = q.all()
+        for result in results_local:
+            result.get_meta_imdb()
+        return {
+            "local": results_local,
+            "imdb": results_imdb
+        }
+
+    @staticmethod
+    def get_director_directed(director):
+        """Returns a list of movies given a director"""
+
+        q = ZdbQuery(MetaImdb, session=db.session)
+        q = q.filter(MetaImdb.director.like(director))
+        results_imdb = q.all()
+        if not results_imdb:
+            return {
+                "local": [],
+                "imdb": []
+            }
+
+        ids = [z.id for z in results_imdb]
+        results_imdb = sorted(results_imdb, key=lambda x: x.rating, reverse=True)
+
+        q = ZdbQuery(Files, session=db.session)
+        q = q.filter(Files.meta_imdb_id.in_(ids))
+        q = q.filter(Files.file_size >= 134217728)
+
+        results_local = q.all()
+        for result in results_local:
+            result.get_meta_imdb()
+        return {
+            "local": results_local,
+            "imdb": results_imdb
+        }
 
     @staticmethod
     def search(actors: List = None, genres: List = None, min_rating: int = None,
@@ -100,13 +157,24 @@ class MetaImdbController:
         if not results:
             return []
 
-        ids = [z.id for z in results]
+        ids = list(set([z.id for z in results]))
 
         q = ZdbQuery(Files, session=db.session)
         q = q.filter(Files.meta_imdb_id.in_(ids))
         q = q.filter(Files.file_size >= 134217728)
         q = q.limit(45)
         results = q.all()
+
+        # @TODO: migrate `meta_info` to JSONB so we get the #> operator
+        # with that we can DISTINCT on nested json key 'title'
+        # e.g: SELECT DISTINCT ON (files.meta_info#>'{ptn, title}')
+        # to prevent from returning duplicates in popcorn view.
+        # for now, lets just do this:
+        _names = []
+        _rtn = []
         for result in results:
             result.get_meta_imdb()
-        return results
+            if result.meta_imdb.title not in _names:
+                _rtn.append(result)
+                _names.append(result.meta_imdb.title)
+        return _rtn

@@ -240,6 +240,13 @@
                 search_controller.search();
             });
 
+            $(document).on("keyup", "#search", function(e){
+                if (e.keyCode == 13) {
+                    $("#search").autocomplete( "close" );
+                    search_controller.search();
+                }
+            });
+
             $('#table_view').click(function(){
                 session_set('search_display_view', 'table');
             });

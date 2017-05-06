@@ -16,8 +16,9 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li class="file_counter">{{ ('{:,}').format(env['db_file_count']) }}</li>
-                <li><a href="{{ url_for("search_home")}}">{{ _('Search') }}</a></li>
-                <li><a href="{{ url_for("browse_home")}}">{{ _('Browse') }}</a></li>
+                <li><a href="{{ url_for("search_home")}}"><i class="fa fa-search fa-fw"></i> {{ _('Search') }}</a></li>
+                <li><a href="{{ url_for("browse_home")}}"><i class="fa fa-th-list fa-fw"></i> {{ _('Browse') }}</a></li>
+                <li><a href="{{ url_for("meta_popcorn")}}"><i class="fa fa-film fa-fw"></i> Popcorn</a></li>
                 <li><a href="{{ url_for("research")}}">Research</a></li>
                 <li><a href="#">API</a></li>
             </ul>

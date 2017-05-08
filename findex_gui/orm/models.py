@@ -1,40 +1,69 @@
 import re
 import uuid
 from datetime import datetime
+
+import humanfriendly
 from flask import request
-
-from sqlalchemy_zdb import ZdbColumn
-from sqlalchemy_zdb.types import FULLTEXT
-from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
-
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm.attributes import flag_modified, InstrumentedAttribute
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column,
-    SMALLINT, ARRAY
-)
+    SMALLINT, ARRAY)
+from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
 
-from flaskext.auth import AuthUser, get_current_user_data
-
-from findex_gui import locales, app
-from findex_gui.controllers.user.roles import RolesType
-from findex_common.static_variables import ResourceStatus, FileProtocols
-from findex_common.utils import Sanitize, rand_str
+from sqlalchemy_zdb import ZdbColumn
+from sqlalchemy_zdb.types import FULLTEXT
+from findex_common.static_variables import ResourceStatus, FileProtocols, FileCategories
+from findex_common.utils import rand_str
 from findex_common.utils_time import TimeMagic
 from findex_common import static_variables
+from findex_gui import locales, app
+from findex_gui.controllers.auth.auth import AuthUser, get_current_user_data
+from findex_gui.controllers.user.roles import RolesType
 
-base = declarative_base(name="Model")
+BASE = declarative_base(name="Model")
 force_auto_coercion()
 
 
-class _extend(object):
+class Extended(object):
     def get(self, column, default=None):
         if hasattr(self, column):
             val = getattr(self, column)
             if val:
                 return val
         return default
+
+    def get_json(self, depth=0):
+        if depth > 1:
+            return
+
+        json = {}
+        for k, v in self.__class__.__dict__.items():
+            if k.startswith("_"):
+                continue
+            if not issubclass(v.__class__, (property, InstrumentedAttribute)):
+                continue
+
+            if isinstance(v, InstrumentedAttribute):
+                if "json_exclude" in v.info and v.info["json_exclude"]:
+                    value = "***"
+                else:
+                    value = getattr(self, k)
+            else:
+                value = getattr(self, k)
+
+            if issubclass(value.__class__, BASE):
+                value = value.get_json(depth + 1)
+            if isinstance(value, list):
+                _value = []
+                for _v in value:
+                    if hasattr(_v, "get_json"):
+                        _value.append(_v.get_json(depth + 1))
+                    else:
+                        _value.append(str(_v))
+            json[k] = value
+        return json
 
     @classmethod
     def get_columns(cls, zombodb_only=False):
@@ -62,8 +91,11 @@ class _extend(object):
             rtn.append("%s %s" % (column.name, column_type))
         return ",\n\t".join(rtn)
 
+    def __repr__(self):
+        return "%s" % self.__class__
 
-class Server(base, _extend):
+
+class Server(BASE, Extended):
     __tablename__ = "server"
 
     id = Column(Integer, primary_key=True)
@@ -85,15 +117,8 @@ class Server(base, _extend):
         name = re.sub("[^a-zA-Z0-9_\.]", "", name)
         self.name = name
 
-    def to_json(self):
-        return {
-            "name": self.name,
-            "address": self.address,
-            "description": self.description
-        }
 
-
-class Resource(base, _extend):
+class Resource(BASE, Extended):
     __tablename__ = "resources"
 
     id = Column(Integer, primary_key=True)
@@ -107,7 +132,7 @@ class Resource(base, _extend):
     group_id = Column(Integer, ForeignKey("resource_group.id"))
     group = relationship("ResourceGroup", back_populates="parents")
 
-    created_by_id = Column(Integer, ForeignKey('users.id'))
+    created_by_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User")
 
     description = Column(String(), nullable=True)
@@ -130,42 +155,38 @@ class Resource(base, _extend):
         self.protocol = protocol
         self.basepath = basepath
 
-    def to_json(self):
-        # @TODO: once  here, once in the resourcecontroller.. no need for duplicate code
-        tm = TimeMagic()
-        fp = static_variables.FileProtocols()
-        rs = static_variables.ResourceStatus()
+    @property
+    def protocol_human(self):
+        protocol = static_variables.FileProtocols()
+        return protocol.name_by_id(self.protocol)
 
-        out = {
-            "server": self.server.to_json(),
-            "meta": self.meta.to_json(),
-            "group": self.group.to_json(),
-            "ago": tm.ago_dt(self.date_crawl_end),
-            "status_human": rs.name_by_id(self.meta.status),
-            "protocol_human": fp.name_by_id(self.protocol)
-        }
+    @property
+    def ago(self):
+        return TimeMagic().ago_dt(self.date_crawl_end)
 
-        for k, v in self.__dict__.items():
-            if not k.startswith("_"):
-                if not issubclass(v.__class__, base):
-                    out[k] = v
+    @property
+    def status_human(self):
+        status = static_variables.ResourceStatus()
+        return status.name_by_id(self.meta.status)
 
-        return out
+    @property
+    def resource_id(self):
+        return "%s:%d" % (self.server.address, self.port)
 
     @staticmethod
     def make_valid_resourcename(resourcename):
         return re.sub("[^a-zA-Z0-9_\.]", "", resourcename)
 
 
-class ResourceMeta(base, _extend):
+class ResourceMeta(BASE, Extended):
     __tablename__ = "resource_meta"
 
     id = Column(Integer, primary_key=True)
     file_count = Column(Integer(), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=0)
 
-    auth_user = Column(String, nullable=True)
-    auth_pass = Column(String, nullable=True)
+    auth_user = Column(String, nullable=True, info={"exclude_json": True})
+    auth_pass = Column(String, nullable=True, info={"exclude_json": True})
     auth_type = Column(String, nullable=True)
 
     web_user_agent = Column(String, nullable=True)
@@ -177,6 +198,9 @@ class ResourceMeta(base, _extend):
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(JSONType, nullable=True)
     throttle_connections = Column(Boolean, nullable=False, default=False)
+
+    banner = Column(String(), nullable=True)
+    response_time = Column(Integer(), nullable=True)
 
     def set_auth(self, username, password, auth_type):
         if username and password and not auth_type:
@@ -190,20 +214,8 @@ class ResourceMeta(base, _extend):
     def is_busy(cls):
         return ResourceStatus().name_by_id(cls.busy)
 
-    def to_json(self):
-        return {
-            "auth_user": "***",
-            "auth_pass": "***",
-            "file_count": self.file_count,
-            "auth_type": self.auth_type,
-            "web_user_agent": self.web_user_agent,
-            "recrusive_sizes": self.recursive_sizes,
-            "file_distribution": self.file_distribution,
-            "throttle_connections": self.throttle_connections
-        }
 
-
-class ResourceGroup(base, _extend):
+class ResourceGroup(BASE, Extended):
     __tablename__ = "resource_group"
 
     id = Column(Integer, primary_key=True)
@@ -228,33 +240,23 @@ class ResourceGroup(base, _extend):
             raise Exception("group name cannot be empty or invalid")
         return groupname
 
-    def to_json(self):
-        out = {
-            "name": self.name,
-            "description": self.description,
-            "added": self.added,
-            "removable": self.removable
-        }
-
-        return out
-
 
 task_crawlers = Table(
-    '_task_crawlers',
-    base.metadata,
-    Column('task_id', Integer(), ForeignKey('tasks.id')),
-    Column('id', Integer(), ForeignKey('crawlers.id'))
+    "_task_crawlers",
+    BASE.metadata,
+    Column("task_id", Integer(), ForeignKey("tasks.id")),
+    Column("id", Integer(), ForeignKey("crawlers.id"))
 )
 
 task_groups = Table(
-    '_task_groups',
-    base.metadata,
-    Column('task_id', Integer(), ForeignKey('tasks.id')),
-    Column('id', Integer(), ForeignKey('resource_group.id'))
+    "_task_groups",
+    BASE.metadata,
+    Column("task_id", Integer(), ForeignKey("tasks.id")),
+    Column("id", Integer(), ForeignKey("resource_group.id"))
 )
 
 
-class Task(base, _extend):
+class Task(BASE, Extended):
     __tablename__ = "tasks"
 
     id = Column(Integer(), primary_key=True)
@@ -276,18 +278,8 @@ class Task(base, _extend):
         self.name = name
         self.owner_id = owner.id
 
-    def to_json(self):
-        out = {
-            "name": self.name,
-            "added": self.added,
-            "description": self.description,
-            "owner_id": self.owner_id,
-            "group_id": self.group_id
-        }
-        return out
 
-
-class Crawler(base, _extend):
+class Crawler(BASE, Extended):
     __tablename__ = "crawlers"
 
     id = Column(Integer, primary_key=True)
@@ -300,7 +292,7 @@ class Crawler(base, _extend):
     amqp = relationship("Amqp", back_populates="crawlers")
 
 
-class Amqp(base, _extend):
+class Amqp(BASE, Extended):
     __tablename__ = "amqp"
 
     id = Column(Integer, primary_key=True)
@@ -311,8 +303,8 @@ class Amqp(base, _extend):
     vhost = Column(String, nullable=False)
     queue = Column(String, nullable=False)
 
-    auth_user = Column(String, nullable=False)
-    auth_pass = Column(String)
+    auth_user = Column(String, nullable=False, info={"exclude_json": True})
+    auth_pass = Column(String, info={"exclude_json": True})
 
     added = Column(DateTime(), default=datetime.utcnow)
     crawlers = relationship("Crawler", back_populates="amqp")
@@ -327,7 +319,7 @@ class Amqp(base, _extend):
         self.virtual_host = virtual_host
 
 
-class Options(base, _extend):
+class Options(BASE, Extended):
     __tablename__ = "options"
 
     id = Column(Integer, primary_key=True)
@@ -340,7 +332,7 @@ class Options(base, _extend):
         self.val = val
 
 
-class Roles(base, _extend):
+class Roles(BASE, Extended):
     __tablename__ = "user_roles"
 
     id = Column(Integer, primary_key=True)
@@ -354,28 +346,28 @@ class Roles(base, _extend):
 
 
 user_group_admins = Table(
-    '_user_group_admins',
-    base.metadata,
-    Column('group_id', Integer(), ForeignKey('user_groups.group_id')),
-    Column('id', Integer(), ForeignKey('users.id', ondelete='CASCADE'))
+    "_user_group_admins",
+    BASE.metadata,
+    Column("group_id", Integer(), ForeignKey("user_groups.group_id")),
+    Column("id", Integer(), ForeignKey("users.id", ondelete="CASCADE"))
 )
 
 user_group_members = Table(
-    '_user_group_members',
-    base.metadata,
-    Column('group_id', Integer(), ForeignKey('user_groups.group_id')),
-    Column('id', Integer(), ForeignKey('users.id', ondelete='CASCADE'))
+    "_user_group_members",
+    BASE.metadata,
+    Column("group_id", Integer(), ForeignKey("user_groups.group_id")),
+    Column("id", Integer(), ForeignKey("users.id", ondelete="CASCADE"))
 )
 
 user_group_resources = Table(
-    '_user_group_resources',
-    base.metadata,
-    Column('group_id', Integer(), ForeignKey('user_groups.group_id')),
-    Column('id', Integer(), ForeignKey('resources.id', ondelete='CASCADE'))
+    "_user_group_resources",
+    BASE.metadata,
+    Column("group_id", Integer(), ForeignKey("user_groups.group_id")),
+    Column("id", Integer(), ForeignKey("resources.id", ondelete="CASCADE"))
 )
 
 
-class UserGroup(base, _extend):
+class UserGroup(BASE, Extended):
     __tablename__ = "user_groups"
 
     group_id = Column(Integer, primary_key=True)
@@ -387,7 +379,7 @@ class UserGroup(base, _extend):
 
     created = Column(DateTime(), default=datetime.utcnow, nullable=False)
     description = Column(String(), nullable=True)
-    password = Column(String(32), nullable=True)
+    password = Column(String(32), nullable=True, info={"json_exclude": True})
     invite_only = Column(Boolean, default=False, nullable=False)
 
     def __init__(self, name, owner):
@@ -406,15 +398,15 @@ class UserGroup(base, _extend):
         return re.sub("[^a-zA-Z0-9_\.]", "", groupname)
 
 
-class User(base, AuthUser, _extend):
+class User(BASE, AuthUser, Extended):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
 
     username = Column(String(16), unique=True, nullable=False)
-    realname = Column(String(128), nullable=True)
-    password = Column(String(120), nullable=False)
-    salt = Column(String(16), default=rand_str(16))
+    realname = Column(String(128), nullable=True, info={"json_exclude": True})
+    password = Column(String(120), nullable=False, info={"json_exclude": True})
+    salt = Column(String(16), default=rand_str(16), info={"json_exclude": True})
 
     created = Column(DateTime(), default=datetime.utcnow, nullable=False)
     modified = Column(DateTime(), default=datetime.utcnow, nullable=False)
@@ -423,7 +415,7 @@ class User(base, AuthUser, _extend):
     removable = Column(Boolean, default=True, nullable=False)
     roles = Column("roles", RolesType, nullable=False)
 
-    locale = Column(String(8), default='en')
+    locale = Column(String(8), default="en")
 
     def __init__(self, *args, **kwargs):
         kwargs["username"] = self.make_valid_username(kwargs.get("username"))
@@ -472,7 +464,7 @@ class User(base, AuthUser, _extend):
         return cls.query.filter(cls.username == data["username"]).one()
 
 
-class MetaImdb(base, _extend):
+class MetaImdb(BASE, Extended):
     __tablename__ = "meta_imdb"
 
     id = Column(SMALLINT, primary_key=True)
@@ -486,21 +478,21 @@ class MetaImdb(base, _extend):
     plot = ZdbColumn(String())
 
 
-class MetaImdbActors(base, _extend):
+class MetaImdbActors(BASE, Extended):
     __tablename__ = "meta_imdb_actors"
 
     id = Column(SMALLINT, primary_key=True)
     actor = ZdbColumn(FULLTEXT())
 
 
-class MetaImdbDirectors(base, _extend):
+class MetaImdbDirectors(BASE, Extended):
     __tablename__ = "meta_imdb_directors"
 
     id = Column(SMALLINT, primary_key=True)
     director = ZdbColumn(FULLTEXT())
 
 
-class Files(base, _extend):
+class Files(BASE, Extended):
     __tablename__ = "files"
 
     id = Column(BigInteger, primary_key=True)
@@ -516,7 +508,7 @@ class Files(base, _extend):
 
     file_modified = Column(DateTime())
 
-    file_perm = Column(Integer())
+    file_perm = Column(SMALLINT())
 
     searchable = ZdbColumn(FULLTEXT(41))
 
@@ -534,6 +526,13 @@ class Files(base, _extend):
     #     "searchable": "gin_trgm_ops"
     # })
 
+    def get_json(self, depth=0):
+        json = super(BASE, self).get_json()
+        json["resource"] = {
+            "address": self.resource.server.address
+        }
+        return json
+
     def get_meta_imdb(self):
         if self.meta_imdb_id is None:
             return
@@ -541,40 +540,57 @@ class Files(base, _extend):
         self.meta_imdb = db.session.query(MetaImdb).filter(MetaImdb.id == self.meta_imdb_id).first()
         return self.meta_imdb
 
-    def fancify(self):
-        # @TODO: remove this shit
-        from findex_common.static_variables import FileProtocols, FileCategories
-        obj = Sanitize(self).humanize(humandates=True, humansizes=True,  dateformat="%d %b %Y")
+    @property
+    def file_name_human(self):
+        return "%s%s%s" % (self.file_name,
+                           "." if not self.file_isdir else "",
+                           self.file_ext)
 
-        file_url = "%s%s" % (obj.file_path, obj.file_name)
-        display_url = obj.resource.display_url
+    @property
+    def file_modified_human(self):
+        return self.file_modified.strftime("%d %b %Y")
+
+    @property
+    def file_format_human(self):
+        return FileCategories().name_by_id(self.file_format)
+
+    @property
+    def file_size_human(self):
+        return humanfriendly.format_size(self.file_size)
+
+    @property
+    def path_dir(self):
+        return "%s:%d%s" % (
+            self.resource.server.address,
+            self.resource.port,
+            self.file_path)
+
+    @property
+    def path_file(self):
+        return "%s:%d%s%s%s" % (
+            self.resource.server.address,
+            self.resource.port,
+            self.file_path,
+            self.file_name_human,
+            "/" if self.file_isdir else "")
+
+    @property
+    def path_direct(self):
+        display_url = self.resource.display_url
         if display_url.endswith("/"):
             display_url = display_url[:-1]
 
-        setattr(obj, "path_dir", "%s:%d%s" % (
-            obj.resource.server.address,
-            obj.resource.port,
-            obj.file_path))
-        setattr(obj, "path_file", "%s:%d%s%s%s" % (
-            obj.resource.server.address,
-            obj.resource.port,
-            obj.file_path,
-            obj.file_name,
-            "/" if obj.file_isdir else ""))
-        setattr(obj, "file_format_human", FileCategories().name_by_id(obj.file_format))
         if display_url:
-            setattr(obj, "path_direct", display_url + file_url)
+            return "path_direct", display_url + self.file_url
         else:
-            setattr(obj, "path_direct", "%s://%s:%s%s%s" % (FileProtocols().name_by_id(
-                obj.resource.protocol), obj.resource.server.address, obj.resource.port, obj.resource.basepath, file_url))
+            return "%s://%s:%s%s%s" % (
+                FileProtocols().name_by_id(self.resource.protocol),
+                self.resource.server.address,
+                self.resource.port,
+                self.resource.basepath,
+                self.file_url)
 
-        return obj
+    @property
+    def file_url(self):
+        return "%s%s" % (self.file_path, self.file_name)
 
-    def to_json(self):
-        blob = {k: v for k, v in self.__dict__.items() if not k.startswith("_") and not issubclass(v.__class__, base)}
-
-        blob["resource"] = {
-            "address": self.resource.server.address
-        }
-
-        return blob

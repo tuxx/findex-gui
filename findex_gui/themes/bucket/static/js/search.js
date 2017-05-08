@@ -84,7 +84,7 @@ class bucket_search extends Search {
                               </span> </span>
                             </a>
 
-                            <h1><a class="result-link" href="${"/browse/"+result['path_file']}">${result['file_name']}</a></h1>
+                            <h1><a class="result-link" href="${"/browse/"+result['path_file']}">${result['file_name_human']}</a></h1>
 
                             <p> Path: <a href="${"/browse/"+result['path_dir']}" rel="nofollow"> ${result['file_path']} </a></p>
                             <ul class="result-metadata clearfix">
@@ -135,7 +135,7 @@ class bucket_search extends Search {
             $.each(data['results'], function(index, obj) {
                 let result = obj;
 
-                let file_name = result['file_name'];
+                let file_name = result['file_name_human'];
                 let file_path = result['file_path'];
                 let file_modified_human = result['file_modified_human'];
 
@@ -152,7 +152,7 @@ class bucket_search extends Search {
                 file_modified_human = `${file_modified_human[1]} ${file_modified_human[2]}`;
 
                 buffer += `
-                <tr class="clickable" data-id="" data-href="/browse/${result['file_name']}" rel="popover" title="">
+                <tr class="clickable" data-id="" data-href="/browse/${result['file_name_human']}" rel="popover" title="">
                     <td>
                         <img id="file_icon" src="${url_for("/static/img/default_thumbnail.png")}" data-file_isdir="${result['file_isdir']}" data-file_format="${result['file_format']}" title="">
                         <a href="${url_for("/browse/"+result['path_file'])}">

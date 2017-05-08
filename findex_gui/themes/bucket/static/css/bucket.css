@@ -553,7 +553,7 @@ table.browser>thead>tr{
 }
 
 #popcorn .results .panel .panel-body{
-    min-height:400px;
+    min-height: 360px;
 }
 
 #popcorn .results .panel .panel-footer .rating .pull-right{

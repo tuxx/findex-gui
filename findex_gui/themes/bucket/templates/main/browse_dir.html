@@ -33,7 +33,7 @@
         {% if browser.file_distribution %}
             <div class="file_distribution_container">
                 <span id="header">{{ _('File distribution') }}</span>
-                {% for key, val in browser.file_distribution.iteritems() %}
+                {% for key, val in browser.file_distribution.items() %}
                     <div class="skillbar clearfix " data-percent="{{ val }}%">
                         <div class="skillbar-title"><span>{{ key }}</span></div>
                         <div class="skillbar-bar"></div>

@@ -5,9 +5,9 @@
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
-        <div id="popcorn" class="container-fluid">
+        <div id="popcorn" class="container-fluid" style="max-width: 1400px;">
             <div class="row">
-                <div class="filters col-md-8 col-md-offset-2">
+                <div class="filters col-md-10 col-md-offset-1">
                     <div class="row no-padding">
                         <div class="col-md-4 beetje-padding">
                             <input disabled id="movie_title" placeholder="Movie Title" name="movie_title" class="txtinput">
@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="results col-md-8 col-md-offset-2">
+                <div class="results col-md-10 col-md-offset-1">
                     <div class="row">
                         {% if not results %}
                             <p>
@@ -65,7 +65,8 @@
                                         {% endif %}
                                     </p>
                                     <p>
-                                        Director: <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a><br>
+                                        Director:
+                                        <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a><br>
                                         Actors:
                                         {{ macros.actors_link(result.meta_imdb.actors) }}
                                     </p>
@@ -80,6 +81,10 @@
                                 </div>
                             </div>
                         </div>
+                        {% if loop.index % 3 == 0 %}
+                            </div>
+                            <div class="row">
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>

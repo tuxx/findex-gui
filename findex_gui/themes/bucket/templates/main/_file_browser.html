@@ -18,14 +18,16 @@
                     {% set icon = "fa-folder" %}
                     {% set href = f.file_name + "/" %}
                 {% endif %}
+                {% set file_name = f.file_name %}
             {% else %}
                 {% set icon = "fa-file-text-o" %}
-                {% set href = f.file_name %}
+                {% set file_name = f.file_name_human %}
+                {% set href = f.file_name_human %}
             {% endif %}
 
             <tr class="clickable text-nowrap" data-id="{{f.id}}" data-href="{{href}}" rel="popover" title="">
                 <td><i class="fa {{ icon }}"></i>
-                    <a href="{{ href }}">{{f.file_name}}</a>
+                    <a href="{{ href }}">{{file_name}}</a>
                 </td>
 
                 <td><b>{{f.file_size_human}}</b></td>

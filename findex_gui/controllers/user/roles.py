@@ -77,13 +77,19 @@ class Role:
                 return v
         raise RoleException("unknown role name \"%s\"" % r_name)
 
+    def __repr__(self):
+        return str(self.name)
+
+    def __str__(self):
+        return str(self.rid)
+
     def __eq__(self, other):
         if isinstance(other, int):
             return self.rid == other
         elif isinstance(other, str):
             return self.name == other.upper()
 
-    def to_json(self):
+    def get_json(self, depth=0):
         return {
             "rid": self.rid,
             "name": self.name,

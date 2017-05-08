@@ -149,6 +149,7 @@ class SearchController:
             results = q.all()
         except Exception as ex:
             e = ""
+            raise Exception(ex)
 
         resource_ids = set([z.resource_id for z in results])
         resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
@@ -156,7 +157,6 @@ class SearchController:
         for result in results:
             setattr(result, 'resource', resource_obs[result.resource_id])
 
-        results = [result.fancify() for result in results]
         return results
 
 
@@ -166,9 +166,9 @@ class SearchResult:
         self.params = {}
         self.debug = {}
 
-    def to_json(self):
+    def get_json(self):
         return {
-            "results": [z.to_json() for z in self.results],
+            "results": [z.get_json() for z in self.results],
             "params": self.params,
             "results_count": len(self.results),
             "debug": self.debug

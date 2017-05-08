@@ -21,24 +21,25 @@ class ResourceController:
 
     @staticmethod
     @role_req("RESOURCE_VIEW")
-    def get_resources(uid=None, name=None, address=None, port=None, limit=None, by_owner=None):
-        query = db.session.query(Resource)
+    def get_resources(uid: int = None, name: str = None, address: str = None,
+                      port: int = None, limit: int = None, by_owner: int = None):
+        q = db.session.query(Resource)
 
         if isinstance(by_owner, int):
-            query = query.filter(Resource.created_by_id == by_owner)
+            q = q.filter(Resource.created_by_id == by_owner)
 
         if isinstance(uid, int):
-            query = query.filter(Resource.id == uid)
+            q = q.filter(Resource.id == uid)
 
         if isinstance(address, str):
             qs = Server.query
             server = qs.filter(Server.address == address).first()
             if not server:
                 raise Exception("Could not find server")
-            query = query.filter(Resource.server_id == server.id)
+            q = q.filter(Resource.server_id == server.id)
 
         if isinstance(port, int):
-            query = query.filter(Resource.port == port)
+            q = q.filter(Resource.port == port)
 
         if isinstance(name, str):
             qs = Server.query
@@ -46,21 +47,12 @@ class ResourceController:
             if not server:
                 raise Exception("Could not find server")
 
-            query = query.filter(Resource.server_id == server.id)
+            q = q.filter(Resource.server_id == server.id)
 
         if limit and isinstance(limit, int):
-            query = query.limit(limit)
+            q = q.limit(limit)
 
-        results = query.all()
-        tm = TimeMagic()
-        fp = static_variables.FileProtocols()
-        rs = static_variables.ResourceStatus()
-        for resource in results:
-            setattr(resource, "protocol_human", fp.name_by_id(resource.protocol))
-            setattr(resource, "ago", tm.ago_dt(resource.date_crawl_end))
-            setattr(resource, "status_human", rs.name_by_id(resource.meta.status))
-            setattr(resource, "resource_id", "%s:%d" % (resource.server.address, resource.port))
-        return results
+        return q.all()
 
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_CREATE")

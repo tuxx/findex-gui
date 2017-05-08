@@ -1,3 +1,4 @@
+import os
 import ntpath
 
 from findex_gui import app
@@ -11,9 +12,13 @@ class BrowseUrlConverter(BaseConverter):
     weight = 666
 
     def to_python(self, value):
+        file_name = None
+        file_ext = None
+        file_isdir = value.endswith("/")
+
         value = value.split("/")
         if not len(value) >= 1:
-            return Exception("faulty path")
+            raise Exception("faulty path")
 
         resource_id = value[0]
         path = "/".join(value[1:])
@@ -22,24 +27,28 @@ class BrowseUrlConverter(BaseConverter):
             path = "/%s" % path
 
         if ":" not in resource_id:
-            return Exception("faulty resource uid")
-
-        filename = ntpath.basename(path)
-        path = "%s/" % "/".join(path.split("/")[:-1])
-
+            raise Exception("faulty resource uid")
         try:
             resource = Browse().get_resource(resource_id=resource_id)
         except:
-            return Exception("resource not found")
+            raise Exception("resource not found")
+
+        if not file_isdir:
+            file_name, file_ext = os.path.splitext(ntpath.basename(path))
+
+        file_path = "%s/" % "/".join(path.split("/")[:-1])
 
         f = None
-        if path and filename:
+        if file_path and file_name:
             try:
-                f = Browse().get_file(resource=resource, file_name=filename, file_path=path)
-            except:
-                return Exception("file not found")
+                f = Browse().get_file(resource=resource,
+                                      file_name=file_name,
+                                      file_path=file_path,
+                                      file_ext=file_ext)
+            except Exception as ex:
+                raise Exception("file not found")
 
-        return resource, f, path, filename
+        return resource, f, file_path, file_name
 
     def to_url(self, values):
         return "+".join(BaseConverter.to_url(value)

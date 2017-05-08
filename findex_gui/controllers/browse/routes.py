@@ -18,14 +18,7 @@ from findex_common.utils_time import TimeMagic
 
 @app.route("/browse")
 def browse_home():
-    #@TODO replace with API call @ frontend
-
     resources = ResourceController.get_resources()
-    for r in resources:
-        setattr(r, "protocol_human", FileProtocols().name_by_id(r.protocol))
-        setattr(r, "ago", TimeMagic().ago_dt(r.date_crawl_end))
-        setattr(r, "status_human", ResourceStatus().name_by_id(r.meta.status))
-
     resources = sorted(resources, key=lambda k: k.meta.file_count, reverse=True)
     return themes.render("main/browse", resources=resources)
 

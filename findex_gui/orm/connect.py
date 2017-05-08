@@ -8,7 +8,7 @@ from sqlalchemy.sql import text
 from sqlalchemy import pool
 
 import settings
-from findex_gui.orm.models import base
+from findex_gui.orm.models import BASE
 from findex_common.exceptions import DatabaseException, ElasticSearchException
 
 
@@ -42,7 +42,7 @@ class Database(object):
                                                    autoflush=True,
                                                    expire_on_commit=True,
                                                    bind=self.engine))
-        base.query = self.session.query_property()
+        BASE.query = self.session.query_property()
 
     def bootstrap(self):
         # check if es can be reached
@@ -68,7 +68,7 @@ class Database(object):
 
         # create the tables, types and indexes
         import findex_gui.orm.events
-        base.metadata.create_all(bind=self.engine)
+        BASE.metadata.create_all(bind=self.engine)
 
         if settings.es_enabled:
             # check required types for es

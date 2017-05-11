@@ -30,9 +30,20 @@
             </div>
         </li>
 
+        <div class="container">
+            <span id="header">Server Information</span>
+            <b>Address: </b>{{ browser.resource.server.address }}<br>
+            <b>Port: </b>{{ browser.resource.port }}<br>
+            <b>Protocol: </b>{{ browser.resource.protocol_human }}<br>
+            <b>Added: </b>{{ browser.resource. }}
+            <br>
+            <b>Files: </b>{{ browser.resource.meta.file_count }}
+        </div>
+
         {% if browser.file_distribution %}
-            <div class="file_distribution_container">
+            <div class="container">
                 <span id="header">{{ _('File distribution') }}</span>
+                <div style="margin-top:8px;">
                 {% for key, val in browser.file_distribution.items() %}
                     <div class="skillbar clearfix " data-percent="{{ val }}%">
                         <div class="skillbar-title"><span>{{ key }}</span></div>
@@ -40,6 +51,7 @@
                         <div class="skill-bar-percent">{{ val }}%</div>
                     </div>
                 {% endfor %}
+                </div>
             </div>
         {% endif %}
 

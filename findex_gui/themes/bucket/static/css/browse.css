@@ -1,12 +1,16 @@
-#sidebar-wrapper .file_distribution_container{
+#sidebar-wrapper .container{
     padding-left: 14px;
     padding-right: 14px;
+	font-size:11px;
+	margin-bottom:12px;
+	color: #969696;
 }
-#sidebar-wrapper .file_distribution_container span#header{
+#sidebar-wrapper span#header{
 	font-weight: bold;
     color: #5D5D5D;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     display: block;
+	font-size: 14px;
 }
 .skillbar {
 	position:relative;
@@ -16,6 +20,7 @@
 	background:#eee;
 	height:16px;
 	border-radius:3px;
+
 	-moz-border-radius:3px;
 	-webkit-border-radius:3px;
 	-webkit-transition:0.4s linear;

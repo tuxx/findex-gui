@@ -158,10 +158,14 @@ class Resource(BASE, Extended):
     @property
     def protocol_human(self):
         protocol = static_variables.FileProtocols()
-        return protocol.name_by_id(self.protocol)
+        return protocol.name_by_id(self.protocol).upper()
 
     @property
-    def ago(self):
+    def date_added_human(self):
+        return TimeMagic().ago_dt(self.date_added.strftime)
+
+    @property
+    def date_crawl_end_human(self):
         return TimeMagic().ago_dt(self.date_crawl_end)
 
     @property
@@ -492,6 +496,28 @@ class MetaImdbDirectors(BASE, Extended):
     director = ZdbColumn(FULLTEXT())
 
 
+class Post(BASE, Extended):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True)
+
+    created_by_id = Column(Integer, ForeignKey("users.id"))
+    created_by = relationship("User")
+
+    title = Column(String(), nullable=False)
+    content = Column(String(), nullable=False)
+    date_added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+
+    def __init__(self, created_by, content, title):
+        self.created_by = created_by
+        self.content = content
+        self.title = title
+
+    @property
+    def ago(self):
+        return TimeMagic().ago_dt(self.date_added)
+
+
 class Files(BASE, Extended):
     __tablename__ = "files"
 
@@ -581,7 +607,7 @@ class Files(BASE, Extended):
             display_url = display_url[:-1]
 
         if display_url:
-            return "path_direct", display_url + self.file_url
+            return display_url + self.file_url
         else:
             return "%s://%s:%s%s%s" % (
                 FileProtocols().name_by_id(self.resource.protocol),
@@ -592,5 +618,5 @@ class Files(BASE, Extended):
 
     @property
     def file_url(self):
-        return "%s%s" % (self.file_path, self.file_name)
+        return "%s%s" % (self.file_path, self.file_name_human)
 

@@ -38,7 +38,7 @@ class Database(object):
 
     def connect(self):
         self.engine = create_engine('postgresql+psycopg2://', pool=self.pool, echo=settings.app_debug)
-        self.session = scoped_session(sessionmaker(autocommit=False,
+        self.session = scoped_session(sessionmaker(autocommit=True,
                                                    autoflush=True,
                                                    expire_on_commit=True,
                                                    bind=self.engine))

@@ -1,8 +1,7 @@
 import six
+import inspect
 import sqlalchemy
 import json
-from flask import request
-
 from sqlalchemy_utils.types.json import JSONType, has_postgres_json
 
 from findex_common.exceptions import RoleException
@@ -142,12 +141,13 @@ def check_role(requirements, **kwargs):
     if "skip_authorization" in kwargs:
         return
 
-    def check_requirements(user):
+    def check_requirements(_user):
         for requirement in requirements:
-            roles = [r.name for r in user.roles]
+            roles = [r.name for r in _user.roles]
             if requirement not in roles:
-                raise RoleException("current user does not have the required role \"%s\"" % requirement)
-
+                raise RoleException("current user does not have the "
+                                    "required role \"%s\"" % requirement)
+        return _user
     try:
         user = UserController.get_current_user(apply_timeout=False)
     except RuntimeError:
@@ -155,14 +155,24 @@ def check_role(requirements, **kwargs):
 
     if user:
         if user.admin:
-            return
+            return user
         return check_requirements(user)
 
 
 def role_req(*requirements):
+    """
+    Decorator for role requirements. Injects the
+    current logged in user when the function signature
+    of `f` contains positional argument `current_user`.
+    :param requirements: tuple of requirements, see `role_mapping`
+    :return: wrapped function
+    """
     def wrap(f):
         def wrapped_f(*args, **kwargs):
-            check_role(requirements, **kwargs)
+            user = check_role(requirements, **kwargs)
+            f_args = dict(inspect.signature(f).parameters)
+            if "current_user" in f_args and f_args.get("current_user").default == inspect._empty:
+                kwargs["current_user"] = user
             return f(*args, **kwargs)
         return wrapped_f
     return wrap

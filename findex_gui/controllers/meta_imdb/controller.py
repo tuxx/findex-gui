@@ -149,7 +149,7 @@ class MetaImdbController:
             if not isinstance(limit, int):
                 raise Exception("limit must be int")
 
-        if actors or genres or min_rating or director:
+        if actors or genres or min_rating or director or year:
             q = ZdbQuery(MetaImdb, session=db.session)
         else:
             q = db.session.query(Files)

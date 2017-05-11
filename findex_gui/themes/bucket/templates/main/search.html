@@ -269,7 +269,7 @@
                     }).done(function (response) {
                         let data = [];
 
-                        response['results'].forEach(function(item){
+                        response.data.results.forEach(function(item){
                             let name = item['file_name'];
                             let ext = item['file_ext'];
 

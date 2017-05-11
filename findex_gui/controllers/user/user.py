@@ -1,5 +1,5 @@
 from flask import request, session
-from flaskext.auth.auth import get_current_user_data
+from findex_gui.controllers.auth.auth import get_current_user_data
 
 from findex_gui import db, locales, auth
 from findex_gui.orm.models import User, UserGroup
@@ -107,21 +107,22 @@ class UserController:
         if not hasattr(request, "authorization"):
             raise FindexException("request object has no attribute authorization")
         bauth = request.authorization
-        if 'username' not in bauth or 'password' not in bauth or not bauth['username'] or not bauth['password']:
-            raise FindexException('username/password not supplied')
-        username = bauth['username']
-        password = bauth['password']
+        if "username" not in bauth or "password" not in bauth or not bauth["username"] or not bauth["password"]:
+            raise FindexException("username/password not supplied")
+        username = bauth["username"]
+        password = bauth["password"]
+
         try:
             user = User.query.filter(User.username == username).one()
             if not user:
                 raise AuthenticationException("bad username/password combination")
-        except:
+        except Exception as e:
             raise AuthenticationException("bad username/password combination")
 
         password += user.salt
-        if auth.hash_algorithm(password).hexdigest() == user.password:
+        if auth.hash_algorithm(password.encode("UTF-8")).hexdigest() == user.password:
             if inject:
-                setattr(request, 'user', user)
+                setattr(request, "user", user)
             return user
         else:
             raise AuthenticationException("bad username/password combination")

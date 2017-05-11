@@ -1,84 +1,53 @@
 # Findex-GUI
 
-Findex is a platform for finding and indexing files over multiple protocols. The platform consists of 3 individual python packages:
+Findex is a high performance platform for finding and indexing files. It tries to be fast, customizable and scaleable. 
 
-  - `findex-gui` - provides the front-end in the form of a `flask` web application.
-  - `findex-crawl` - provides the crawl bot(s) that are responsible for crawling resources.
-  - `findex-common` - provides utitilies used by both the GUI and crawl instances.
+[![pic](http://i.imgur.com/WpTTkxx.png)](w0w)
 
-### Features
+In practical terms, Findex is an over-engineered FTP crawler. You may observe a live example over at [http://findex.cedsys.nl](http://findex.cedsys.nl)
 
-  - Crawl HTTP open directories (webdav)(BASIC/DIGEST)
-  - Crawl FTP servers
-  - Distributed crawling with RabbitMQ AMQP messaging
-  - Bootstrap 3.1.1 file browser.
+### Goals
+- Support the following protocols: FTP, HTTP, SMB (windows), AFP (apple).
+- 100% self-hosted, no third-party assets from CDNs to guarantee privacy.
+- Should have a API that people can freely query against.
+- Searches should be fast (< 500ms), even when the database has more than 100 million rows and at the same time not impose ridiculous hardware requirements.
+- Should run on sane software: Linux, Postgres, ECMAScript 6, etc.
+- 100% open-source, MIT licensed.
+
+### Software stack
+In order to meet the requirements set above, Findex has been designed in a modular fashion for maximum scalability. There are many components involved, some of which are listed below:
+
+- [Postgres 9.5](https://www.postgresql.org/): The main database application.
+- [RabbitMQ](https://www.rabbitmq.com/): AMQP message broker provides a way to manage crawl jobs. Individual crawlers subscribe on a queue and may accept or reject incoming crawl tasks.
+- [ElasticSearch 1.7](https://www.elastic.co/): While Postgres provides excellent full-text search capabilities through the GIN index, ES is better suited when it comes to Big Data™.
+- [ZomboDB](https://github.com/zombodb/zombodb): A Postgres module that syncs data to ElasticSearch.
+- [Flask](http://flask.pocoo.org/): A microframework used by the web application. Chosen for its simplicity.
+- [Twisted](https://twistedmatrix.com/trac/): Asynchronous networking library that powers the crawl bots.
+
+As for the requirements:
+  - Linux (Debian >= **7** | Ubuntu >= **11** | CentOS >= **6**)
+  - Python >= **3.5**
+  - Postgres **9.5**
+  - ElasticSearch **1.7.6**
+  - RabbitMQ >= **3.5.4**
 
 ## Status
-Still in development, don't bother trying to get this to run.
 
+Findex is still in development, however the following things *kinda* work:
 
-**Backend**
+- Protocols supported: FTP/HTTP
+- [Searching](http://i.imgur.com/WpTTkxx.png) (file name, category, size, extension)
+- [File browsing](http://i.imgur.com/6UkGBzB.png)
+- [IMDB powered 'popcorn' view](http://i.imgur.com/8nk8rbY.png) (release year, director, actors/actresses, genre)
+- User login / registration
+- Creating news posts
+- Reverse proxy from FTP/HTTP backends to allow video streaming through HTML5 elements
 
- Feature  |  Status  | Details
----|:---:|---|
- API  | :white_check_mark: | Supported: Search, Browse, Session, Admin
- Users | :white_check_mark: | Supported: Register, Login
- Roles | :clock2: | In development
- Sessions | :white_check_mark: | Supported
- Admin Panel  | :clock2: | In development
- I18n Translations | :white_check_mark: | Supported: English, Dutch
- In-App Crawling  | :clock2: | In development
- RAW/JSON Interface | :clock2: | In development
- WebDav Interface  | :x: | Not yet
-
-
-**Frontend**
-
- Feature  |  Status  | Details
----|:---:|---|
-Themes  | :white_check_mark:  |  Custom themes supported
-Bootstrap | :white_check_mark:  |  v3
-jQuery  | :white_check_mark:  |  v1.11.3
-Grunt | :x: | Not yet
-SCSS/Sass | :x: | Not yet
-
-
-**Crawling**
-
- Feature  |  Status  | Details
----|:---:|---|
-HTTP|:white_check_mark:|Supported
-FTP|:white_check_mark:|Supported
-Direct Connect|:x:| Not yet
-SMB|:x:| Not yet
-SSH|:x:| Not yet
-
-
-**File Metadata and Performance**
-
-| Feature  | Status  | Details  |
-|---|---|---|
-Metadata|:clock2:| Not yet
-DB Pools|:white_check_mark:| Supported
-ES backend|:clock2:| In development
-
-
-### Example
-[http://findex.cedsys.nl](http://findex.cedsys.nl)
-
-### Requirements:
-  - Linux (Debian >= **7** | Ubuntu >= **11** | CentOS >= **6**)
-  - Python == ** 2.7.* **
-  - Postgres == **9.5**
-  - RabbitMQ >= **3.5.4** (optional)
-  - `findex-common` >= **0.3.4**
-
-### Installation
-Not yet available.
+I'd advice against trying to get this to run before any documentation has been written.
 
 ### Authors
 Maintained by Sander Ferdinand of [CedSys](http://www.cedsys.nl).
 
 ### License
 
-`findex-gui` is distributed under the MIT license.
+MIT

@@ -175,6 +175,9 @@ class MetaImdbController:
         if year:
             q = q.filter(MetaImdb.year == year)
 
+        if director:
+            q = q.filter(MetaImdb.director == director)
+
         results = q.all()
         if not results:
             return []

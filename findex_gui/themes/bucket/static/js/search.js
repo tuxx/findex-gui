@@ -21,6 +21,18 @@ class bucket_search extends Search {
 
     /* Required */
     parse_results(data){
+        if(!data.hasOwnProperty("data")){
+            bucket_search.error("Something went wrong");
+            throw "bleh";
+        }
+
+        if(!data.status){
+            bucket_search.error(data.data);
+            throw "bleh";
+        }
+
+        data = data.data;
+
         if(!this._loading){
             this._loading = true;
         }
@@ -354,8 +366,22 @@ class bucket_search extends Search {
     }
 
     error(msg){
-        // @TO-DO: autocomplete should use this func for errors
-        // maybe throw an exception, do some cool stuff, etc.
-        $('#search_header').text(msg);
+        let val = null;
+        if(typeof msg === "object"){
+            if(msg.hasOwnProperty("data")) {
+                val = msg.data;
+            } else if(msg.hasOwnProperty("responseText")){
+                val = msg.responseText;
+            } else {
+                debugger;
+                val = "Could not get repr for type Object";
+            }
+        } else {
+            val = msg;
+        }
+
+        $('#search_header').html(`
+        <span style="color:red">Error: </span> <small>${val}</small>
+        `);
     }
 }

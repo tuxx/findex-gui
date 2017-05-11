@@ -161,11 +161,11 @@ class Resource(BASE, Extended):
         return protocol.name_by_id(self.protocol).upper()
 
     @property
-    def date_added_human(self):
-        return TimeMagic().ago_dt(self.date_added.strftime)
+    def date_added_ago(self):
+        return TimeMagic().ago_dt(self.date_added)
 
     @property
-    def date_crawl_end_human(self):
+    def date_crawl_end_ago(self):
         return TimeMagic().ago_dt(self.date_crawl_end)
 
     @property

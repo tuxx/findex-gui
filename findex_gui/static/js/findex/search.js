@@ -170,6 +170,8 @@ class Search {
 
         return FindexGui.api(_url, "POST", _data).then(function(data){
             this.parse_results(data);
+        }.bind(this)).fail(function(data){
+            this.error(data);
         }.bind(this));
     }
 }

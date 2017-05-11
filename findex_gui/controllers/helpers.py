@@ -1,5 +1,7 @@
-from flask import request, url_for, jsonify
+from functools import wraps
 from datetime import datetime
+
+from flask import request, url_for, jsonify
 
 from findex_gui import app
 from findex_common.utils import decorator_parametrized
@@ -16,14 +18,18 @@ def findex_api(f, *api_arguments):
      On success: return any of: str, int, float, list, dict.
      On failure: return an exception
     """
-    def rep():
-        incoming = {}
-        outgoing = {}
+    @wraps(f)
+    def rep(*args, **kwargs):
+        request_data = {}
+        data = {}
+        if not kwargs:
+            kwargs = {}
+
         if request.method == "POST":
             if request.form:
-                incoming = request.form.to_dict()
+                request_data = request.form.to_dict()
             elif request.json:
-                incoming = request.json
+                request_data = request.json
             else:
                 raise Exception("Wrong parameters")
         elif request.method == "GET":
@@ -33,8 +39,8 @@ def findex_api(f, *api_arguments):
             raise Exception("unsupported method")
 
         for api_argument in api_arguments:
-            if api_argument.key in incoming:
-                value = incoming.get(api_argument.key)
+            if api_argument.key in request_data:
+                value = request_data.get(api_argument.key)
 
                 if type(value) != api_argument.type:
                     if issubclass(api_argument.type, int):
@@ -50,16 +56,21 @@ def findex_api(f, *api_arguments):
                         raise Exception("wrong type for argument \"%s\", "
                                         "should be of type \"%s\"" % (api_argument.key,
                                                                       str(api_argument.type)))
-                outgoing[api_argument.key] = value
+                data[api_argument.key] = value
             else:
                 if api_argument.required:
                     raise Exception("argument \"%s\" is required" % api_argument.key)
 
-        api_result = f(outgoing)
-        if isinstance(api_result, (int, float, str, list, dict, datetime)):
+        kwargs["data"] = data
+
+        try:
+            api_result = f(*args, **kwargs)
+            if not isinstance(api_result, (int, float, str, list, dict, datetime)):
+                raise Exception("Bad return type for api_result")
             return jsonify({"status": True, "data": api_result})
-        else:
-            return jsonify({"status": False, "data": api_result})
+        except Exception as ex:
+            return jsonify({"status": False, "data": str(ex)}), 500
+
     return rep
 
 
@@ -70,7 +81,7 @@ class ApiArgument:
         if "type" not in kwargs or not kwargs["type"]:
             raise Exception("type required")
 
-        if not issubclass(kwargs["type"], (int, dict, float, str, datetime)):
+        if not issubclass(kwargs["type"], (int, dict, float, str, list, datetime)):
             raise Exception("bad type for argument %s" % self.key)
 
         if "help" not in kwargs or not kwargs["help"]:

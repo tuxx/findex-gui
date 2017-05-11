@@ -2,9 +2,8 @@ from flask import abort, request
 from functools import wraps
 
 from flask_babel import gettext
-from flaskext.auth import get_current_user_data
-from flaskext.auth.auth import not_logged_in
 
+from findex_gui.controllers.auth.auth import get_current_user_data, not_logged_in
 from findex_gui.controllers.user.user import UserController
 
 

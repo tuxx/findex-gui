@@ -3,7 +3,7 @@ Module containing functions and classes specific to the permission model.
 """
 
 from flask import current_app
-from flaskext.auth.auth import get_current_user_data, not_logged_in
+from findex_gui.controllers.auth.auth import get_current_user_data, not_logged_in
 
 
 def has_permission(role, resource, action):

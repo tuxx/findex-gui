@@ -35,7 +35,7 @@ import findex_gui.controllers.routes.errors
 import findex_gui.controllers.routes.before_request
 
 # init user authentication
-from flaskext.auth import Auth
+from findex_gui.controllers.auth.auth import Auth
 import hashlib
 auth = Auth(app)
 auth.user_timeout = 604800
@@ -71,3 +71,4 @@ from findex_gui.controllers.browse import api
 from findex_gui.controllers.resources import api
 from findex_gui.controllers.tasks import api
 from findex_gui.controllers.meta_imdb import api
+from findex_gui.controllers.posts import api

@@ -1,12 +1,13 @@
 import flask
 from flask import request
 
-from flaskext.auth import get_current_user_data
+# @TODO: remove flask_restful, use @findex_api instead
 from flask_restful import reqparse, abort
 from flask_restful import Resource
 
 from findex_gui import app, locales, appapi
 from findex_gui.orm.models import User
+from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
 

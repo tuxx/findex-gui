@@ -1,9 +1,9 @@
 import os
 from flask import render_template, session, url_for
-from flask.ext.auth import get_current_user_data
-from findex_gui.controllers.user.user import UserController
 
 from findex_gui import app
+from findex_gui.controllers.auth.auth import get_current_user_data
+from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.options.options import OptionsController
 from findex_gui.orm.models import User
 from findex_common import utils
@@ -12,6 +12,7 @@ from findex_common.exceptions import FindexException
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 app.jinja_env.globals['application_root'] = app.config["APPLICATION_ROOT"]
+
 
 class Theme:
     def __init__(self, name, data):

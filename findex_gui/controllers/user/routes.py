@@ -1,5 +1,5 @@
 from flask import request, redirect, flash, url_for
-from flaskext.auth.auth import get_current_user_data
+from findex_gui.controllers.auth.auth import get_current_user_data
 from flask_babel import gettext, lazy_gettext
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, SelectField, IntegerField
 

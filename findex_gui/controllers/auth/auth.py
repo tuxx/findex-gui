@@ -9,7 +9,7 @@ import datetime
 from functools import partial
 from flask import session, abort, current_app, redirect, url_for
 
-DEFAULT_HASH_ALGORITHM = hashlib.sha1
+DEFAULT_HASH_ALGORITHM = hashlib.sha256
 
 DEFAULT_USER_TIMEOUT = 3600
 

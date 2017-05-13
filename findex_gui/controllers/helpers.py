@@ -102,6 +102,10 @@ def redirect_url(default='index'):
 
 
 @app.after_request
-def after_request(response):
-    response.headers.add('Accept-Ranges', 'bytes')
-    return response
+def after_request(r):
+    r.headers.add('Accept-Ranges', 'bytes')
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r

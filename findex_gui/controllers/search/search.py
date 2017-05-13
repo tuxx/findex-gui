@@ -56,12 +56,12 @@ class SearchController:
 
     @staticmethod
     def _search(**kwargs):
-        kwargs['key'] = CrawlController.make_valid_key(kwargs['key'])
+        kwargs["key"] = CrawlController.make_valid_key(kwargs["key"])
 
         q = ZdbQuery(Files, session=db.session) if settings.es_enabled else Files.query
 
         # @TODO: filter by protocols / hosts
-        # only find files that are not in 'temp' mode
+        # only find files that are not in "temp" mode
         # q = q.filter(Files.resource_id >= 1)
 
         # ignores certain filters
@@ -69,25 +69,25 @@ class SearchController:
 
         # filter only files/dirs
         if kwargs.get("file_type"):
-            if 'both'in kwargs["file_type"]:
+            if "both"in kwargs["file_type"]:
                 pass
-            if 'folders' in kwargs["file_type"]:
+            if "folders" in kwargs["file_type"]:
                 q = q.filter(Files.file_isdir == True)
-                ignore_filters.extend(('file_size', 'file_categories', 'file_extensions'))
-            elif 'files' in kwargs['file_type']:
+                ignore_filters.extend(("file_size", "file_categories", "file_extensions"))
+            elif "files" in kwargs["file_type"]:
                 q = q.filter(Files.file_isdir == False)
 
         # size
-        if kwargs['file_size'] and 'file_size' not in ignore_filters:
+        if kwargs["file_size"] and "file_size" not in ignore_filters:
             try:
-                file_size = kwargs['file_size'].split('-')
+                file_size = kwargs["file_size"].split("-")
 
                 if not len(file_size) == 2:
                     raise Exception()
 
-                if file_size[0] == '*':
+                if file_size[0] == "*":
                     q = q.filter(Files.file_size <= int(file_size[1]))
-                elif file_size[1] == '*':
+                elif file_size[1] == "*":
                     q = q.filter(Files.file_size >= int(file_size[0]))
                 else:
                     q = q.filter(Files.file_size.between(*[int(x) for x in file_size]))
@@ -98,7 +98,7 @@ class SearchController:
         filecategories = FileCategories()
 
         cat_ids = []
-        for cat in kwargs['file_categories']:
+        for cat in kwargs["file_categories"]:
             cat_id = filecategories.id_by_name(cat)
 
             if cat_id is None:
@@ -106,18 +106,18 @@ class SearchController:
 
             cat_ids.append(FileCategories().id_by_name(cat))
 
-        if cat_ids and not 'file_categories' in ignore_filters:
+        if cat_ids and not "file_categories" in ignore_filters:
             q = q.filter(Files.file_format.in_(cat_ids))
 
-        if not kwargs['file_categories']:
+        if not kwargs["file_categories"]:
             file_categories = filecategories.get_names()
 
         # filter extensions
-        if kwargs['file_extensions'] and 'file_extensions' not in ignore_filters:
+        if kwargs["file_extensions"] and "file_extensions" not in ignore_filters:
             exts = []
 
-            for ext in kwargs['file_extensions']:
-                if ext.startswith('.'):
+            for ext in kwargs["file_extensions"]:
+                if ext.startswith("."):
                     ext = ext[1:]
 
                 exts.append(ext)
@@ -128,21 +128,24 @@ class SearchController:
         if settings.es_enabled:
             val = kwargs["key"]
         else:
-            if kwargs['autocomplete'] or app.config['db_file_count'] > 5000000:
-                print("warning: too many rows, enable ES")
-                val = "%s%%" % escape_like(kwargs['key'])
+            if kwargs["autocomplete"] or app.config["db_file_count"] > 5000000:
+                print("warning: too many rows, enable ElasticSearch")
+                val = "%s%%" % escape_like(kwargs["key"])
             else:
                 val = "%%%s%%" % escape_like(kwargs["key"])
         q = q.filter(Files.searchable.like(val))
 
-        # pagination
-        q = q.offset(kwargs['page'])
+        q = q.order_by(Files.file_size.desc())
 
-        if kwargs['autocomplete']:
+        # pagination
+        q = q.offset(kwargs["page"])
+
+        if kwargs["autocomplete"]:
             q = q.limit(5)
-            q = q.distinct(func.lower(Files.file_name))
+            # q = q.distinct(func.lower(Files.file_name))
+            q = q.distinct(Files.file_size)
         else:
-            q = q.limit(kwargs['per_page'])
+            q = q.limit(kwargs["per_page"])
 
         # fetch
         try:
@@ -155,7 +158,7 @@ class SearchController:
         resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
 
         for result in results:
-            setattr(result, 'resource', resource_obs[result.resource_id])
+            setattr(result, "resource", resource_obs[result.resource_id])
 
         return results
 

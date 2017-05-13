@@ -42,10 +42,14 @@ class bucket_search extends Search {
         // Below clauses will update global var `search_results` based on different scenarios
         if(Object.keys(search_results).length == 0 && search_results.constructor === Object){
             search_results = jQuery.extend(true, {}, data);
-        } else if(data['params']['key'] != search_results['params']['key']){
+        } else if(data['params']['key'] != search_results['params']['key']) {
             // results came in with a new key
             search_results = jQuery.extend(true, {}, data);
             $(sel_results_container).html('');
+        } else if (data.params.page == 0 && data.results.length == 0) {
+            $(sel_results_container).html('');
+            $(sel_results_container).append(`<span id="no_more_results">no results</span>`);
+            return;
         } else if(search_results['results'].length > 0 && data['results'].length == 0) {
             // hit end of search
             $(sel_results_container).append(`<span id="no_more_results">no more results</span>`);

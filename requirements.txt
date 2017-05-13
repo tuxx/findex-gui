@@ -16,4 +16,3 @@ IPy
 pysocks
 python-magic
 requests
-humanfriendly

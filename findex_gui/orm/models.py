@@ -62,7 +62,9 @@ class Extended(object):
                         _value.append(_v.get_json(depth + 1))
                     else:
                         _value.append(str(_v))
-            json[k] = value
+                json[k] = _value
+            else:
+                json[k] = value
         return json
 
     @classmethod

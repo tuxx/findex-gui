@@ -44,7 +44,7 @@
             if(username && password){
                 UserController.add(username, password).then(function(data){
                     if(data.status == true) {
-                        goto_uri("/user/login");
+                        goto_uri(url_for(`user/login`));
                     } else {
                         alert("Could not register user");
                     }

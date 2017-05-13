@@ -176,7 +176,7 @@ $(document).ready(function(){
 
             let data = Object.assign(form1, form2);
             Resources.resource_add(data).then(function(data){
-                goto_uri("/user/cp/services");
+                goto_uri(url_for(`user/cp/services`));
             }, function(err){
                 $("#errors").html(err.responseText);
             });

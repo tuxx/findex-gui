@@ -129,7 +129,7 @@
             if (e.keyCode == 13) {
                 var val = $("#search").val();
 
-                goto_uri(`search/${val}`);
+                goto_uri(url_for(`search/${val}`));
             }
         });
 

@@ -65,7 +65,7 @@
             let data = resource_table.row( this ).data();
             let id = data[0];
 
-            goto_uri("/user/cp/services/" + id);
+            goto_uri(url_for(`/user/cp/services/${id}`));
         });
 
         function fetch(){

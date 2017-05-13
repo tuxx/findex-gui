@@ -1,344 +1,38 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
-<style>
-    /*
-    * Homepage
-    */
 
-    .hero_container{
-        background: url('/static/themes/bucket/static/img/bg_blue2.jpg');
-        background-size: cover;
-        width: 100%;
-        height: auto;
-        min-height: 700px;
-        margin-right: auto;
-        margin-left: auto;
-        padding-left: 15px;
-        padding-right: 15px;
-        padding-bottom: 120px;
-    }
-    .max_width{
-        max-width:970px;
-        margin:0 auto;
-    }
-    .app_container{
-        width: 100%;
-        height: auto;
-        display: block;
-        margin: 0 auto;
-        text-align: center;
-        padding:20px;
-        padding-top:26px;
-        padding-bottom:26px;
-        border-bottom: 1px solid #e8e8e8;
-    }
-    .app_container>p{
-        margin-top: 20px;
-        margin-bottom: 20px;
-        font-family: "roboto condensed";
-        font-weight: 700;
-        font-size: 18px;
-        color: rgb(89, 89, 89);
-        padding-left: 34px;
-        padding-right: 34px;
-        display: inline-block;
-        vertical-align: middle;
-        margin: 0;
-        width: 100%;
-        line-height: 47px;
-    }
-    .app_container>p>img{
-        display: inline-block;
-        margin: 0 1%;
-        box-sizing: inherit;
-        max-height: 75px;
-    }
-    .home_container{
-        width:100%;
-        height:auto;
-        display: inline-flex;
-        border-top: 1px solid #e7e7e7;
-        font-size: 16px;
-        line-height: 36px;
-        font-weight: 300;
-        background:whitesmoke;
-        padding-bottom:80px;
-    }
-    div#home_cta_row>a>.well{
-        background:white;
-    }
-    div#home_cta_row>a>.well>h4{
-        line-height: 24px;
-    }
-    div#home_cta_row>a>.well>p{
-        line-height: 26px;
-    }
+<link href="{{ url_for("static", filename="themes/bucket/static/css/home.css") }}" rel="stylesheet">
 
-    /*
-    * home hero
-    */
-    .hero_search{
-        overflow:hidden;
-    }
-    .hero_tagline{
-        color:white;
-        font-family: "Roboto Condensed";
-        font-size: 36px;
-        text-align:center;
-        float:left;
-        width:100%;
-    }
-    .hero_search_container{
-        overflow:hidden;
-        width:620px;
-        height:100px;
-        margin:0 auto;
-    }
-    .hero_search_container>.arrow{
-        width:90px;
-        height:70px;
-        float:left;
-        background:url('/static/themes/old/static/img/arrowdown3.png');
-    }
-    .hero_search_container>.search{
-        height:70px;
-        float:left;
-    }
-    .hero_search>input{
-        width: 520px;
-        margin-left: 4px;
-        margin-top: 32px;
-        border: 2px solid rgba(29, 160, 228, 0.55);
-    }
+<div id="test">
 
-    a#hero_icon{
-        text-align: center;
-        margin-top:40px;
-        cursor: pointer;
-        -webkit-transition: all 150ms ease;
-        -moz-transition: all 150ms ease;
-        -ms-transition: all 150ms ease;
-        -o-transition: all 150ms ease;
-        transition: all 150ms ease;
-    }
-    a#hero_icon:hover {
-        text-decoration: none;
-    }
-    a#hero_icon>i{
-        font-size:72px;
-        color:white;
-        width:100%
-    }
-    a#hero_icon>span{
-        color:white;
-        margin-top:20px;
-        display:block;
-        font-family: "Roboto Condensed";
-        font-size: 15px;
-    }
-    div#hero_icon_row{
-        margin-top:20px;
-        opacity:0;
-    }
+</div>
 
-    .bg_container{
-        background: transparent !important;
-    }
-    #home_cta_row>a>div.well{
-        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.10);
-        border: 1px solid rgba(0, 0, 0, 0.22);
-    }
+<div class="hero">
+    <div class="max_width" style="padding-top:100px;">
+        <div class="col-md-12 text-center">
+            <span class="tagline">
+                Looking for something?
+            </span>
 
-/*
-* Footer
-*/
+            <div class="search_container">
+                <div class="arrow">
 
-footer a{
-    color: #dedede;
-}
-footer a:hover{
-    color:white;
-}
-.site-footer{
-    background: linear-gradient(rgb(58, 58, 58), rgb(23, 23, 23));
-    color: rgb(181, 181, 181);
-}
-
-#site_branding{
-    display: inline-block;
-}
-
-#footer_copyright {
-    float: left;
-    width: 45%;
-}
-
-footer#colophon>#container {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-#footer_logo {
-  max-width: 120px;
-    display: block;
-    float: left;
-    margin-right: 10px;
-    opacity: .6;
-    /* margin-top: 6px; */
-    transition: .2s ease-in-out;
-    background-image: url('/static/img/findex.png');
-    height: 30px;
-    width: 70px;
-    background-position-x: -38px;
-    background-position-y: -10px;
-}
-
-#footer_copyright>#site_branding>#made_by {
-    font-size: 14px;
-    line-height: 30px;
-    font-weight: 600;
-    display: block;
-    float: left;
-    padding-left: 10px;
-    margin: 0 6px 0 0;
-    border-left: 1px solid #595c6b;
-    cursor: pointer;
-    color:rgb(181, 181, 181);
-}
-
-#copyright_widget_area {
-    margin-top: 5px;
-    font-size: 13px;
-}
-
-#copyright_widget_area .widget:last-of-type {
-    margin-bottom: 0;
-}
-
-#copyright_widget_area p:last-of-type {
-    margin-bottom: 0;
-}
-
-.textwidget a {
-    color: #8A8B91;
-    text-decoration: none;
-    font-size: 15px;
-    transition: all .2s ease-in-out;
-}
-
-.footer_nav_block a, .textwidget a {
-    color: #6e7083;
-    text-decoration: none;
-    font-size: 15px;
-    transition: all .2s ease-in-out;
-}
-
-.footer_nav_block p {
-    margin: 0;
-}
-
-.footer_nav_block li {
-    display: inline-block;
-    margin: 0 10px 0 0;
-}
-
-
-#page-content-wrapper{
-    padding-top:20px;
-    padding-bottom:80px;
-}
-
-/* News */
-.news{
-    padding-bottom:40px;
-}
-
-.container-fluid>.row .col-md-6>h3{
-    text-align:center;
-    width:100%;
-    color: #868686;
-    font-family: "Roboto Condensed";
-    padding-bottom:20px;
-}
-
-.container-fluid>.row .col-md-6 .panel-body{
-    padding:4px;
-}
-
-.container-fluid>.row .col-md-6 .panel-body{
-    padding:16px;
-}
-
-.container-fluid>.row .col-md-6 .panel-body h4 {
-    margin-top:16px;
-    margin-bottom:6px;
-}
-
-.container-fluid>.row .col-md-6 .panel-heading{
-    font-size:22px;
-    font-family: "Roboto Condensed";
-    margin-bottom: 0px;
-    padding: 4px;
-    padding-left: 12px;
-}
-
-.container-fluid>.row .col-md-6 .panel-body ul{
-    padding-right:10px;
-}
-
-</style>
-
-<div class="hero_container">
-    <div class="max_width">
-        <div id="hero_tagline_row" class="row" style="padding-top:140px;">
-            <div class="col-md-12 text-center">
-                <span id="hero_tagline" class="hero_tagline">
-                    Findex is an open-source search engine for files.
-                </span>
-                <small style="
-                    color: white;
-                    font-size: 16px;
-                    font-family: 'Roboto Condensed'
-                ">~alpha version~
-                </small>
-
-                <div class="hero_search_container">
-                    <div class="arrow">
-
-                    </div>
-                    <div class="hero_search">
-                        <input id="search" class="form-control" type="text" placeholder="" autofocus>
-                    </div>
+                </div>
+                <div class="search">
+                    <input id="search" class="form-control" type="text" placeholder="" autofocus>
                 </div>
             </div>
-        </div>
 
-        <div id="hero_icon_row" class="row" style="padding-top:20px;">
-            <div class="col-md-12 text-center">
-                <a href="/research/" id="hero_icon" class="col-md-3 hero_icon">
-                    <i class="fa fa-bar-chart"></i>
-                    <span>
-                        Findex can gather files from FTP and HTTP resources all over the world
-                    </span>
-                </a>
-                <a href="/documentation/" id="hero_icon" class="col-md-3 hero_icon">
-                    <i class="fa fa-cogs"></i>
-                    <span>
-                        Findex is fast and runs on any decent linux box.
-                    </span>
-                </a>
-                <a href="/api" id="hero_icon" class="col-md-3 hero_icon">
-                    <i class="fa fa-connectdevelop"></i>
-                    <span>
-                        Use the API to implement your own file searching tool
-                    </span>
-                </a>
-                <a href="https://github.com/skftn/findex-gui/" id="hero_icon" class="col-md-3 hero_icon">
-                    <img style="width:76px;" src="/static/themes/bucket/static/img/logos/github.png"/>
-                    <span style="margin-top:14px;">
-                        Findex is open-source. Find us on GitHub :-)
-                    </span>
-                </a>
+            <div class="description">
+                <div class="bracket" style="width:30px;">
+                    {
+                </div>
+                <div style="width:260px;padding-top: 16px;">
+                    <span>Findex is a high performance platform for finding and indexing files.</span>
+                </div>
+                <div class="bracket" style="width:30px;">
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -379,10 +73,7 @@ footer#colophon>#container {
                         <div class="panel panel-default">
                             <div class="panel-heading">{{ post.title }}</div>
                             <div class="panel-body">
-                                <p class="content">{{ post.content }} Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis pharetra varius quam sit amet vulputate.
-    Quisque mauris augue, molestie tincidunt condimentum vitae, gravida a libero. Aenean sit amet felis
-    dolor, in sagittis nisi. Sed ac orci quis tortor imperdiet venenatis. Duis elementum auctor accumsan.
-    Aliquam in felis sit amet augue.</p>
+                                <p class="content">{{ post.content }}</p>
                                 <ul class="list-inline list-unstyled pull-right">
                                     <li>
                                         <span><i class="fa fa-user-circle" aria-hidden="true"></i> <span style="font-size:12px;color:grey;">By {{ post.created_by.realname }}</span> </span>
@@ -397,90 +88,12 @@ footer#colophon>#container {
                     {% endfor %}
                 </div>
                 <div class="about col-md-6">
-                    <h3>About</h3>
+                    <h3>Stats</h3>
                     <div class="panel panel-default">
                         <div class="panel-heading">&nbsp;</div>
                         <div class="panel-body">
-                            <h4 style="margin-top:0px;">Motivation</h4>
                             <p>
-                                A few years ago I got the idea of writing a FTP crawler during <a target="_blank" href="https://en.wikipedia.org/wiki/Observe._Hack._Make.">OHM2013</a>.
-                                Many visitors were sharing files over various protocols but unfortunately there was no central place to search for them.
-                            </p>
-
-                            <p>
-                                It seemed like an interesting technical challenge to tackle, as writing a search engine
-                                gets you involved in many aspects of software development.
-                                First and foremost mastering Python, but also system administration and network programming.
-                            </p>
-
-                            <h4>Goals</h4>
-                            <p>
-                                Before I started, I established a few goals for Findex:
-
-                                <ul>
-                                    <li>
-                                        Support the following protocols: FTP, HTTP, SMB (windows), AFP (apple)
-                                    </li>
-                                    <li>
-                                        100% self-hosted, no third-party assets from CDNs to guarantee privacy.
-                                    </li>
-                                    <li>
-                                        Should have a API that people can freely query against.
-                                    </li>
-                                    <li>
-                                        Searches should be fast (< 500ms),
-                                        even when the database has more than 100 million rows
-                                        and at the same time not impose ridiculous hardware requirements.
-                                    </li>
-                                    <li>
-                                        Should run on sane software: Linux, Postgres, ECMAScript 6, etc.
-                                    </li>
-                                    <li>
-                                        100% open-source, MIT licensed.
-                                    </li>
-                                </ul>
-                            </p>
-
-                            <h4>Implementation</h4>
-                            <p>
-                                In order to reach these requirements, Findex has been designed in a modular fashion for
-                                maximum scalability. There are many components involved, some of which are listed below:
-
-                                <ul>
-                                    <li>
-                                        <a target="_blank" href="https://www.postgresql.org/">Postgres 9.5: </a>
-                                        The main database application.
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="https://www.rabbitmq.com/">RabbitMQ: </a>
-                                        AMQP message broker provides a way to manage crawl jobs.
-                                        Individual crawlers subscribe on a queue and may accept or reject incoming
-                                        crawl tasks.
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="https://www.elastic.co/">ElasticSearch 1.7: </a>
-                                        While Postgres provides excellent full-text search capabilities through the GIN index,
-                                        ES is better suited when it comes to Big Data™.
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="https://github.com/zombodb/zombodb">ZomboDB: </a>
-                                        A Postgres module that syncs data to ElasticSearch.
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="http://flask.pocoo.org/">Flask (Python): </a>
-                                        A microframework used by the web application. Chosen for its simplicity.
-                                    </li>
-                                    <li>
-                                        <a target="_blank" href="https://twistedmatrix.com/trac/">Twisted (Python): </a>
-                                        Asynchronous networking library that powers the crawl bots.
-                                    </li>
-                                </ul>
-                            </p>
-
-                            <h4>What's next?</h4>
-                            <p>
-                                Improved metadata capabilities could possibly catapult its suitability for more enterprise use-cases.
-                                For now ill settle with trying to index as many servers as possible.
+                                No stats yet!
                             </p>
                         </div>
                     </div>
@@ -501,10 +114,9 @@ footer#colophon>#container {
                 "margin-top": "-=20"
             }, 600, "easeOutQuad");
 
-            $("div#hero_tagline_row").animate({
-                "opacity":1,
-                "margin-top": "-=20"
-            }, 600, "easeOutQuad");
+            $("div.hero .description").animate({
+                "opacity":1
+            }, 800, "easeOutQuad");
         }, 100);
 
         setTimeout(function() {
@@ -526,6 +138,69 @@ footer#colophon>#container {
         }, function(){
             $(this).css("padding-top", "-=6");
         });
+
+        particlesJS("test", {
+          "particles": {
+            "number": {
+              "value": 80,
+              "density": {
+                "enable": true,
+                "value_area": 800
+              }
+            },
+            "color": {
+              "value": "#FFFFFF"
+            },
+            "shape": {
+              "type": "circle",
+              "stroke": {
+                "width": 0,
+                "color": "black"
+              },
+              "polygon": {
+                "nb_sides": 5
+              },
+              "image": {
+                "src": "img/github.svg",
+                "width": 100,
+                "height": 100
+              }
+            },
+            "opacity": {
+              "value": 0.5,
+              "random": false,
+            },
+            "size": {
+              "value": 3,
+              "random": true,
+              "anim": {
+                "enable": false,
+                "speed": 20,
+                "size_min": 0.1,
+                "sync": false
+              }
+            },
+             line_linked: {
+               enable: 0, distance: 100, color: "#fff", opacity: 1, width: 1
+            },
+            "move": {
+              "enable": true,
+              "speed": 2,
+              "direction": "none",
+              "random": false,
+              "straight": false,
+              "out_mode": "out",
+              "bounce": false,
+              "attract": {
+                "enable": false,
+                "rotateX": 600,
+                "rotateY": 1200
+              }
+            }
+          },
+          "retina_detect": true
+        });
+
     });
 </script>
 

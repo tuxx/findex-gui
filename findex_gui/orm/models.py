@@ -205,6 +205,7 @@ class ResourceMeta(BASE, Extended):
 
     banner = Column(String(), nullable=True)
     response_time = Column(Integer(), nullable=True)
+    uid = Column(String(), nullable=True)
 
     def set_auth(self, username, password, auth_type):
         if username and password and not auth_type:

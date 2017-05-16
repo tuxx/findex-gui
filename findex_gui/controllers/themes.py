@@ -1,6 +1,8 @@
 import os
 from flask import render_template, session, url_for
+from jinja2.exceptions import TemplateNotFound
 
+import settings
 from findex_gui import app
 from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.user import UserController
@@ -65,7 +67,13 @@ class ThemeController:
                 session['locale'] = user.locale
 
         kwargs['user'] = user
-        return render_template('%s/templates/%s.html' % (theme, template_path), url_for=url_for, **kwargs), status_code
+        try:
+            return render_template('%s/templates/%s.html' % (theme, template_path), url_for=url_for, **kwargs), status_code
+        except TemplateNotFound as e:
+            return "Template \"%s\" not found" % str(e)
+        except Exception as ex:
+            print(ex)
+            return "Jinja2 error!"
 
     def get_active(self):
         return OptionsController.theme_get_active()

@@ -65,14 +65,14 @@ class ReverseRelayController(object):
     5) Configure a Flask response object
     6) @TODO: update `Files` object mimetype
     """
-    def __init__(self, resource, f, path, filename):
+    def __init__(self, resource, f, path, *args, **kwargs):
         if not resource.meta.relay_enabled:
             raise RelayException("Relay feature disabled for this resource")
 
         self.resource = resource
         self.file = f
         self.path = path
-        self.filename = filename
+        self.filename = f.file_name_human
 
         if self.file.file_isdir:
             RelayException("File needed, not directory")
@@ -279,6 +279,8 @@ class ReverseFtpRelay(ReverseRelayController):
             ftp.retrbinary("RETR %s" % filepath, cb, blocksize=chunk_size, rest=offset)
         except StopIter as ex:
             pass
+        except Exception as ex:
+            raise ex
 
         data = data.getvalue()
         data = data[:chunk_size]

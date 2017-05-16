@@ -3,10 +3,9 @@ from datetime import datetime
 
 from flask import request, url_for, jsonify
 
+import settings
 from findex_gui import app
 from findex_common.utils import decorator_parametrized
-# from findex_gui.controllers.user.decorators import _not_logged_in
-# from findex_gui.controllers.auth.auth import get_current_user_data, not_logged_in
 
 
 @decorator_parametrized
@@ -104,8 +103,10 @@ def redirect_url(default='index'):
 @app.after_request
 def after_request(r):
     r.headers.add('Accept-Ranges', 'bytes')
-    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
+
+    if settings.app_debug:
+        r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        r.headers["Pragma"] = "no-cache"
+        r.headers["Expires"] = "0"
+        r.headers['Cache-Control'] = 'public, max-age=0'
     return r

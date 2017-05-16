@@ -3,7 +3,6 @@
     */
 
     .hero_container{
-        background: url('/static/themes/bucket/static/img/bg_blue2.jpg');
         background-size: cover;
         width: 100%;
         height: auto;
@@ -117,7 +116,6 @@ footer#colophon>#container {
     opacity: .6;
     /* margin-top: 6px; */
     transition: .2s ease-in-out;
-    background-image: url('/static/img/findex.png');
     height: 30px;
     width: 70px;
     background-position-x: -38px;
@@ -221,7 +219,6 @@ footer#colophon>#container {
     * home hero
     */
     .hero{
-        background: url(/static/themes/bucket/static/img/bg_blue2.jpg);
         background-size: cover;
         color: white;
         font-family: "Roboto Condensed";
@@ -259,7 +256,6 @@ footer#colophon>#container {
         width: 90px;
         height: 70px;
         float: left;
-        background: url(/static/themes/bucket/static/img/arrowdown3.png);
     }
     .hero .search_container>.search{
         height:70px;

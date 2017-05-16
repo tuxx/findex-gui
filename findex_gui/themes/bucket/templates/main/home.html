@@ -7,7 +7,7 @@
 
 </div>
 
-<div class="hero">
+<div class="hero" style="background: url({{ url_for("static", filename="themes/bucket/static/img/bg_blue2.jpg") }});">
     <div class="max_width" style="padding-top:100px;">
         <div class="col-md-12 text-center">
             <span class="tagline">
@@ -15,7 +15,7 @@
             </span>
 
             <div class="search_container">
-                <div class="arrow">
+                <div class="arrow" style="background: url({{ url_for("static", filename="themes/bucket/static/img/arrowdown3.png") }});">
 
                 </div>
                 <div class="search">
@@ -41,17 +41,16 @@
 <div class="app_container">
     <p style="opacity:0;">
         Built on:
-        <img class="app" style="margin-left:20px;" src="/static/themes/bucket/static/img/logos/python.png" height="35">
-        <img class="app" src="/static/themes/bucket/static/img/logos/flask.png" height="42">
-        <img class="app" src="/static/themes/bucket/static/img/logos/rabbitmq.png" height="28">
-        <img class="app" src="/static/themes/bucket/static/img/logos/psql.png" height="42">
-        <img class="app" src="/static/themes/bucket/static/img/logos/zombodb.png" height="52">
-        <img class="app" style="margin-left:16px;" src="/static/themes/bucket/static/img/logos/twisted.png" height="50">
-        <img class="app" src="/static/themes/bucket/static/img/logos/sqla.png" height="34">
-        <img class="app" src="/static/themes/bucket/static/img/logos/jinja2.png" height="55">
-        <img class="app" src="/static/themes/bucket/static/img/logos/bootstrap.png" height="50">
-        <img class="app" src="/static/themes/bucket/static/img/logos/jquery.png" height="46">
-        <img class="app" src="/static/themes/bucket/static/img/logos/highcharts.png" height="35">
+
+        <img class="app" style="margin-left:20px;" src="{{ url_for("static", filename="themes/bucket/static/img/logos/python.png") }}" height="35">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/flask.png") }}" height="42">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/rabbitmq.png") }}" height="28">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/psql.png") }}" height="42">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/zombodb.png") }}" height="52">
+        <img class="app" style="margin-left:16px;" src="{{ url_for("static", filename="themes/bucket/static/img/logos/twisted.png") }}" height="50">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/sqla.png") }}" height="34">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/jinja2.png") }}" height="55">
+        <img class="app" src="{{ url_for("static", filename="themes/bucket/static/img/logos/bootstrap.png") }}" height="50">
     </p>
 </div>
 
@@ -214,7 +213,7 @@
     <div id="container" style="width: 85%;min-height: 120px;">
         <div id="footer_copyright">
             <div id="site_branding">
-                <a id="footer_logo" href="http://findex.cedsys.nl/"></a>
+                <a id="footer_logo" href="http://findex.cedsys.nl/" style="background-image: url('{{ url_for("static", filename="img/findex.png") }}');"></a>
                 <a id="made_by" href="http://cedsys.nl/">CED systems</a>
                 <div class="clear"></div>
             </div>

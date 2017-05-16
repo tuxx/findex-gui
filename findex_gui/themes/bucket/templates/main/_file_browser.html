@@ -52,7 +52,7 @@ $(document).ready(function(){
     let icons = new BucketIcons();
     $("table.browser tr>td:first-child").each(function(i, obj){
         function set_icon(context, icon){
-            context.prepend(`<img width=16 src="/static/themes/bucket/static/img/icons/${icon}"/>`);
+            context.prepend(`<img width=16 src="${APPLICATION_ROOT}static/themes/bucket/static/img/icons/${icon}"/>`);
         }
 
         let sel = $($(obj).parent());

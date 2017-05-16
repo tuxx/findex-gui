@@ -23,9 +23,11 @@ h3.title{
     margin-bottom: 4px;
 }
 .browse_footer {
-    padding-left: 0px;
-    padding-right: 0px;
-    position:absolute;bottom:0;width: 100%;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+    right: 0;
 }
 .browse_footer .container{
     width: 100%;
@@ -38,8 +40,9 @@ h3.title{
     padding-left:14px;
 }
 
-.browse_footer .container span:first-child{
+.browse_footer .container>span:first-child{
     font-size: 12px;
+    padding-left: 230px;
 }
 
 </style>
@@ -89,20 +92,20 @@ h3.title{
 
         <hr>
 
-        <li>
-            <a href="#">
-                <i class="fa fa-info-circle">
-                    <span>{{ _('Report Offline') }}</span>
-                </i>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url_for("search_home") }}">
-                <i class="fa fa-search">
-                    <span>{{ _('Search') }}</span>
-                </i>
-            </a>
-        </li>
+{#        <li>#}
+{#            <a href="#">#}
+{#                <i class="fa fa-info-circle">#}
+{#                    <span>{{ _('Report Offline') }}</span>#}
+{#                </i>#}
+{#            </a>#}
+{#        </li>#}
+{#        <li>#}
+{#            <a href="{{ url_for("search_home") }}">#}
+{#                <i class="fa fa-search">#}
+{#                    <span>{{ _('Search') }}</span>#}
+{#                </i>#}
+{#            </a>#}
+{#        </li>#}
     </ul>
 </div>
 <!-- /#sidebar-wrapper -->
@@ -136,7 +139,7 @@ h3.title{
                     {% endif %}
                 </div>
             </div>
-            <div class="col-lg-12">
+            <div class="col-lg-12" style="margin-bottom: 80px;">
                 {% if browser.files %}
                     {% import 'bucket/templates/main/_file_browser.html' as filebrowser %}
                     {{ filebrowser.render(browser.files) }}

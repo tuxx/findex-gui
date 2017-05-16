@@ -1,37 +1,41 @@
-<table class="browser table">
+{% macro render(files, compact=False) %}
+<script src="{{ url_for("static", filename="themes/bucket/static/js/icons.js") }}"></script>
+<div class="table-responsive">
+<table class="browser table table-hover">
     <thead>
         <tr>
             <th>Filename</th>
             <th style="width:80px;">Size</th>
+            {% if not compact %}
             <th style="width:80px;">Perm</th>
+            {% endif %}
             <th style="width:110px;">Modified</th>
             <th style="width:80px;">Direct</th>
         </tr>
     </thead>
     <tbody>
-        {% for f in browser.files %}
+        {% for f in files %}
             {% if f.file_isdir %}
                 {% if f.file_name == ".." %}
-                    {% set icon = "fa-level-up" %}
                     {% set href = ".." %}
                 {% else %}
-                    {% set icon = "fa-folder" %}
                     {% set href = f.file_name + "/" %}
                 {% endif %}
                 {% set file_name = f.file_name %}
             {% else %}
-                {% set icon = "fa-file-text-o" %}
                 {% set file_name = f.file_name_human %}
+                {% if compact and file_name|length >= 64 %}
+                    {% set file_name = file_name[:64] + " [...]" %}
+                {% endif %}
                 {% set href = f.file_name_human %}
             {% endif %}
 
-            <tr class="clickable text-nowrap" data-id="{{f.id}}" data-href="{{href}}" rel="popover" title="">
-                <td><i class="fa {{ icon }}"></i>
-                    <a href="{{ href }}">{{file_name}}</a>
-                </td>
-
+            <tr class="clickable text-nowrap" data-id="{{f.id}}" data-isdir="{{ f.file_isdir }}" data-type="{{f.file_format}}" data-ext="{{f.file_ext}}" data-href="{{href}}" rel="popover" title="">
+                <td><a href="{{ href }}">{{file_name}}</a></td>
                 <td><b>{{f.file_size_human}}</b></td>
+                {% if not compact %}
                 <td>-</td>
+                {% endif %}
                 <td>{{f.file_modified_human}}</td>
                 <td>
                     {% if not f.file_isdir %}
@@ -42,3 +46,27 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
+<script>
+$(document).ready(function(){
+    let icons = new BucketIcons();
+    $("table.browser tr>td:first-child").each(function(i, obj){
+        function set_icon(context, icon){
+            context.prepend(`<img width=16 src="/static/themes/bucket/static/img/icons/${icon}"/>`);
+        }
+
+        let sel = $($(obj).parent());
+        let isdir = sel.attr("data-isdir");
+        if(isdir == "True") {
+            set_icon($(this), "folder-128.png");
+        } else {
+            let format = sel.attr("data-type");
+            let ext = sel.attr("data-ext");
+
+            let icon = icons.get(ext, format);
+            set_icon($(this), icon);
+        }
+    });
+});
+</script>
+{% endmacro %}

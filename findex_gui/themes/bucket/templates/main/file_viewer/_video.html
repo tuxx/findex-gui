@@ -1,9 +1,13 @@
 <style>
+    .plyr video{
+        object-fit: cover;
+    }
+
     .plyr--video{
         margin: 0 auto;
         margin-bottom: 20px;
         display: block;
-        width:75%;
+        width:100%;
     }
     .plyr__video-wrapper{
         -webkit-user-select: none;  /* Chrome all / Safari all */
@@ -13,7 +17,7 @@
     }
 </style>
 <div style="background-color:black;">
-    <video poster="{{ url_for("static", filename="img/default_thumbnail3.png") }}" controls crossorigin>
+    <video id="vidya" poster="{{ url_for("static", filename="img/default_thumbnail3.png") }}" controls crossorigin>
         <!-- Video files -->
         <source src="{{ url_for("relay", args={}) }}{{ f.path_file }}" type="video/mp4">
 
@@ -27,7 +31,7 @@
 
 <script>
     $(document).ready(function(){
-        plyr.setup({
+        plyr.setup(document.querySelectorAll("#vidya"), {
             debug:              false,
             title:              'video player',
             iconUrl:            '{{ url_for("static", filename="plugins/plyr/plyr.svg") }}',
@@ -38,6 +42,5 @@
                 defaultActive:  true
             }
         });
-        plyr.loadSprite('dist/demo.svg');
     });
 </script>

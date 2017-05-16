@@ -160,7 +160,8 @@
     height: 8px;
 }
 #leftCol .noUi-connect {
-    background: #337ab7;
+    background: #bfbfbf;
+    box-shadow: inset 0 0 0px rgba(51,51,51,.45);
 }
 #leftCol .noUi-tooltip {
     display: block;

@@ -160,7 +160,7 @@ class Resource(BASE, Extended):
     @property
     def protocol_human(self):
         protocol = static_variables.FileProtocols()
-        return protocol.name_by_id(self.protocol).upper()
+        return protocol.name_by_id(self.protocol)
 
     @property
     def date_added_ago(self):

@@ -1,16 +1,13 @@
 #!/usr/bin/env python
-# Code borrowed from 'Cuckoo Sandbox' (https://github.com/cuckoosandbox/cuckoo)
-# Credits go to @jbremer (Jurriaan Bremer) and the Cuckoo team
-
-import hashlib
 import os
 import setuptools
-import sys
 import traceback
 
 
 def githash():
     """Extracts the current Git hash."""
+    # Code borrowed from 'Cuckoo Sandbox' (https://github.com/cuckoosandbox/cuckoo)
+    # Credits go to @jbremer (Jurriaan Bremer) and the Cuckoo team
     git_head = os.path.join(".git", "HEAD")
     if os.path.exists(git_head):
         head = open(git_head, "r").read().strip()

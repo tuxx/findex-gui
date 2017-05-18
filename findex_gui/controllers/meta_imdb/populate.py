@@ -42,13 +42,11 @@ import subprocess
 import gzip
 import json
 
-import settings
+from findex_gui.bin.config import config
 
 
 TMP_FOLDER = None
 IMDB_ENCODING = "ISO-8859-1"
-CREDS = {"db_host": settings.db_hosts[0], "db_port": settings.db_port, "db_name": settings.db_name,
-         "db_user": settings.db_user, "db_pass": settings.db_pass}
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 

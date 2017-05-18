@@ -15,9 +15,6 @@ def static(filename):
 
     search_dirs = ['static/']
 
-    # if not settings.local:
-    #     search_dirs.insert(0, 'themes/_setup/static/')
-
     if filename.startswith('themes/'):
         spl = filename.split('/')
 

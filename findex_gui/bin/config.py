@@ -236,15 +236,15 @@ class Config(object):
                 "secret_token": String(binascii.hexlify(open("/dev/urandom", "rb").read(32)).decode("UTF-8")),
                 "version_check": Boolean(False),
                 "debug": Boolean(False),
-                "async": Boolean(False),
+                "async": Boolean(True),
             },
             "database": {
                 "connection": String(sanitize=True),
                 "debug": Boolean(False),
-
             },
             "elasticsearch": {
-                "enabled": Boolean(True)
+                "enabled": Boolean(True),
+                "host": String("http://localhost:9200/")
             },
             "rabbitmq": {
                 "host": String(""),

@@ -1,5 +1,4 @@
-# Code borrowed from 'Cuckoo Sandbox'
-#   https://github.com/cuckoosandbox/cuckoo
+# Code borrowed from 'Cuckoo Sandbox' (https://github.com/cuckoosandbox/cuckoo)
 # Credits go to @jbremer (Jurriaan Bremer) and the Cuckoo team
 
 import click
@@ -8,7 +7,6 @@ import logging
 import os
 import shutil
 import platform
-import subprocess
 import sys
 import traceback
 
@@ -98,7 +96,9 @@ def findex_main():
     """Findex main loop.
     """
     try:
-        print("main loop w00t")
+        print("""Usage: findex [OPTION]...
+  web           runs the web interface
+        """)
     except KeyboardInterrupt:
         print("w00t")
 
@@ -113,16 +113,16 @@ def findex_main():
 @click.pass_context
 def main(ctx, debug, quiet, nolog, maxcount, user, cwd):
     """Invokes the Findex daemon or one of its subcommands.
-    To be able to use different Cuckoo configurations on the same machine with
-    the same Cuckoo installation, we use the so-called Cuckoo Working
+    To be able to use different Findex configurations on the same machine with
+    the same Findex installation, we use the so-called Findex Working
     Directory (aka "CWD"). A default CWD is available, but may be overridden
     through the following options - listed in order of precedence.
     \b
     * Command-line option (--cwd)
-    * Environment option ("CUCKOO_CWD")
-    * Environment option ("CUCKOO")
+    * Environment option ("Findex_CWD")
+    * Environment option ("Findex")
     * Current directory (if the ".cwd" file exists)
-    * Default value ("~/.cuckoo")
+    * Default value ("~/.Findex")
     """
     decide_cwd(cwd)
 
@@ -135,7 +135,7 @@ def main(ctx, debug, quiet, nolog, maxcount, user, cwd):
 
     ctx.level = level
 
-    # A subcommand will be invoked, so don't run Cuckoo itself.
+    # A subcommand will be invoked, so don't run Findex itself.
     if ctx.invoked_subcommand:
         return
 
@@ -170,36 +170,22 @@ def web(ctx, args, host, port, uwsgi, nginx):
     Operate the Findex Web Interface.
     @TODO: figure out uwsgi help thingy
     """
+    logo(version)
 
     if nginx:
-        print("upstream _uwsgi_cuckoo_web {")
-        print("    server unix:/run/uwsgi/app/findex-gui/socket;")
-        print("}")
-        print("")
-        print("server {")
-        print("    listen %s:%d;" % (host, port))
-        print("")
-        print("    # Findex Web Interface")
-        print("    location / {")
-        print("        client_max_body_size 1G;")
-        print("        proxy_redirect off;")
-        print("        proxy_set_header X-Forwarded-Proto $scheme;")
-        print("        uwsgi_pass  _uwsgi_cuckoo_web;")
-        print("        include     uwsgi_params;")
-        print("    }")
-        print("}")
-        return
+        # @TODO: nginx help msg here
+        pass
 
     # Switch to findex/web and add the current path to sys.path as the Web
     # Interface is using local imports here and there.
-    # TODO Rename local imports to either cuckoo.web.* or relative imports.
+    # TODO Rename local imports to either Findex.web.* or relative imports.
     os.chdir(findex_gui.__path__[0])  # os.chdir(os.path.join(findex_gui.__path__[0], "web"))
     sys.path.insert(0, ".")
     os.environ["FINDEX_APP"] = "web"
     os.environ["FINDEX_CWD"] = cwd()
 
     try:
-        app_debug = config("findex:findex:app_debug")
+        app_debug = config("findex:findex:debug")
         bind_host = host
         bind_port = port
 
@@ -215,10 +201,10 @@ def web(ctx, args, host, port, uwsgi, nginx):
             from findex_gui.web import app
 
             http_server = WSGIServer((bind_host, bind_port), app)
-            print(' * Running on http://%s:%s/ (Press CTRL+C to quit)' % (bind_host, str(bind_port)))
+            print(green(" * Running on http://%s:%s/ (Press CTRL+C to quit)") % (bind_host, str(bind_port)))
             http_server.serve_forever()
 
-        if config("findex:findex:app_async"):
+        if config("findex:findex:async"):
             run_async()
         else:
             run_sync()
@@ -228,7 +214,7 @@ def web(ctx, args, host, port, uwsgi, nginx):
         if len(log.handlers):
             log.critical(message)
         else:
-            sys.stderr.write("{0}\n".format(message))
+            sys.stderr.write("{0}\n".format(traceback.format_exc()))
         sys.exit(1)
 
 

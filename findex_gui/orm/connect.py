@@ -7,40 +7,27 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import text
 from sqlalchemy import pool
 
-import settings
+from findex_gui.bin.config import config
 from findex_gui.orm.models import BASE
 from findex_gui.bin.config import config
 from findex_common.exceptions import DatabaseException, ElasticSearchException
 
 
 class Database(object):
-    def __init__(self, hosts, port, name, user, passwd):
-        """
-        Connects to the Postgres database.
-        :param hosts: list of strings, to be used in the connection pool
-        :param port: int
-        :param name: database name
-        :param user: database user
-        :param passwd: database password
-        """
+    def __init__(self):
+        """Connects to the Postgres database."""
         self.engine = None
         self.session = None
-
-        self.hosts = hosts
-        self.port = port
-        self.name = name
-        self.user = user
-        self.passwd = passwd
 
         self.pool = pool.QueuePool(creator=self._getconn,
                                    max_overflow=1,
                                    pool_size=300,
-                                   echo=settings.app_debug)
+                                   echo=config("findex:findex:debug"))
 
     def connect(self):
         self.engine = create_engine('postgresql+psycopg2://',
                                     pool=self.pool,
-                                    echo=settings.app_debug)
+                                    echo=config("findex:findex:debug"))
         self.session = scoped_session(sessionmaker(autocommit=True,
                                                    autoflush=True,
                                                    expire_on_commit=True,
@@ -48,14 +35,6 @@ class Database(object):
         BASE.query = self.session.query_property()
 
     def bootstrap(self):
-        # check if es can be reached
-        # if settings.es_enabled:
-        #     try:
-        #         r = requests.get(settings.es_host, verify=False, timeout=1)
-        #         r.raise_for_status()
-        #     except:
-        #         raise ElasticSearchException("ElasticSearch is down? (%s)" % settings.es_host)
-
         # check necessary postgres extensions
         self.create_extension(
             extension="pg_trgm",
@@ -63,7 +42,7 @@ class Database(object):
                                   "could not be enabled, "
                                   "possibly missing administrator rights to enable "
                                   "pg_trgm: `CREATE EXTENSION pg_trgm;`")
-        if settings.es_enabled:
+        if config("findex:elasticsearch:enabled"):
             self.create_extension(
                 extension="zombodb",
                 msg_on_activate_error="Postgres extension \"zombodb\" installed but "
@@ -73,7 +52,7 @@ class Database(object):
         import findex_gui.orm.events
         BASE.metadata.create_all(bind=self.engine)
 
-        if settings.es_enabled:
+        if config("findex:elasticsearch:enabled"):
             # check required types for es
             if not self.check_type(type_name="type_files"):
                 raise DatabaseException("Postgres type `type files` not found. "
@@ -83,7 +62,7 @@ class Database(object):
             # check if the zombodb index is present
             if not self.check_index(table_name="files", index="idx_zdb_files"):
                 raise DatabaseException("Postgres index `idx_zdb_files` not found "
-                                        "while settings.es_enabled was ``True``.\n"
+                                        "while ElasticSearch was enabled.\n"
                                         "Try the following SQL to rebuild the table:\n"
                                         "\tDROP TYPE type_files CASCADE;\n"
                                         "\tDROP TABLE files;\n")
@@ -92,7 +71,7 @@ class Database(object):
                 raise DatabaseException("Please remove the index `idx_zdb_files` before "
                                         "using findex without ES enabled:\n"
                                         "\tDROP INDEX idx_zdb_files\n"
-                                        "\tcurl -XDELETE %sdb.schema.table.index" % settings.es_host)
+                                        "\tcurl -XDELETE <es_host> db.schema.table.index")
 
         from findex_gui.controllers.user.user import UserController
         from findex_gui.controllers.user.roles import default_anon_roles
@@ -103,7 +82,7 @@ class Database(object):
         if not UserController.user_view(username="root"):
             UserController.user_add(
                 username="root",
-                password=settings.auth_default_root_pw,
+                password=config("findex:users:default_root_password"),
                 removeable=False,
                 admin=True,
                 skip_authorization=True)
@@ -111,7 +90,7 @@ class Database(object):
         if not UserController.user_view(username="anon"):
             UserController.user_add(
                 username="anon",
-                password=settings.auth_default_anon_pw,
+                password=config("findex:users:default_anon_password"),
                 privileges=default_anon_roles,
                 removeable=False,
                 skip_authorization=True)
@@ -215,10 +194,11 @@ class Database(object):
                 logging.debug("Enabled database extension \"%s\"" % extension)
 
     def _getconn(self):
-        random.shuffle(self.hosts)
-        for host in self.hosts:
-            try:
-                return psycopg2.connect(config("findex:database:connection"))
-            except psycopg2.OperationalError as e:
-                print('Failed to connect to %s: %s' % (host, e))
-        raise psycopg2.OperationalError("Ran out of database servers - exiting")
+        # random.shuffle(self.hosts)
+        # for host in self.hosts:
+        dsn = config("findex:database:connection")
+        try:
+            return psycopg2.connect(dsn)
+        except psycopg2.OperationalError as e:
+            print('Failed to connect to %s: %s' % (dsn, e))
+            raise psycopg2.OperationalError("Ran out of database servers - exiting")

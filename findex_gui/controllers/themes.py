@@ -2,7 +2,7 @@ import os
 from flask import render_template, session, url_for
 from jinja2.exceptions import TemplateNotFound
 
-import settings
+from findex_gui.bin.config import config
 from findex_gui.web import app
 from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.user import UserController

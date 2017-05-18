@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import request, url_for, jsonify
 
-import settings
+from findex_gui.bin.config import config
 from findex_gui.web import app
 from findex_common.utils import decorator_parametrized
 
@@ -104,7 +104,7 @@ def redirect_url(default='index'):
 def after_request(r):
     r.headers.add('Accept-Ranges', 'bytes')
 
-    if settings.app_debug:
+    if config("findex:findex:debug"):
         r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         r.headers["Pragma"] = "no-cache"
         r.headers["Expires"] = "0"

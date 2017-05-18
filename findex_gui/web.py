@@ -1,5 +1,5 @@
 import os
-import settings
+from findex_gui.bin.config import config
 
 from flask import Flask
 from flask_restful import Api
@@ -11,12 +11,12 @@ app = Flask(import_name=__name__,
             template_folder='themes')
 
 # setup config
-app.config['SECRET_KEY'] = settings.app_secret
+app.config['SECRET_KEY'] = config("findex:findex:secret_token")
 app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
 app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
-app.config['APPLICATION_ROOT'] = settings.application_root
-app.config['TEMPLATES_AUTO_RELOAD'] = settings.app_debug
-SECRET_KEY = settings.app_secret
+app.config['APPLICATION_ROOT'] = config("findex:findex:application_root")
+app.config['TEMPLATES_AUTO_RELOAD'] = config("findex:findex:debug")
+SECRET_KEY = config("findex:findex:secret_token")
 
 # setup api
 appapi = Api(app)
@@ -44,11 +44,7 @@ auth.hash_algorithm = hashlib.sha256
 # init database
 from findex_gui.orm.connect import Database
 
-db = Database(hosts=settings.db_hosts,
-              user=settings.db_user,
-              passwd=settings.db_pass,
-              port=settings.db_port,
-              name=settings.db_name)
+db = Database()
 db.connect()
 db.bootstrap()
 

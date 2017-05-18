@@ -1,4 +1,4 @@
-import settings
+from findex_gui.bin.config import config
 from datetime import datetime
 
 from flask_babel import gettext
@@ -58,7 +58,7 @@ class SearchController:
     def _search(**kwargs):
         kwargs["key"] = CrawlController.make_valid_key(kwargs["key"])
 
-        q = ZdbQuery(Files, session=db.session) if settings.es_enabled else Files.query
+        q = ZdbQuery(Files, session=db.session) if config("findex:elasticsearch:enabled") else Files.query
 
         # @TODO: filter by protocols / hosts
         # only find files that are not in "temp" mode
@@ -125,7 +125,7 @@ class SearchController:
             q = q.filter(Files.file_ext.in_(exts))
 
         # Search
-        if settings.es_enabled:
+        if config("findex:elasticsearch:enabled"):
             val = kwargs["key"]
         else:
             if kwargs["autocomplete"] or app.config["db_file_count"] > 5000000:

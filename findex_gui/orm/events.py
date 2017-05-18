@@ -1,8 +1,10 @@
 from sqlalchemy import event, DDL
 
-import settings
+from findex_gui.bin.config import config
 from findex_gui.web import db
 from findex_gui.orm.models import Files
+
+#@TODO: move this to package sqlalchemy_zdb
 
 # Creates a composite type for the `files` table, to be
 # used during zombodb partial index creation. executes
@@ -31,8 +33,8 @@ event.listen(
             zdb(ROW(%s)::type_files))
         WITH (url='%s');
     """ % (", ".join([column.name for column in Files.get_columns(zombodb_only=True)]),
-           settings.es_host)
+           config("findex:elasticsearch:host"))
     ).execute_if(
-        callable_=lambda *args, **kwargs: not db.check_index(table_name="files", index="idx_zdb_files") and settings.es_enabled
+        callable_=lambda *args, **kwargs: not db.check_index(table_name="files", index="idx_zdb_files") and config("findex:elasticsearch:enabled")
     )
 )

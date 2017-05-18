@@ -33,6 +33,20 @@ Requirements
 
 Docker containers will be provided soon. For now, don't attempt to manually install. You've been warned! :)
 
+```sh
+apt-get install -y python3.5 python-virtualenv python3.5-dev libpq-dev git
+virtualenv -p /usr/bin/python3.5 findex
+cd $_
+source bin/activate
+git clone https://github.com/skftn/sqlalchemy_zdb.git
+cd sqlalchemy_zdb
+python setup.py develop
+cd ..
+pip install findex-gui
+```
+
+After that you can type `findex`.
+
 ### Streetcred
 - Volkskrant (http://i.imgur.com/9oqlKU2.png) (dutch)
 - Security.nl (dutch): [Duizenden openstaande FTP-servers in Nederland](https://www.security.nl/posting/440684)

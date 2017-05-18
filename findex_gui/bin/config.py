@@ -2,6 +2,7 @@
 #   https://github.com/cuckoosandbox/cuckoo
 # Credits go to @jbremer (Jurriaan Bremer) and the Cuckoo team
 
+import binascii
 import configparser as ConfigParser
 import click
 import os
@@ -231,14 +232,33 @@ class Config(object):
     configuration = {
         "findex": {
             "findex": {
+                "application_root": String("/"),
+                "secret_token": String(binascii.hexlify(open("/dev/urandom", "rb").read(32)).decode("UTF-8")),
                 "version_check": Boolean(False),
-                "app_debug": Boolean(False),
-                "app_async": Boolean(False)
+                "debug": Boolean(False),
+                "async": Boolean(False),
             },
             "database": {
-                "connection": String(sanitize=True)
+                "connection": String(sanitize=True),
+                "debug": Boolean(False),
+
             },
-        },
+            "elasticsearch": {
+                "enabled": Boolean(True)
+            },
+            "rabbitmq": {
+                "host": String(""),
+                "username": String("changeme"),
+                "password": String("changeme"),
+                "virtual_host": String(""),
+                "queue_name": String(""),
+                "queue_size": Int(20)
+            },
+            "users": {
+                "default_root_password": String("changeme"),
+                "default_anon_password": String("changeme")
+            }
+        }
     }
 
     def get_section_types(self, file_name, section, strict=False, loose=False):

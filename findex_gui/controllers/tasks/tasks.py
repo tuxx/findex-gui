@@ -1,4 +1,4 @@
-from findex_gui import db, app
+from findex_gui.web import db, app
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.user.roles import role_req, check_role
 from findex_gui.orm.models import Task, ResourceGroup

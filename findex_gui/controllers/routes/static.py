@@ -1,5 +1,5 @@
 import os
-from findex_gui import app
+from findex_gui.web import app
 from flask import render_template, request, flash, session, redirect, url_for, send_from_directory, abort
 
 
@@ -8,7 +8,7 @@ def static(filename):
     if filename.startswith('/'):
         return abort(404)
 
-    from findex_gui import themes
+    from findex_gui.web import themes
 
     filename = filename.replace('..', '')
     filename = filename.replace('./', '')

@@ -649,7 +649,7 @@ def update(tmp_folder="/tmp/", download_files=True, relink_files=True):
             f.close()
             print("Unpacked.")
 
-            f = open("%s%s" % (tmp_folder, name), "wb")
+            f = open("%s%s" % (tmp_folder, name), "w")
             f.write(file_content)
             f.close()
             print("Saved as %s%s" % (tmp_folder, name))

@@ -9,6 +9,7 @@ from sqlalchemy import pool
 
 import settings
 from findex_gui.orm.models import BASE
+from findex_gui.bin.config import config
 from findex_common.exceptions import DatabaseException, ElasticSearchException
 
 
@@ -217,9 +218,7 @@ class Database(object):
         random.shuffle(self.hosts)
         for host in self.hosts:
             try:
-                return psycopg2.connect(host=host, user=self.user,
-                                        dbname=self.name, password=self.passwd,
-                                        port=self.port)
+                return psycopg2.connect(config("findex:database:connection"))
             except psycopg2.OperationalError as e:
                 print('Failed to connect to %s: %s' % (host, e))
         raise psycopg2.OperationalError("Ran out of database servers - exiting")

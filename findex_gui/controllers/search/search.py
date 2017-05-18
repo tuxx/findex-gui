@@ -6,7 +6,7 @@ from sqlalchemy_utils import escape_like
 from sqlalchemy import func
 from sqlalchemy_zdb import ZdbQuery
 
-from findex_gui import app, db
+from findex_gui.web import app, db
 from findex_gui.orm.models import Files, Resource
 from findex_common.crawl.crawl import CrawlController
 from findex_common.static_variables import FileCategories, FileProtocols

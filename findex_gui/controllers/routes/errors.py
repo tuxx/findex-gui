@@ -1,7 +1,7 @@
 from flask import Response
 
 import settings
-from findex_gui import app
+from findex_gui.web import app
 
 
 @app.errorhandler(404)

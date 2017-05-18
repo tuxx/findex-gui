@@ -2,7 +2,7 @@ import flask
 from flask_restful import reqparse, abort
 from flask_restful import Resource
 
-from findex_gui import app, locales, appapi
+from findex_gui.web import app, locales, appapi
 from findex_gui.controllers.tasks.tasks import TaskController
 
 

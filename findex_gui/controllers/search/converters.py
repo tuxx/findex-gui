@@ -1,4 +1,4 @@
-from findex_gui import app
+from findex_gui.web import app
 from furl import furl
 from werkzeug.routing import BaseConverter
 from findex_common.static_variables import SearchParameters

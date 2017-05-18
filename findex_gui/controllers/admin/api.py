@@ -2,7 +2,7 @@ import flask
 
 from flask_restful import reqparse, abort, Resource
 
-from findex_gui import appapi
+from findex_gui.web import appapi
 from findex_gui.controllers.user.decorators import admin_required
 from findex_gui.controllers.options.options import OptionsController
 

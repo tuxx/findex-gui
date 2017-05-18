@@ -1,7 +1,7 @@
 from flask import request, session
 from findex_gui.controllers.auth.auth import get_current_user_data
 
-from findex_gui import db, locales, auth
+from findex_gui.web import db, locales, auth
 from findex_gui.orm.models import User, UserGroup
 from findex_gui.controllers.user.roles import default_registered_roles, role_req, check_role
 from findex_common.exceptions import DatabaseException, FindexException, RoleException, AuthenticationException

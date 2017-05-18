@@ -1,4 +1,4 @@
-from findex_gui import app
+from findex_gui.web import app
 import flask
 
 # remove this ~ setup a proper Jinja2 environment

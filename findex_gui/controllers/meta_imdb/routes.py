@@ -1,4 +1,4 @@
-from findex_gui import app, themes
+from findex_gui.web import app, themes
 from findex_gui.controllers.meta_imdb.controller import MetaImdbController
 import findex_gui.controllers.meta_imdb.converters
 

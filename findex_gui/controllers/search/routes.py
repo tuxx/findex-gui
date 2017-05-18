@@ -1,7 +1,7 @@
 import flask
 from flask import session
 import findex_gui.controllers.search.converters
-from findex_gui import app, themes
+from findex_gui.web import app, themes
 from findex_gui.controllers.search.search import SearchController
 
 

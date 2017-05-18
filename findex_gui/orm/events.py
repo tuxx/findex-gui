@@ -1,7 +1,7 @@
 from sqlalchemy import event, DDL
 
 import settings
-from findex_gui import db
+from findex_gui.web import db
 from findex_gui.orm.models import Files
 
 # Creates a composite type for the `files` table, to be

@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import request, url_for, jsonify
 
 import settings
-from findex_gui import app
+from findex_gui.web import app
 from findex_common.utils import decorator_parametrized
 
 
@@ -110,3 +110,9 @@ def after_request(r):
         r.headers["Expires"] = "0"
         r.headers['Cache-Control'] = 'public, max-age=0'
     return r
+
+
+@app.errorhandler(404)
+def error(e):
+    from findex_gui.web import themes
+    return themes.render("main/error", msg=str(e))

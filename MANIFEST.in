@@ -1,0 +1,3 @@
+graft findex_gui
+recursive-exclude * *.pyc *.pyo *.map
+recursive-exclude findex_gui/themes/old *

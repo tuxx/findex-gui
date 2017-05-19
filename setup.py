@@ -54,7 +54,7 @@ def do_setup(**kwargs):
 
 do_setup(
     name="Findex-GUI",
-    version="0.2.0",
+    version="0.2.12",
     author="Sander Ferdinand",
     author_email="sa.ferdinand@gmail.com",
     packages=[
@@ -90,6 +90,8 @@ do_setup(
     install_requires=[
         "gevent==1.2.1",
         "flask==0.12",
+        "click",
+        "findex_common",
         "flask-wtf==0.14.2",
         "flask-auth==0.85",
         "psycopg2==2.7.1",

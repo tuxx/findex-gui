@@ -97,6 +97,11 @@ def decide_cwd(cwd=None, exists=False):
 
 
 def migrate_cwd():
+    path_hashes = cwd("cwd", "hashes.txt", private=True)
+    if not os.path.isfile(path_hashes):
+        log.error("hashes.txt could not found at %s" % path_hashes)
+        return
+
     log.warning(
         "This is the first time you're running Cuckoo after updating your "
         "local version of Cuckoo. We're going to update files in your CWD "
@@ -106,7 +111,7 @@ def migrate_cwd():
     )
 
     hashes = {}
-    for line in open(cwd("cwd", "hashes.txt", private=True), "rb"):
+    for line in open(path_hashes, "rb"):
         if not line.strip():
             continue
         hash_, filename = line.split()

@@ -54,7 +54,7 @@ def do_setup(**kwargs):
 
 do_setup(
     name="Findex-GUI",
-    version="0.2.15",
+    version="0.2.16",
     author="Sander Ferdinand",
     author_email="sa.ferdinand@gmail.com",
     packages=[
@@ -95,8 +95,8 @@ do_setup(
         "flask-wtf==0.14.2",
         "flask-auth==0.85",
         "psycopg2==2.7.1",
-        "sqlalchemy==1.1.6",
-        "sqlalchemy-utils==0.32.13",
+        "sqlalchemy>=1.1.6",
+        "sqlalchemy-utils>=0.32.13",
         "sqlalchemy-zdb>=0.1.0",
         "jinja2==2.9.5",
         "furl==0.5.7",

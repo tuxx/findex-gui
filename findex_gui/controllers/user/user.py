@@ -1,7 +1,7 @@
 from flask import request, session
 from findex_gui.controllers.auth.auth import get_current_user_data
 
-from findex_gui import db, locales, auth
+from findex_gui.web import db, locales, auth
 from findex_gui.orm.models import User, UserGroup
 from findex_gui.controllers.user.roles import default_registered_roles, role_req, check_role
 from findex_common.exceptions import DatabaseException, FindexException, RoleException, AuthenticationException
@@ -45,6 +45,7 @@ class UserController:
 
             db.session.delete(user)
             db.session.commit()
+            db.session.flush()
             return True
         except Exception as ex:
             db.session.rollback()
@@ -76,6 +77,7 @@ class UserController:
         try:
             db.session.add(user)
             db.session.commit()
+            db.session.flush()
             if create_session:
                 UserController.authenticate_and_session(username=username,
                                                         password=password)
@@ -90,6 +92,7 @@ class UserController:
         group = UserGroup(name=name, owner=owner)
         db.session.add(group)
         db.session.commit()
+        db.session.flush()
         return group
 
     @staticmethod
@@ -144,6 +147,7 @@ class UserController:
         if user:
             user.locale = locale
             db.session.commit()
+            db.session.flush()
 
     @staticmethod
     def locale_get():

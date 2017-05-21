@@ -3,3 +3,7 @@ settings.py
 auth/*
 *.pyc
 troep/
+findex_gui/data-private/.cwd
+.egg*
+build/*
+dist/*

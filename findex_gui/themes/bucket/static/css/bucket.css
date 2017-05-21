@@ -246,10 +246,10 @@ button:focus {
 
 .navbar-default {
     background: red;
-    background: -webkit-linear-gradient(left, #4f9bdc, #4e7f96);
-    background: -o-linear-gradient(right, #4f9bdc, #4e7f96);
-    background: -moz-linear-gradient(right, #4f9bdc, #4e7f96);
-    background: linear-gradient(to right, #4f9bdc, #4e7f96);
+    background: -webkit-linear-gradient(left, #4f9bdc, #378bb3);
+    background: -o-linear-gradient(right, #4f9bdc, #378bb3);
+    background: -moz-linear-gradient(right, #4f9bdc, #378bb3);
+    background: linear-gradient(to right, #4f9bdc, #378bb3);
 	border-color: #5579af;
     border-bottom: 0;
 }
@@ -643,4 +643,25 @@ table.browser>thead>tr{
   color: #bdc3c7;
   top: 0;
   left: 0;
+}
+
+
+/* RESPONSIVE / MOBILE */
+
+@media (min-width: 768px) {
+    .container {
+        width: inherit;
+    }
+}
+
+.navbar-default .navbar-toggle {
+    border-color: #fff;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+    background-color: white;
+}
+
+.navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
+    background-color: transparent;
 }

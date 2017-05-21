@@ -1,7 +1,7 @@
 import os
 import ntpath
 
-from findex_gui import app
+from findex_gui.web import app
 from findex_gui.controllers.browse.browse import Browse
 from furl import furl
 from werkzeug.routing import BaseConverter

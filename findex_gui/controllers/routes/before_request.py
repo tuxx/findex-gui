@@ -1,7 +1,6 @@
 from flask import request, session
 
-from findex_gui import app
-from findex_gui import babel, locales
+from findex_gui.web import app, babel, locales
 
 
 @app.before_request
@@ -10,7 +9,7 @@ def require_authorization():
         if not request.path in ['/'] and not request.path.startswith('/browse'):
             return
 
-    from findex_gui import db
+    from findex_gui.web import db
 
     app.config['db_file_count'] = int(db.session.execute("""
     SELECT reltuples::int FROM pg_class WHERE relname ='files'

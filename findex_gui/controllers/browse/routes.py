@@ -7,7 +7,7 @@ from flask import Response, send_file, request
 from flask_babel import gettext
 
 import findex_gui.controllers.browse.converters
-from findex_gui import app, themes, db
+from findex_gui.web import app, themes, db
 from findex_gui.orm.models import MetaImdb
 from findex_gui.controllers.browse.browse import Browse
 from findex_gui.controllers.resources.resources import ResourceController

@@ -2,23 +2,25 @@ import re
 import uuid
 from datetime import datetime
 
-import humanfriendly
 from flask import request
+import humanfriendly
+import sqlalchemy_zdb
+from sqlalchemy_zdb import ZdbColumn
+from sqlalchemy_zdb.types import FULLTEXT
+
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.attributes import flag_modified, InstrumentedAttribute
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column,
     SMALLINT, ARRAY)
 from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
+from sqlalchemy.ext.declarative import declarative_base
 
-from sqlalchemy_zdb import ZdbColumn
-from sqlalchemy_zdb.types import FULLTEXT
 from findex_common.static_variables import ResourceStatus, FileProtocols, FileCategories
 from findex_common.utils import rand_str
 from findex_common.utils_time import TimeMagic
 from findex_common import static_variables
-from findex_gui import locales, app
+from findex_gui.web import locales, app
 from findex_gui.controllers.auth.auth import AuthUser, get_current_user_data
 from findex_gui.controllers.user.roles import RolesType
 
@@ -565,7 +567,7 @@ class Files(BASE, Extended):
     def get_meta_imdb(self):
         if self.meta_imdb_id is None:
             return
-        from findex_gui import db
+        from findex_gui.web import db
         self.meta_imdb = db.session.query(MetaImdb).filter(MetaImdb.id == self.meta_imdb_id).first()
         return self.meta_imdb
 

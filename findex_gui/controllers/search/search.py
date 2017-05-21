@@ -1,4 +1,4 @@
-import settings
+from findex_gui.bin.config import config
 from datetime import datetime
 
 from flask_babel import gettext
@@ -6,7 +6,7 @@ from sqlalchemy_utils import escape_like
 from sqlalchemy import func
 from sqlalchemy_zdb import ZdbQuery
 
-from findex_gui import app, db
+from findex_gui.web import app, db
 from findex_gui.orm.models import Files, Resource
 from findex_common.crawl.crawl import CrawlController
 from findex_common.static_variables import FileCategories, FileProtocols
@@ -57,8 +57,10 @@ class SearchController:
     @staticmethod
     def _search(**kwargs):
         kwargs["key"] = CrawlController.make_valid_key(kwargs["key"])
+        if not kwargs["key"]:
+            raise Exception("Invalid search. Too short?")
 
-        q = ZdbQuery(Files, session=db.session) if settings.es_enabled else Files.query
+        q = ZdbQuery(Files, session=db.session) if config("findex:elasticsearch:enabled") else Files.query
 
         # @TODO: filter by protocols / hosts
         # only find files that are not in "temp" mode
@@ -125,7 +127,7 @@ class SearchController:
             q = q.filter(Files.file_ext.in_(exts))
 
         # Search
-        if settings.es_enabled:
+        if config("findex:elasticsearch:enabled"):
             val = kwargs["key"]
         else:
             if kwargs["autocomplete"] or app.config["db_file_count"] > 5000000:

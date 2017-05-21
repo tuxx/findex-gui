@@ -42,13 +42,11 @@ import subprocess
 import gzip
 import json
 
-import settings
+from findex_gui.bin.config import config
 
 
 TMP_FOLDER = None
 IMDB_ENCODING = "ISO-8859-1"
-CREDS = {"db_host": settings.db_hosts[0], "db_port": settings.db_port, "db_name": settings.db_name,
-         "db_user": settings.db_user, "db_pass": settings.db_pass}
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -649,7 +647,7 @@ def update(tmp_folder="/tmp/", download_files=True, relink_files=True):
             f.close()
             print("Unpacked.")
 
-            f = open("%s%s" % (tmp_folder, name), "wb")
+            f = open("%s%s" % (tmp_folder, name), "w")
             f.write(file_content)
             f.close()
             print("Saved as %s%s" % (tmp_folder, name))

@@ -1,4 +1,4 @@
-from findex_gui import db
+from findex_gui.web import db
 from findex_gui.orm.models import Post, User
 from findex_gui.controllers.user.roles import role_req
 

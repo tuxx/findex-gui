@@ -1,9 +1,11 @@
 from flask import request, redirect, flash, url_for
-from findex_gui.controllers.auth.auth import get_current_user_data
+
+
 from flask_babel import gettext, lazy_gettext
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, SelectField, IntegerField
 
-from findex_gui import app, themes, locales
+from findex_gui.web import app, themes, locales
+from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.helpers import redirect_url
@@ -76,7 +78,7 @@ def user_cp_resource_detail(resource_id):
     # @TODO redo
     from findex_gui.controllers.resources.resources import ResourceController
     from findex_gui.orm.models import Resource
-    from findex_gui import db
+    from findex_gui.web import db
     try:
         resource = db.session.query(Resource).filter(Resource.id == resource_id).first()
     except:
@@ -93,7 +95,7 @@ def user_cp_resource_detail(resource_id):
 def user_cp_resource_remove(resource_id):
     # @TODO redo
     from findex_gui.orm.models import Resource
-    from findex_gui import db
+    from findex_gui.web import db
     try:
         resource = db.session.query(Resource).filter(Resource.id == resource_id).first()
     except:

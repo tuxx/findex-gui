@@ -1,4 +1,4 @@
-from findex_gui import app, settings, themes
+from findex_gui.web import app, themes
 from flask import render_template
 from findex_gui.controllers.user.decorators import admin_required
 

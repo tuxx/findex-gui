@@ -1,12 +1,9 @@
 import flask
 from flask import request
 
-# @TODO: remove flask_restful, use @findex_api instead
-from flask_restful import reqparse, abort
-from flask_restful import Resource
-
-from findex_gui import app, locales, appapi
+from findex_gui.web import app, locales
 from findex_gui.orm.models import User
+from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
 from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
@@ -49,39 +46,25 @@ def api_user_locale_set():
         return flask.jsonify(**{'fail': str(ex)}), 400
 
 
-class UserRegister(Resource):
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('username', location='json', type=str, required=True, help='Username')
-        self.reqparse.add_argument('password', location='json', type=str, required=True, help='Password')
-        super(UserRegister, self).__init__()
-
-    def post(self):
-        args = self.reqparse.parse_args()
-        args = {k: v for k, v in list(args.items()) if v is not None}
-
-        user = UserController.user_add(username=args['username'], password=args['password'])
-        if isinstance(user, Exception):
-            return abort(404, message=str(user))
-        else:
-            return flask.jsonify(**{'status': True})
+@app.route("/api/v2/user/delete", methods=["POST"])
+@findex_api(
+    api_arg("username", type=str, required=True, help="Username")
+)
+def api_user_delete(data):
+    user = UserController.user_delete(username=data['username'])
+    if isinstance(user, Exception):
+        return user
+    return data
 
 
-class UserDelete(Resource):
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('username', location='json', type=str, required=True, help='Username')
-        super(UserDelete, self).__init__()
+@app.route("/api/v2/user/register", methods=["POST"])
+@findex_api(
+    api_arg("username", type=str, required=True, help="Username"),
+    api_arg("password", type=str, required=True, help="Password")
+)
+def api_user_register(data):
+    user = UserController.user_add(username=data['username'], password=data['password'])
+    if isinstance(user, Exception):
+        return user
 
-    def post(self):
-        args = self.reqparse.parse_args()
-        args = {k: v for k, v in list(args.items()) if v is not None}
-
-        user = UserController.user_delete(username=args['username'])
-        if isinstance(user, Exception):
-            return abort(404, message=str(user))
-        else:
-            return flask.jsonify(**args)
-
-appapi.add_resource(UserRegister, '/api/v2/user/delete', endpoint='api_user_delete')
-appapi.add_resource(UserRegister, '/api/v2/user/register', endpoint='api_user_register')
+    return "user registered"

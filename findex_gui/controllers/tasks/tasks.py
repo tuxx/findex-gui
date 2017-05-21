@@ -1,4 +1,4 @@
-from findex_gui import db, app
+from findex_gui.web import db, app
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.user.roles import role_req, check_role
 from findex_gui.orm.models import Task, ResourceGroup
@@ -35,6 +35,7 @@ class TaskController:
         try:
             db.session.add(task)
             db.session.commit()
+            db.session.flush()
             return task
         except Exception as ex:
             db.session.rollback()
@@ -98,6 +99,7 @@ class TaskController:
         try:
             task.groups.append(group)
             db.session.commit()
+            db.session.flush()
         except Exception as ex:
             db.session.rollback()
             raise DatabaseException(ex, log_error)

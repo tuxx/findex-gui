@@ -1,6 +1,6 @@
 import flask
 
-from findex_gui import app
+from findex_gui.web import app
 from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
 from findex_gui.controllers.resources.resources import ResourceController
 

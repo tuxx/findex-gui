@@ -1,4 +1,4 @@
-from findex_gui import db, locales, auth
+from findex_gui.web import db, locales, auth
 from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server
 from findex_gui.controllers.user.roles import role_req, check_role
 from findex_gui.controllers.user.user import UserController
@@ -132,6 +132,7 @@ class ResourceController:
 
         resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == "Default").first()
         db.session.commit()
+        db.session.flush()
 
         return True
 
@@ -174,6 +175,7 @@ class ResourceController:
             db.session.delete(resource)
 
         db.session.commit()
+        db.session.flush()
 
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_CREATE")
@@ -209,6 +211,7 @@ class ResourceController:
         srv.description = description
         db.session.add(srv)
         db.session.commit()
+        db.session.flush()
         return srv
 
     @staticmethod
@@ -220,6 +223,7 @@ class ResourceController:
                                description=description)
             db.session.add(rg)
             db.session.commit()
+            db.session.flush()
             return rg
         except Exception as ex:
             db.session.rollback()

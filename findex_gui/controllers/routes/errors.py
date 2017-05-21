@@ -1,7 +1,7 @@
 from flask import Response
 
-import settings
-from findex_gui import app
+from findex_gui.bin.config import config
+from findex_gui.web import app
 
 
 @app.errorhandler(404)
@@ -14,7 +14,7 @@ def page_not_found(e):
 def all_exception_handler(error):
     rtn = 'Error'
 
-    if settings.app_debug:
+    if config("findex:findex:debug"):
         if hasattr(error, "message"):
             rtn += ': %s' % error.message
         else:

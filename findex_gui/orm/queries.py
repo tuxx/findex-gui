@@ -6,7 +6,7 @@ from findex_gui.orm.models import Files, Resource
 class Findex(object):
     def __init__(self):
         self.resource = None
-        self._cache = {}  # @TODO: could use memcache here
+        self._cache = {}
 
     def _get_cache(self, section, _id):
         if section not in self._cache:

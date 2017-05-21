@@ -1,64 +1,49 @@
 import flask
 from flask import session
 
-from flask_restful import reqparse, abort, Resource
+from findex_gui.web import app
+from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
 
-from findex_gui import appapi
+KEYS = [
+    "search_display_view"
+]
 
-keys = [
-    'search_display_view'
+VALUES = [
+    "table", "fancy"
 ]
 
 
-class SessionGet(Resource):
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
+@app.route("/api/v2/session/set", methods=["POST"])
+@findex_api(
+    api_arg("key", type=str, required=True, help="key is required"),
+    api_arg("val", type=str, required=False, help="value")
+)
+def api_session_set(data):
+    key = data["key"]
+    val = data["val"]
 
-        self.reqparse.add_argument('key', location='json', type=str, required=True, help='key is required')
+    if key not in KEYS:
+        return Exception("key \"%s\" doesn't exist" % key)
 
-        super(SessionGet, self).__init__()
+    if val not in VALUES:
+        return Exception("could not set val \"%s\" - doesn't exist" % val)
 
-    def post(self):
-        args = self.reqparse.parse_args()
-        args = {k: v for k, v in list(args.items()) if v is not None}
-
-        if not args['key'] in keys:
-            return abort(404, message="key \"%s\" doesn't exist" % args['key'])
-
-        if not args['key'] in session:
-            session[args['key']] = 'fancy'
-
-        return flask.jsonify(**{
-            'value': session[args['key']]
-        })
+    session[key] = val
+    return "session key set"
 
 
-class SessionSet(Resource):
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
+@app.route("/api/v2/session/get", methods=["POST"])
+@findex_api(
+    api_arg("key", type=str, required=True, help="key is required"),
+    api_arg("val", type=str, required=True, help="value is required")
+)
+def api_session_get(data):
+    key = data["key"]
 
-        self.reqparse.add_argument('key', location='json', type=str, required=True, help='key is required')
-        self.reqparse.add_argument('val', location='json', type=str, required=True, help='value is required')
+    if key not in KEYS:
+        return Exception("key \"%s\" doesn't exist" % key)
 
-        super(SessionSet, self).__init__()
+    if key not in session:
+        session[key] = "fancy"
 
-    def post(self):
-        args = self.reqparse.parse_args()
-        args = {k: v for k, v in list(args.items()) if v is not None}
-
-        if not args['key'] in keys:
-            return abort(404, message="key \"%s\" doesn't exist" % args['key'])
-
-        if not args['val'] in ['table', 'fancy']:
-            return abort(404, message="could not set val \"%s\" - doesn't exist" % args['val'])
-
-        session[args['key']] = args['val']
-        print(session[args['key']])
-
-        return flask.jsonify(**{
-            'message': 'ok'
-        })
-
-appapi.add_resource(SessionSet, '/api/v2/session/set', endpoint='api_session_set')
-appapi.add_resource(SessionGet, '/api/v2/session/get', endpoint='api_session_get')
-
+    return session[key]

@@ -1,6 +1,6 @@
 from findex_gui.controllers.relay.relay import (
     ReverseRelayController, ReverseHttpRelay, ReverseFtpRelay, ReverseFsRelay, RelayException)
-from findex_gui import app
+from findex_gui.web import app
 
 
 @app.route("/relay/<browse:args>")

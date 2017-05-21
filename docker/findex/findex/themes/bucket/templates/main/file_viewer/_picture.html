@@ -1,0 +1,33 @@
+<style>
+    .plyr__video-wrapper{
+        -webkit-user-select: none;  /* Chrome all / Safari all */
+        -moz-user-select: none;     /* Firefox all */
+        -ms-user-select: none;      /* IE 10+ */
+        user-select: none;          /* Likely future */
+    }
+
+    .hljs-line-numbers {
+        text-align: right;
+        border-right: 1px solid #ccc;
+        color: #999;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    #viewer{
+        background-color: black;
+    }
+
+    #viewer.picture img{
+        margin: 0 auto;
+        display: block;
+        max-width: 100%;
+    }
+</style>
+<div id="viewer" class="picture">
+    <img src="{{ url_for("relay", args={}) }}{{ f.path_file }}"/>
+</div>

@@ -1,0 +1,99 @@
+{% extends "bucket/templates/base.html" %}
+{% block content %}
+    <script src="/static/js/findex/search.js"></script>
+
+    <style>
+    table.browser td a{
+        word-break: break-word;
+    }
+    table.browser td{
+        white-space: normal !important;
+    }
+    </style>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div id="popcorn" class="container-fluid">
+            <div class="row">
+                <div class="filters col-md-8 col-md-offset-2" style="padding-bottom: 20px;">
+                    {% import 'bucket/templates/main/meta/_macros.html' as macros %}
+                    <h3>{{ title.capitalize() }}: {{ person }}</h3>
+                    <hr>
+                    <h4>Local Movies</h4>
+                    {% if results["local"] %}
+                    <table class="browser table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Rating</th>
+                                <th>Cast</th>
+                                <th>Director</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for result in results["local"] %}
+                        <tr class="clickable text-nowrap" data-id="1" data-href="hi/" rel="popover" title="">
+                            <td>
+                                <i class="fa fa-film"></i>
+                                <a href="{{ application_root }}search/{{ result.meta_imdb.title }}&cats=[movies]">
+                                {{ result.meta_imdb.title }} ({{ result.meta_imdb.year }})
+                                </a>
+                            </td>
+
+                            <td><b>{{ result.meta_imdb.rating/10 }}</b></td>
+                            <td>{{ macros.actors_link(result.meta_imdb.actors) }}</td>
+                            <td><a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a></td>
+                            <td>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div style="padding-top:20px;">No movies found featuring "{{ person }}" in the local library.</div>
+                    {% endif %}
+                    <hr>
+                    <h4>From Database</h4>
+                    {% if results["imdb"] %}
+                    <table class="browser table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Rating</th>
+                                <th>Cast</th>
+                                <th>Director</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for result in results["imdb"] %}
+                        <tr class="clickable text-nowrap" data-id="1" data-href="hi/" rel="popover" title="">
+                            <td><i class="fa fa-film"></i>
+                                {{ result.title }} ({{ result.year }})
+                            </td>
+
+                            <td><b>{{ result.rating/10 }}</b></td>
+                            <td>{{ macros.actors_link(result.actors) }}</td>
+                            <td><a target="_blank" href="{{ application_root }}meta/popcorn/director/{{ result.director }}">{{ result.director }}</a></td>
+                            <td>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div style="padding-top:20px;">No movies found featuring "{{ person }}" in the metadata library.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2 col-md-offset-2 no-padding">
+                    <a href="{{ application_root }}meta/popcorn">
+                    <button type="submit" class="btn btn-md" style="width:100%;background: #f5f5f5;border: 1px solid #ddd;">
+                        <i class="fa fa-chevron-left fa-fw"></i> Popcorn Page
+                    </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

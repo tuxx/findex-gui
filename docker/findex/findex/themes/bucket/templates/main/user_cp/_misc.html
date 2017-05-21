@@ -1,0 +1,49 @@
+{% extends "bucket/templates/main/user_cp/_base.html" %}
+
+{% block options %}
+{% macro render_field(field) %}
+    <div class="form-group">
+        <label for="concept" class="col-sm-3 control-label">{{ field.label }}</label>
+        <div class="col-sm-9">
+            {{ field(class_='form-control', **kwargs)|safe }}
+        </div>
+    </div>
+
+    {% if field.errors %}
+        <ul class=errors>
+    {% for error in field.errors %}
+        <li>{{ error }}</li>
+    {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+<h3>{{ _("Localization") }}</h3>
+<div class="panel-body form-horizontal">
+    <!-- @TODO: make abstract select box jquery to api thingy (like angular2) -->
+    <div class="col-md-6">
+        <fieldset>
+            {{ render_field(form.language) }}
+        </fieldset>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        //FindexGui.api('/user/locale/all', 'GET', null).then(function(data){
+        //    test(data);
+        //});
+
+        $("select#language").on('change', function (e) {
+            var language = $("option:selected", this).val();
+            UserController.locale_set(language).then(function(data){
+                if(data.success){
+                    location.reload();
+                }
+            })
+        });
+
+    });
+</script>
+
+{% endblock %}

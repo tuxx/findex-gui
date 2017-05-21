@@ -1,0 +1,399 @@
+{% extends "bucket/templates/base.html" %}
+{% block content %}
+    <link href="{{ url_for("static", filename="themes/bucket/static/css/search.css") }}" rel="stylesheet">
+    <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
+    <script src="{{ url_for("static", filename="themes/bucket/static/js/search.js") }}"></script>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3>{{ _('Search') }}</h3>
+
+                    <div class="form-inline" role="form">
+                        <div class="form-group" style="display:inline;">
+                            <input type="text" class="form-control" id="search" value="" style="max-width: 300px;width: 30%;">
+                        </div>
+                        <div class="form-group" style="display:inline;">
+                            <button type="submit" id="submit_search" class="btn btn-primary btn-md">{{ _('Search') }}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-lg-push-10" id="misc">
+                    <span id="display">
+                        <i id="search_display_view_fancy" data-name="fancy" class="fa fa-th-list fa-middle fa-button" aria-hidden="true"></i>
+                        <i id="search_display_view_table" data-name="table" class="fa fa-table fa-middle fa-button" aria-hidden="true"></i>
+                    </span>
+                </div>
+            </div>
+
+            <hr style="margin-bottom: 10px;margin-top: 4px;">
+
+            <div class="row">
+                <div class="col-md-2" id="leftCol">
+
+                    <form class="form-horizontal" role="form" id="sidebar">
+                        <h4 style="margin-top:24px;">{{ _('Filters') }}</h4>
+
+                        <div id="size" class="noUi-target noUi-ltr noUi-horizontal noUi-background"></div>
+
+                        <div class="btn-group" id="cats">
+                            <button id="cats" style="width: 100%;text-align: left;" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                {{ _('File Categories') }} <span class="caret"></span>
+                            </button>
+
+                            <ul class="dropdown-menu noclose">
+                                <li>
+                                  <input type="checkbox" id="ex3_0" name="cats" data-name="unknown" value="0">
+                                  <label for="ex3_0">{{ _('Unknown') }}</label>
+                                </li>
+                                <li>
+                                  <input type="checkbox" id="ex3_1" name="cats" data-name="documents" value="1">
+                                  <label for="ex3_1">{{ _('Documents') }}</label>
+                                </li>
+                                <li>
+                                  <input type="checkbox" id="ex3_2" name="cats" data-name="movies" value="2">
+                                  <label for="ex3_2">{{ _('Movies') }}</label>
+                                </li>
+                                <li>
+                                  <input type="checkbox" id="ex3_3" name="cats" data-name="music" value="3">
+                                  <label for="ex3_3">{{ _('Music') }}</label>
+                                </li>
+                                <li>
+                                  <input type="checkbox" id="ex3_4" name="cats" data-name="images" value="4">
+                                  <label for="ex3_4">{{ _('Images') }}</label>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="btn-group" id="type">
+                            <button id="type" style="width: 100%;text-align: left;" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-placeholder="false">
+                                 {{ _('File Types') }}<span class="caret"></span>
+                            </button>
+
+                            <ul class="dropdown-menu noclose">
+                                <li>
+                                  <input type="checkbox" id="ex4_0" data-name="files" name="type" value="1">
+                                  <label for="ex4_0">{{ _('Files') }}</label>
+                                </li>
+                                <li>
+                                  <input type="checkbox" id="ex4_1" data-name="folders" name="type" value="2">
+                                  <label for="ex4_1">{{ _('Folders') }}</label>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="btn-group" id="extensions">
+                            <input id="tag1" name="exts" value="" style="display: none;"/>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-10" id="search_col">
+                    <h3 id="search_header"></h3>
+                    <ol id="search_results" class="iterable"></ol>
+                </div>
+            </div>
+            <!--/row-->
+            <div id="loading" style="
+                text-align: center;
+                position: fixed;
+                font-size: 22px;
+                padding: 6px;
+                z-index: 7000;
+                color: grey;
+                top: 50%;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.75);
+                border-top: 2px solid rgba(141, 171, 226, 0.56);
+                border-bottom: 2px solid rgba(141, 171, 226, 0.55);
+                display: none;
+            ">Fetching more results</div>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        var search_controller;
+        var search_results = {};
+        var search_display_view;
+        var exhausted_results = false;
+
+        $( document ).ready(function() {
+            var sel_sidebar = $('#sidebar');
+            var sel_sidebar_parent = $('#leftCol');
+            var sel_size_slider = document.getElementById('size');
+
+            /* meh */
+            search_display_view = '{% if session.search_display_view %}{{ session.search_display_view }}{% endif %}';
+            if(search_display_view==''){
+                search_display_view = 'table';
+                session_set('search_display_view', 'table');
+            }
+
+            $(`#misc #display i[data-name="${search_display_view}"]`).addClass('fa-active');
+
+            /* activate sidebar */
+            $('#sidebar').affix({
+                offset: {
+                    top: 115
+                }
+            });
+
+            /* sidebar->filter->size - slider */
+            noUiSlider.create(sel_size_slider, {
+                start: [0, 8589934592],
+                connect: true,
+                tooltips: [true, true],
+                step: 1,
+                range: {
+                    'min': 0,
+                    '5%': 2030000,     // 2mb
+                    '40%': 101500000,  // 10mb
+                    '50%': 1048576000, // 1gb
+                    '75%': 2147483648, // 2gb
+                    'max': 8589934592  // 8gb
+                },
+                format: {
+                    to: function(value) {
+                        if(value == 8589934592) {
+                            return '>8 G';
+                        } else if (value == 0){
+                            return '1K'
+                        } else {
+                            var round = 1;
+
+                            if(value >= 1095780308) round = 1;
+                            else round = 0;
+
+                            return filesize(value, {
+                                round: round,
+                                base: 2,
+                                unix: true
+                            });
+                        }
+                    },
+                    from: function(value) {
+                        return value;
+                    }
+                }
+            });
+
+            /* sidebar->filter->extensions - init and search on change */
+            $("#tag1").tagsInput({
+                width:"auto",
+                "defaultText": "{{ _("Add ext") }}",
+                "onChange": function(){
+                    if(Object.keys(search_results).length !== 0 && search_results.constructor === Object){
+                        search_controller.search();
+                    }
+                }
+            });
+
+            /* sidebar->filter->radiobutton - search on change */
+            $('#leftCol .dropdown-menu li input[type="radio"]').change(function() {
+                search_controller.search();
+            });
+
+            /* sidebar->filter->checkbox - search on change */
+            $('#leftCol .dropdown-menu li :checkbox').click(function() {
+                let name = $(this).attr('name');
+                let button_group = $(this).closest('.btn-group');
+
+                let dirty = false;
+                button_group.find(`input[name="${name}"]`).each(function(){
+                    if ($(this).is(':checked')) dirty = true;
+                });
+
+                if(!dirty){
+                    button_group.find('button').removeClass('btn-group-active');
+                    button_group.find('button').text({
+                        'cats': 'File Categories',
+                        'types': 'File Types'
+                    }[name]);
+                } else {
+                    button_group.find('button').addClass('btn-group-active');
+                }
+
+                search_controller.search();
+            });
+
+            /* sidebar - affix fix: keep width */
+            $(window).resize(function () {
+                sel_sidebar.width(sel_sidebar_parent.width());
+            });
+
+            /* sidebar - affix fix: keep width */
+            $(document).bind('scroll', function() {
+                sel_sidebar.width(sel_sidebar_parent.width());
+            });
+
+            /* search inputbox stuff */
+            $('#search').focusin(function() {
+                $('#search').autocomplete("search");
+            });
+
+            $('#submit_search').click(function(){
+                search_controller.search();
+            });
+
+            $(document).on("keyup", "#search", function(e){
+                if (e.keyCode == 13) {
+                    $("#search").autocomplete( "close" );
+                    search_controller.search();
+                }
+            });
+
+            $('#table_view').click(function(){
+                session_set('search_display_view', 'table');
+            });
+
+            // move to FindexGui.api
+            $('input#search').autocomplete({
+                minLength: 4,
+                delay: 350,
+                source: function(request, callback) {
+                    $.ajax({
+                        type: 'post',
+                        contentType: 'application/json',
+                        url: `${APPLICATION_ROOT}api/v2/search/` + $('input#search').val(),
+                        dataType: 'json',
+                        data: JSON.stringify({
+                            'autocomplete': true,
+                            'key': $('input#search').val()
+                        }),
+                        timeout: 1500
+                    }).done(function (response) {
+                        let data = [];
+
+                        response.data.results.forEach(function(item){
+                            let name = item['file_name'];
+                            let ext = item['file_ext'];
+
+                            if(name.endsWith(ext)) name = name.slice(0, -ext.length-1);
+                            name = name.toLowerCase();
+
+                            // todo: should not have to do this
+                            // replace with a better autocomplete
+                            // popup thingy.
+                            if(name.length > 36){
+                                name = name.slice(0, 36) + "...";
+                            }
+
+                            data.push({
+                                'label': name,
+                                'logo': search_controller.icons[item['file_format']]
+                            });
+                        });
+
+                        callback(data);
+                    }).fail(function(error) {
+                        switch (error.statusText) {
+                            case 'OK':
+                                console.log(error);
+                                break;
+                            default:
+                                console.log(error);
+                                break;
+                        }
+                    });
+                },
+                select: function(event, ui) {
+                    search_controller.search();  //ui.item.label == the text3
+                }
+            }).autocomplete("instance")._renderItem = function(ul, item) {
+                return $("<li>").append(`<a><img class="ui-menu-item-icon" src="${item.logo}"/>${item.label}</a>`).appendTo(ul);
+            };
+
+            /* init search class */
+            search_controller = new bucket_search(APPLICATION_ROOT, false, 50, {
+                'search_input': 'input#search',
+                'search_results': 'ol#search_results'
+            });
+
+            /* sidebar->filters->size - on update fire search */
+            sel_size_slider.noUiSlider.on('set.one', function() {
+                search_controller.search();
+            });
+
+            /* Session stuff */
+            // @TODO: move to own class
+            function session_set(key, val) {
+                $.ajax({
+                    type: 'post',
+                    contentType: 'application/json',
+                    url: `${APPLICATION_ROOT}api/v2/session/set`,
+                    async: false,
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        'key': key,
+                        'val': val
+                    }),
+                    timeout: 50000
+                }).done(function (response) {
+                    console.log('session set');
+                });
+            }
+
+            function session_get(key) {
+                $.ajax({
+                    type: 'post',
+                    contentType: 'application/json',
+                    url: `${APPLICATION_ROOT}api/v2/session/get`,
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        'key': key
+                    }),
+                    timeout: 50000
+                }).done(function (response) {
+                    console.log('session set');
+                });
+            }
+
+            /* Change the display/view of search results */
+            $('#misc #display i').on('click', function(){
+                let name = $(this).attr('data-name');
+
+                if($(this).hasClass('fa-active')){
+                    $(this).removeClass('fa-active');
+                    $(`#misc #display i[data-name!="${name}"]`).addClass('fa-active');
+                } else {
+                    $(this).addClass('fa-active');
+                    $(`#misc #display i[data-name!="${name}"]`).removeClass('fa-active');
+                }
+
+                // update session view option
+                session_set('search_display_view', name);
+                search_display_view = name;
+
+                // empty HTML search results
+                $('ol#search_results').html('');
+
+                // redraw search results
+                bucket_search.set_result_html(search_results, search_controller);
+
+                // assign icons
+                bucket_search.set_result_icons(search_controller.icons);
+
+                // highlight search results
+                $(search_controller.selectors['search_results']).highlight(search_controller.key, { className: 'important' });
+            });
+
+            // Detect end of page scroll
+            $(window).scroll(function() {
+               if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+                    if(!exhausted_results && Object.keys(search_results).length !== 0 && search_results.constructor === Object && search_results['results'].length > 0){
+                        $("#loading").show();
+                        search_controller.search(search_results['results'].length).then(function(){
+                            $("#loading").fadeOut();
+                        });
+                    }
+               }
+            });
+        });
+
+    </script>
+{% endblock %}

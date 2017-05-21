@@ -1,0 +1,156 @@
+{% extends "bucket/templates/base.html" %}
+{% block content %}
+    <script src="{{ url_for("static", filename="themes/bucket/static/js/icons.js") }}"></script>
+    <style>
+    tr{
+        cursor:pointer;
+    }
+
+    .meta_container > .well{
+        background-color:white;
+        border-radius:0;
+        border:0;
+
+    }
+
+    .viewer{
+        box-shadow: 0 0px 2px rgba(0,0,0,.1);
+        -moz-box-sizing: border-box;
+        margin-bottom:16px;
+    }
+
+    .viewer.movie{
+        background-color:black;
+    }
+
+    .viewer.document{
+        background-color:white;
+    }
+    table td{
+        vertical-align: middle !important;
+    }
+
+    .meta_container .well{
+        box-shadow: 0 1px 2px rgba(0,0,0,.1);
+        -moz-box-sizing: border-box;
+    }
+
+    .meta_container h3.title{
+        padding-top:0px;
+        margin-top:0px;
+        font-size:18px;
+        margin-bottom: 14px;
+        word-break: break-all;
+    }
+
+    .btn-secondary{
+        background-color: #f3f3f3;
+        border: 1px solid #dedede;
+    }
+
+    .btn-xs span{
+        font-family: sans;
+    }
+
+    .btn-xs .fa span{
+        font-family: sans;
+        padding-left: 4px;
+    }
+    </style>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="center_max_width">
+            <div class="col-md-12">
+                {% set relay_category = get_relay_category_by_extension(f.file_ext) %}
+                {% if relay_category and resource.meta.relay_enabled %}
+                <div class="row">
+                    <div class="meta_container" style="box-shadow: 0 1px 2px rgba(0,0,0,.1);">
+                        {% set ext_category, ext_properties = relay_category %}
+                        {% if ext_category == "video" %}
+                            {% include 'bucket/templates/main/file_viewer/_video.html' %}
+                        {% elif ext_category == "document" %}
+                            {% include 'bucket/templates/main/file_viewer/_document.html' %}
+                        {% elif ext_category == "picture" %}
+                            {% include 'bucket/templates/main/file_viewer/_picture.html' %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="meta_container">
+                        <div class="well main col-md-12">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3 class="title">{{ f.file_name_human }} <small>{{ f.file_size_human }}</small></h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <td>Direct Link</td>
+                                                <td>
+                                                    <a href="{{ f.path_direct }}">
+                                                        <button type="button" class="btn btn-success btn-sm">Download</button>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Modified</td>
+                                                <td>{{ f.file_modified_human }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Extension</td>
+                                                <td>{{ f.file_ext }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Category</td>
+                                                <td>{{ f.file_format_human.capitalize() }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <pre style="color: grey;font-size:11px;white-space: pre-line;">wget --user=anonymous --password='anonymous' '{{ f.path_direct }}'</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if imdb %}
+                        <div class="well main">
+                            <h3>{{ imdb.title }} ({{ imdb.year }})</h3>
+                            <hr>
+                            Director: <a href="#">{{ imdb.director }}</a>
+                            <br>
+                            Actors:
+                            {% for name in imdb.actors %}
+                                <a href="#">{{ name }}</a>,
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="meta_container">
+                        <div class="well browser">
+                            <h3 class="title">Other files in this directory</h3>
+                            <hr>
+                            {% import 'bucket/templates/main/_file_browser.html' as filebrowser %}
+                            {{ filebrowser.render(browser.files, compact=True) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function(){
+
+    });
+    </script>
+{% endblock %}

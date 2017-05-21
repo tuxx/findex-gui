@@ -1,0 +1,231 @@
+# Dutch translations for PROJECT.
+# Copyright (C) 2016 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-03-17 10:25+0100\n"
+"PO-Revision-Date: 2016-05-31 22:03+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.3.4\n"
+
+#: findex_gui/controllers/browse/browse.py:30
+msgid "No resource could be found for "
+msgstr "Geen resource gevonden voor"
+
+#: findex_gui/controllers/options/options.py:19
+#, python-format
+msgid "theme name '%s' not found"
+msgstr ""
+
+#: findex_gui/controllers/search/search.py:167
+msgid "Search key too short"
+msgstr "Zoek opdracht te kort"
+
+#: findex_gui/controllers/user/decorators.py:12
+msgid "Unauthorized"
+msgstr "Toegang geweigerd"
+
+#: findex_gui/controllers/user/decorators.py:16
+msgid "Admin privileges required"
+msgstr "Admin privileges nodig"
+
+#: findex_gui/controllers/user/routes.py:27
+msgid "You were successfully logged in"
+msgstr "Je bent succesvol ingelogged"
+
+#: findex_gui/controllers/user/routes.py:32
+msgid "Invalid credentials"
+msgstr "Foutieve inlog"
+
+#: findex_gui/controllers/user/routes.py:47
+msgid "Language"
+msgstr "Taal"
+
+#: findex_gui/themes/bucket/templates/base.html:14
+msgid "Warning"
+msgstr "Waarschuwing"
+
+#: findex_gui/themes/bucket/templates/main/browse.html:9
+msgid "Browse Servers"
+msgstr "Serverlijst"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:22
+msgid "files"
+msgstr "bestanden"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:34
+msgid "File distribution"
+msgstr "Bestands distributie"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:57
+#: findex_gui/themes/bucket/templates/main/search.html:12
+#: findex_gui/themes/bucket/templates/main/search.html:19
+#: findex_gui/themes/bucket/templates/navigation/top.html:19
+msgid "Search"
+msgstr "Zoeken"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:87
+#: findex_gui/themes/bucket/templates/main/search.html:78
+msgid "Files"
+msgstr "Bestanden"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:99
+msgid "Fetch"
+msgstr "Download"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:116
+msgid "Recursively fetch the current directory"
+msgstr "Download de huidige directory"
+
+#: findex_gui/themes/bucket/templates/main/browse_dir.html:171
+msgid "no files"
+msgstr "geen bestanden"
+
+#: findex_gui/themes/bucket/templates/main/login.html:10
+#: findex_gui/themes/bucket/templates/main/register.html:11
+msgid "Username"
+msgstr "Gebruikersnaam"
+
+#: findex_gui/themes/bucket/templates/main/login.html:12
+#: findex_gui/themes/bucket/templates/main/register.html:13
+msgid "Please enter you username"
+msgstr "Voer uw gebruikersnaam in"
+
+#: findex_gui/themes/bucket/templates/main/login.html:17
+#: findex_gui/themes/bucket/templates/main/register.html:18
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: findex_gui/themes/bucket/templates/main/login.html:19
+#: findex_gui/themes/bucket/templates/main/register.html:20
+msgid "Please enter your password"
+msgstr "Voer uw wachtwoord in"
+
+#: findex_gui/themes/bucket/templates/main/login.html:30
+msgid "Remember login"
+msgstr "Onthoud login"
+
+#: findex_gui/themes/bucket/templates/main/login.html:39
+msgid "Register an account"
+msgstr "Registreer een account"
+
+#: findex_gui/themes/bucket/templates/main/login.html:41
+msgid "Sign up for additional functionality"
+msgstr "Registreer een account"
+
+#: findex_gui/themes/bucket/templates/main/login.html:45
+msgid "Add servers"
+msgstr "Servers toevoegen"
+
+#: findex_gui/themes/bucket/templates/main/login.html:46
+msgid "Rate servers"
+msgstr "Servers beoordelen"
+
+#: findex_gui/themes/bucket/templates/main/login.html:47
+msgid "And more"
+msgstr "En meer"
+
+#: findex_gui/themes/bucket/templates/main/login.html:49
+#: findex_gui/themes/bucket/templates/main/register.html:8
+#: findex_gui/themes/bucket/templates/main/register.html:29
+#: findex_gui/themes/bucket/templates/navigation/top.html:34
+msgid "Register"
+msgstr "Registreer"
+
+#: findex_gui/themes/bucket/templates/main/register.html:31
+msgid "Already have an account?"
+msgstr "Heb je al een account?"
+
+#: findex_gui/themes/bucket/templates/main/search.html:37
+msgid "Filters"
+msgstr "Filters"
+
+#: findex_gui/themes/bucket/templates/main/search.html:43
+msgid "File Categories"
+msgstr "Bestands Categoriën"
+
+#: findex_gui/themes/bucket/templates/main/search.html:49
+msgid "Unknown"
+msgstr "Onbekend"
+
+#: findex_gui/themes/bucket/templates/main/search.html:53
+msgid "Documents"
+msgstr "Documenten"
+
+#: findex_gui/themes/bucket/templates/main/search.html:57
+msgid "Movies"
+msgstr "Films"
+
+#: findex_gui/themes/bucket/templates/main/search.html:61
+msgid "Music"
+msgstr "Muziek"
+
+#: findex_gui/themes/bucket/templates/main/search.html:65
+msgid "Images"
+msgstr "Plaatjes"
+
+#: findex_gui/themes/bucket/templates/main/search.html:72
+msgid "File Types"
+msgstr "Bestands Types"
+
+#: findex_gui/themes/bucket/templates/main/search.html:82
+msgid "Folders"
+msgstr "Mappen"
+
+#: findex_gui/themes/bucket/templates/main/search.html:173
+msgid "Add ext"
+msgstr "extensie"
+
+#: findex_gui/themes/bucket/templates/main/user_cp/_base.html:72
+msgid "User Control Panel"
+msgstr "Gebruikerspaneel"
+
+#: findex_gui/themes/bucket/templates/main/user_cp/_base.html:84
+msgid "Options"
+msgstr "Opties"
+
+#: findex_gui/themes/bucket/templates/main/user_cp/_misc.html:21
+msgid "Localization"
+msgstr "Localisatie"
+
+#: findex_gui/themes/bucket/templates/navigation/top.html:8
+msgid "Toggle navigation"
+msgstr "Schakel navigatie"
+
+#: findex_gui/themes/bucket/templates/navigation/top.html:20
+msgid "Browse"
+msgstr "Serverlijst"
+
+#: findex_gui/themes/bucket/templates/navigation/top.html:29
+msgid "Account"
+msgstr ""
+
+#: findex_gui/themes/bucket/templates/navigation/top.html:33
+msgid "Login"
+msgstr "Inloggen"
+
+#~ msgid "Error while registering"
+#~ msgstr "Error tijdens de registratie"
+
+#~ msgid "user already logged in"
+#~ msgstr "gebruiker is al ingelogged"
+
+#~ msgid "No resource could be found for"
+#~ msgstr "Kon geen server vinden bij resource:"
+
+#~ msgid "Report Offline"
+#~ msgstr "Rapporteer Offline"
+
+#~ msgid "Copy/paste to recursively download this directory."
+#~ msgstr ""
+

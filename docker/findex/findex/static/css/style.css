@@ -1,0 +1,39 @@
+body {
+    padding-top: 60px;
+}
+
+.error{
+    background-color: #f2dede;
+    border-style:none;
+    color: #a94442;
+}
+
+.error > .panel-heading{
+    background-color: f2dede;
+    border-style:none;
+    color: #a94442;
+}
+
+.home{
+    background-color: #eee;
+    border-style:none;
+}
+
+.home > .panel-heading {
+    background-color: #eee;
+    border-style: none;
+}
+
+.navbar-default{
+    background-color: #f58735;
+    border-style: none;
+}
+
+.navbar-nav > li > a {
+    color: #3f547f!important;
+}
+
+.navbar-nav > li > a:hover{
+    background-color: #3F547F!important;
+    color: #DDDDDD!important;
+}

@@ -1,7 +1,8 @@
+import sys
+import re
 import random
 import psycopg2
 import logging
-import requests
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import text
@@ -25,10 +26,10 @@ class Database(object):
                                    echo=config("findex:findex:debug"))
 
     def connect(self):
-        self.engine = create_engine('postgresql+psycopg2://',
+        self.engine = create_engine("postgresql+psycopg2://",
                                     pool=self.pool,
                                     echo=config("findex:findex:debug"))
-        self.session = scoped_session(sessionmaker(autocommit=True,
+        self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=True,
                                                    expire_on_commit=True,
                                                    bind=self.engine))
@@ -130,8 +131,7 @@ class Database(object):
         """
         sql = """
         SELECT schemaname, tablename, indexname, indexdef FROM pg_indexes
-        WHERE tablename = :table_name AND indexname = :index;
-        """
+        WHERE tablename = :table_name AND indexname = :index;"""
         return self.session.execute(text(sql), params={"table_name": table_name, "index": index}).fetchone()
 
     def check_type(self, type_name: str):
@@ -153,8 +153,7 @@ class Database(object):
                              FROM pg_catalog.pg_type el
                              WHERE el.oid = t.typelem AND el.typarray = t.oid)
               AND n.nspname NOT IN ('pg_catalog', 'information_schema')
-              AND t.typname=:type_name;
-        """
+              AND t.typname=:type_name;"""
         return self.session.execute(text(sql), params={"type_name": type_name}).fetchone()
 
     def check_extension(self, extension: str):
@@ -164,8 +163,7 @@ class Database(object):
         :return: A :class:`sqlalchemy.engine.result.RowProxy` instance if found.
         """
         sql = """
-        SELECT name,installed_version FROM pg_available_extensions WHERE name=:extension
-        """
+        SELECT name,installed_version FROM pg_available_extensions WHERE name=:extension"""
         return self.session.execute(text(sql), params={"extension": extension}).fetchone()
 
     def create_extension(self, extension: str, msg_on_activate_error: str):
@@ -181,11 +179,18 @@ class Database(object):
             raise DatabaseException("Postgres extension \"%s\" not installed" % extension)
 
         if not extension.installed_version:
-            self.session.execute("CREATE EXTENSION :extension", params={"extension": extension})
-            self.session.commit()
-            self.session.flush()
+            try:
+                self.session.execute("CREATE EXTENSION %s" % re.sub(r'\W+', '', extension.name))
+                self.session.commit()
+                self.session.flush()
+            except Exception as ex:
+                if "permission denied" in str(ex):
+                    sys.stderr.write(str(ex))
+                    sys.stderr.write("\n\nDatabase user not admin.\n\nSQL: ALTER USER myuser WITH SUPERUSER; ")
+                    sys.exit()
+                raise Exception(ex)
 
-            extension = self.check_extension(extension)
+            extension = self.check_extension(extension.name)
             if not extension:
                 raise DatabaseException("Postgres extension \"%s\" not installed" % extension)
             if not extension.installed_version:

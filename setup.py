@@ -54,7 +54,7 @@ def do_setup(**kwargs):
 
 do_setup(
     name="Findex-GUI",
-    version="0.2.12",
+    version="0.2.13",
     author="Sander Ferdinand",
     author_email="sa.ferdinand@gmail.com",
     packages=[
@@ -105,7 +105,8 @@ do_setup(
         "IPy==0.83",
         "pysocks",
         "python-magic",
-        "requests==2.13.0"
+        "requests==2.13.0",
+        "flask_restful"
     ],
     setup_requires=[
         "pytest-runner",

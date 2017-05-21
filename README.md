@@ -33,28 +33,7 @@ Requirements
 
 Docker containers will be provided soon. For now, don't attempt to manually install. You've been warned! :)
 
-Install Python 3.5 by adding the `unstable` repository. Use my [gist](https://gist.github.com/skftn/be58f8e4cc2afac7cfac34e536a7128c).
-
-Install some system requirements:
-```sh
-sudo apt-get install -y python3.5 python-virtualenv python3.5-dev libpq-dev git
-```
-
-Setup a virtualenv:
-
-```sh
-virtualenv -p /usr/bin/python3.5 findex
-cd findex
-source bin/activate
-```
-
-Use pip to install findex-gui:
-```sh
-pip install findex-gui
-```
-
-After that you can type `findex` on the shell to generate configuration. Run `findex web` to run the web interface.
-
+[Manual installation](https://github.com/skftn/findex-gui/blob/master/INSTALL.md)
 
 ### Streetcred
 - Volkskrant (http://i.imgur.com/9oqlKU2.png) (dutch)

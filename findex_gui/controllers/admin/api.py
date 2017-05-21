@@ -1,64 +1,38 @@
-import flask
-
-from flask_restful import reqparse, abort, Resource
-
-from findex_gui.web import appapi
+from findex_gui.web import app
+from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
 from findex_gui.controllers.user.decorators import admin_required
 from findex_gui.controllers.options.options import OptionsController
 
-
-class OptionsGetAPI(Resource):
-    decorators = [admin_required]
-    keys = [
-        'theme_active'
-    ]
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-
-        self.reqparse.add_argument('key', location='json', type=str, required=True, help='key is required')
-
-        super(OptionsGetAPI, self).__init__()
-
-    def get(self, key):
-        global keys
-
-        controller = OptionsController.get(key)
-
-        if controller:
-            return flask.jsonify(**{key: controller.val})
-        else:
-            return abort(404, message='Unknown key \'%s\'' % key)
+KEYS = [
+    'theme_active',
+]
 
 
-class OptionsPostAPI(Resource):
-    decorators = [admin_required]
-    keys = [
-        'theme_active',
-    ]
+# @TODO: ADMIN REQUIRED ON THESE !!
 
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
+@app.route("/api/v2/admin/option_get", methods=["POST"])
+@findex_api(
+    api_arg("key", type=str, required=True, help="a key is required")
+)
+def api_admin_option_get(data):
+    global KEYS
 
-        self.reqparse.add_argument('key', location='json', type=str, required=True, help='key is required')
-        self.reqparse.add_argument('val', location='json', type=str, required=True, help='key is required')
-
-        super(OptionsPostAPI, self).__init__()
-
-    def post(self):
-        global keys
-
-        args = self.reqparse.parse_args()
-        args = {k: v for k, v in list(args.items()) if v is not None}
-
-        if not args['key'] in keys:
-            return abort(404, message='Unknown key \'%s\'' % args['key'])
-
-        OptionsController.set(key=args['key'],
-                              val=args['val'])
-
-        return flask.jsonify(**{'message': 'key set'})
+    controller = OptionsController.get(data["key"])
+    if controller:
+        return controller.val
+    return Exception("Unknown key \'%s\'" % data["key"])
 
 
-appapi.add_resource(OptionsPostAPI, '/api/v2/admin/option_set', endpoint='api_admin_option_set')
-appapi.add_resource(OptionsGetAPI, '/api/v2/admin/option_get', endpoint='api_admin_option_get')
+@app.route("/api/v2/admin/option_set", methods=["POST"])
+@findex_api(
+    api_arg("key", type=str, required=True, help="Key is required"),
+    api_arg("val", type=str, required=True, help="Value is required")
+)
+def api_admin_option_set(data):
+    global KEYS
+
+    if data["key"] not in KEYS:
+        return "Unknown key \'%s\'" % data["key"]
+
+    OptionsController.set(key=data["key"], val=data["val"])
+    return flask.jsonify(**{"message": "key set"})

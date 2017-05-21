@@ -2,7 +2,6 @@ import os
 from findex_gui.bin.config import config
 
 from flask import Flask
-from flask_restful import Api
 from flask_babel import Babel
 
 
@@ -17,9 +16,6 @@ app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
 app.config['APPLICATION_ROOT'] = config("findex:findex:application_root")
 app.config['TEMPLATES_AUTO_RELOAD'] = config("findex:findex:debug")
 SECRET_KEY = config("findex:findex:secret_token")
-
-# setup api
-appapi = Api(app)
 
 # setup translations
 babel = Babel(app)

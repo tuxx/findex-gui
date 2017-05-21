@@ -9,7 +9,7 @@ RUN ls /findex/ \
  && apk add -U postgresql-dev gcc python3-dev musl-dev \
  && pip install findex-gui \
  && findex \
- && sed -i "s/connection =/connection = postgresql:\/\/root:postgres@postgres:5432\/postgres/g" ~/.findex/conf/findex.conf \
+ && sed -i "s/connection =/connection = postgresql:\/\/postgres:findex@postgres:5432\/postgres/g" ~/.findex/conf/findex.conf \
  && sed -i "s/localhost:9200/elasticsearch:9200/g" ~/.findex/conf/findex.conf \
  && cat ~/.findex/conf/findex.conf
 

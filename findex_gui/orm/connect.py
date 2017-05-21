@@ -50,7 +50,6 @@ class Database(object):
                                       "could not be enabled.")
 
         # create the tables, types and indexes
-        import findex_gui.orm.events
         BASE.metadata.create_all(bind=self.engine)
 
         if config("findex:elasticsearch:enabled"):

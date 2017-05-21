@@ -31,9 +31,11 @@ Requirements
 
 ### Installation
 
-Docker containers will be provided soon. For now, don't attempt to manually install. You've been warned! :)
+Please follow the [manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) document. It should include all the steps involved in getting `findex-gui` running.
 
-[Manual installation](https://github.com/skftn/findex-gui/blob/master/INSTALL.md)
+As for Docker, containers will be provided soon.
+
+
 
 ### Streetcred
 - Volkskrant (http://i.imgur.com/9oqlKU2.png) (dutch)

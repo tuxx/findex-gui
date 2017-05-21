@@ -190,12 +190,14 @@ Also modify `default_root_password` and `default_anon_password`. These will be t
 Finally, execute the following to run the web interface. 
 
 ```sh
-findex web
+findex web runserver
 ```
 
 On a first run, it will create all of the neccesary tables, types and indexes for you.
 
 You now have the web interface running. If you actually want to start crawling servers, you should look at how to install the crawl bots [here](https://github.com/skftn/findex-crawl).
+
+For more information on how to run the web interface, check out [Web interface](https://github.com/skftn/findex-gui/blob/master/docs/web/WEB.md)
 
 ### Error: Ran out of servers
 

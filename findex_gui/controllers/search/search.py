@@ -57,6 +57,8 @@ class SearchController:
     @staticmethod
     def _search(**kwargs):
         kwargs["key"] = CrawlController.make_valid_key(kwargs["key"])
+        if not kwargs["key"]:
+            raise Exception("Invalid search. Too short?")
 
         q = ZdbQuery(Files, session=db.session) if config("findex:elasticsearch:enabled") else Files.query
 

@@ -375,7 +375,17 @@ class bucket_search extends Search {
             if(msg.hasOwnProperty("data")) {
                 val = msg.data;
             } else if(msg.hasOwnProperty("responseText")){
-                val = msg.responseText;
+                try {
+                    val = JSON.parse(msg.responseText);
+                    if(val.hasOwnProperty("data")){
+                        val = val.data;
+                    } else {
+                        throw(":(");
+                    }
+                } catch (e) {
+                    val = msg.responseText;
+                }
+
             } else {
                 debugger;
                 val = "Could not get repr for type Object";

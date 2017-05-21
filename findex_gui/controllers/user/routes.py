@@ -1,9 +1,11 @@
 from flask import request, redirect, flash, url_for
-from findex_gui.controllers.auth.auth import get_current_user_data
+
+
 from flask_babel import gettext, lazy_gettext
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, SelectField, IntegerField
 
 from findex_gui.web import app, themes, locales
+from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
 from findex_gui.controllers.helpers import redirect_url

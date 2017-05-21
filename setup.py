@@ -106,7 +106,8 @@ do_setup(
         "pysocks",
         "python-magic",
         "requests==2.13.0",
-        "flask_restful"
+        "flask_restful",
+        "markupsafe"
     ],
     setup_requires=[
         "pytest-runner",

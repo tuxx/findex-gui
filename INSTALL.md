@@ -60,7 +60,7 @@ apt-get install postgresql-9.5 postgresql-client-9.5
 At which point it is time to set up an user and database:
 
 ```sh
-su postgres
+sudo su postgres
 psql
 ```
 
@@ -198,6 +198,34 @@ findex web
 
 On a first run, it will create all of the neccesary tables, types and indexes for you.
 
+You now have the web interface running. If you actually want to start crawling servers, you should look at how to install the crawl bots [here](https://github.com/skftn/findex-crawl).
+
+### Error: Ran out of servers
+
+This means that for some reason Findex could not connect to the Postgres database. Either it is not running, or not accepting connections. Double check the Findex configuration and the Postgres `pg_hba.conf` file.
+
+### Error: Connection refused
+
+This means ElasticSearch was not running at the time the web interface tried to create the tables.
+
+```
+sqlalchemy.exc.InternalError: (psycopg2.InternalError) libcurl error-code: Couldn't connect to server(7); message: Failed to connect to localhost port 9200: Connection refused; req=-XDELETE http://localhost:9200//tieten5.public.files.idx_zdb_files 
+```
+
+This leaves the database in a broken state and requires you to drop and re-create the database:
+
+```sh
+sudo su postgres
+psql
+
+drop database findex;
+create database findex;
+```
+
+```sh
+sudo service elasticsearch restart
+```
+
 ## Final word
 
-If you encountered any problem during these steps, please do not hesitate to submit an issue  [here](https://github.com/skftn/findex-gui/issues).
+If you encountered any problem during these steps and you are stuck, do not hesitate to submit an issue [here](https://github.com/skftn/findex-gui/issues).

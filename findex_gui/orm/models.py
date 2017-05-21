@@ -2,18 +2,20 @@ import re
 import uuid
 from datetime import datetime
 
-import humanfriendly
 from flask import request
+import humanfriendly
+import sqlalchemy_zdb
+from sqlalchemy_zdb import ZdbColumn
+from sqlalchemy_zdb.types import FULLTEXT
+
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.attributes import flag_modified, InstrumentedAttribute
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column,
     SMALLINT, ARRAY)
 from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
+from sqlalchemy.ext.declarative import declarative_base
 
-from sqlalchemy_zdb import ZdbColumn
-from sqlalchemy_zdb.types import FULLTEXT
 from findex_common.static_variables import ResourceStatus, FileProtocols, FileCategories
 from findex_common.utils import rand_str
 from findex_common.utils_time import TimeMagic

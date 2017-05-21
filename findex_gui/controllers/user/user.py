@@ -45,6 +45,7 @@ class UserController:
 
             db.session.delete(user)
             db.session.commit()
+            db.session.flush()
             return True
         except Exception as ex:
             db.session.rollback()
@@ -76,6 +77,7 @@ class UserController:
         try:
             db.session.add(user)
             db.session.commit()
+            db.session.flush()
             if create_session:
                 UserController.authenticate_and_session(username=username,
                                                         password=password)
@@ -90,6 +92,7 @@ class UserController:
         group = UserGroup(name=name, owner=owner)
         db.session.add(group)
         db.session.commit()
+        db.session.flush()
         return group
 
     @staticmethod
@@ -144,6 +147,7 @@ class UserController:
         if user:
             user.locale = locale
             db.session.commit()
+            db.session.flush()
 
     @staticmethod
     def locale_get():

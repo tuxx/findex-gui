@@ -16,7 +16,7 @@ First, install Python 3.5. At the time of writing, Python 3.5 is not yet include
 After Python 3.5 is installed (should be present at `/usr/bin/python3.5`), install the following:
 
 ```sh
-sudo apt-get install -y libpq-dev
+sudo apt-get install -y libpq-dev python-virtualenv
 ```
 
 ## Findex
@@ -65,16 +65,10 @@ psql
 ```
 
 ```sql
-create database findex
+create database findex;
 CREATE USER findex WITH PASSWORD 'changeme';
 GRANT ALL PRIVILEGES ON DATABASE "findex" to findex;
 ALTER USER findex WITH SUPERUSER;
-```
-
-In order for Postgres to receive socket connections from localhost, we need to modify `/etc/postgresql/9.5/main/pg_hba.conf`, add the following line:
-
-```conf
-host    all             all             127.0.0.1/32            md5
 ```
 
 Then restart Postgres:
@@ -93,9 +87,13 @@ tar -xvzf jdk-8u121-linux-x64.tar.gz
 mkdir /usr/lib/jvm
 mv jdk1.8.0_121 /usr/lib/jvm/
 
-update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk1.8.0_121/bin/javac 1
-update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_121/bin/java 1
-update-alternatives --install /usr/bin/javaws javaws /usr/lib/jvm/jdk1.8.0_121/bin/javaws 1
+sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk1.8.0_121/bin/javac 1
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_121/bin/java 1
+sudo update-alternatives --install /usr/bin/javaws javaws /usr/lib/jvm/jdk1.8.0_121/bin/javaws 1
+
+sudo update-alternatives --config javac 
+sudo update-alternatives --config java 
+sudo update-alternatives --config javaws
 ```
 
 Confirm that java is working:
@@ -152,7 +150,6 @@ For Postgres, execute the following:
 ```sh
 cd /tmp && wget https://github.com/zombodb/zombodb/releases/download/v3.1.12/zombodb_jessie_pg95-3.1.12_amd64.deb
 sudo dpkg -i zombodb_jessie_pg95-3.1.12_amd64.deb
-sudo service postgresql restart
 ```
 
 A small change is needed to `/etc/postgresql/9.5/main/postgresql.conf`, add the following at the end of the file:

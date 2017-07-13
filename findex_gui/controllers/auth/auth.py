@@ -8,6 +8,7 @@ import hashlib
 import datetime
 from functools import partial
 from flask import session, abort, current_app, redirect, url_for
+from findex_common.utils import random_str
 
 DEFAULT_HASH_ALGORITHM = hashlib.sha256
 
@@ -86,18 +87,21 @@ class AuthUser(object):
         self.salt = salt
         self.role = role
 
-    def set_and_encrypt_password(self, password, salt=str(int(time.time()))):
+    def set_and_encrypt_password(self, password: str, salt: None = str):
         """
         Encrypts and sets the password. If no salt is provided, a new
         one is generated.
         """
+        if not salt:
+            salt = random_str(16)
         self.salt = salt
         self.password = encrypt(password, self.salt)
 
-    def authenticate(self, password):
+    def authenticate(self, password: str):
         """
-        Attempts to verify the password and log the user in. Returns true if
-        succesful.
+        Attempts to verify the password. Registers into session on success.
+        :param password:
+        :return: bool
         """
         if self.password == encrypt(password, self.salt):
             login(self)

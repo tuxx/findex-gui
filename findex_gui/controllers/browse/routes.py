@@ -16,6 +16,11 @@ from findex_common.static_variables import FileProtocols, ResourceStatus
 from findex_common.utils_time import TimeMagic
 
 
+@app.route("/test")
+def test_dyna():
+    return themes.render("main/test")
+
+
 @app.route("/browse")
 def browse_home():
     resources = ResourceController.get_resources()

@@ -21,15 +21,16 @@
      folder instead of downloading all of them to reduce the load. -->
 <link rel="stylesheet" href="/static/themes/_admin/static/css/skin-black-light.css">
 <!-- iCheck -->
-<link rel="stylesheet" href="/static.plugins/iCheck/flat/blue.css">
+<link rel="stylesheet" href="/static/plugins/iCheck/flat/blue.css">
 <!-- Date Picker -->
 <link rel="stylesheet" href="/static/plugins/datepicker/datepicker3.css">
 <!-- Daterange picker -->
 <link rel="stylesheet" href="/static/plugins/daterangepicker/daterangepicker-bs3.css">
 <!-- jQuery Table Sorter -->
 <script type="text/javascript" src="http://mottie.github.com/tablesorter/js/jquery.tablesorter.js"></script>
-<!-- DataTables -->
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
+<!-- Dynatable -->
+<link rel="stylesheet" href="/static/plugins/dynatable/jquery.dynatable.css"/>
+<script type="text/javascript" src="/static/plugins/dynatable/jquery.dynatable.js"></script>
 
 <link rel="stylesheet" href="/static/themes/_admin/static/css/admin.css">
 
@@ -43,4 +44,12 @@
 <script src="/static/themes/_admin/static/js/app.js"></script>
 <script src="/static/themes/_admin/static/js/admin.js"></script>
 
-<script src="/static/js/app.js"></script>
+<script src="/static/js/findex/app.js"></script>
+<script src="/static/js/findex/findex_core.js"></script>
+
+<style type="text/css">
+#icheckForm .radio label, #icheckForm .checkbox label {
+    padding-left: 0;
+}
+</style>
+<script>var APPLICATION_ROOT = "{{ config["APPLICATION_ROOT"] }}";</script>

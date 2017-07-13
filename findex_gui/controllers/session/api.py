@@ -2,7 +2,7 @@ import flask
 from flask import session
 
 from findex_gui.web import app
-from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
+from findex_gui.bin.api import FindexApi, api_arg
 
 KEYS = [
     "search_display_view"
@@ -14,7 +14,7 @@ VALUES = [
 
 
 @app.route("/api/v2/session/set", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("key", type=str, required=True, help="key is required"),
     api_arg("val", type=str, required=False, help="value")
 )
@@ -33,7 +33,7 @@ def api_session_set(data):
 
 
 @app.route("/api/v2/session/get", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("key", type=str, required=True, help="key is required"),
     api_arg("val", type=str, required=True, help="value is required")
 )

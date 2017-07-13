@@ -36,8 +36,9 @@ class Theme:
         ]
 
         for option in options:
-            if not option in data:
-                raise Exception("Theme error for \"%s\". Option \"%s\" not found in theme configuration file but should be present." % (self.name, option))
+            if option not in data:
+                raise Exception("Theme error for \"%s\". Option \"%s\" not found "
+                                "in theme configuration file but should be present." % (self.name, option))
 
         for k, v in data.items():
             self.options[k] = v
@@ -45,7 +46,7 @@ class Theme:
 
 class ThemeController:
     def __init__(self):
-        self.base = app.config['dir_base'] + '/themes/'
+        self.base = app.config["dir_base"] + "/themes/"
         self.data = {}
 
     def render(self, template_path, theme=None, status_code=200, **kwargs):
@@ -53,22 +54,22 @@ class ThemeController:
             theme = self.get_active()
 
         # @TO-DO: use a context processor
-        kwargs['env'] = {z: app.config[z] for z in app.config if z.islower()}
-        kwargs['env']['application_root'] = app.config['APPLICATION_ROOT']
+        kwargs["env"] = {z: app.config[z] for z in app.config if z.islower()}
+        kwargs["env"]["application_root"] = app.config["APPLICATION_ROOT"]
 
         user = UserController.get_current_user()
         user_context = get_current_user_data()
 
         if user_context:
-            if not session.get('locale'):
-                session['locale'] = user.locale
+            if not session.get("locale"):
+                session["locale"] = user.locale
 
-            elif session['locale'] != user.locale:
-                session['locale'] = user.locale
+            elif session["locale"] != user.locale:
+                session["locale"] = user.locale
 
-        kwargs['user'] = user
+        kwargs["user"] = user
         try:
-            return render_template('%s/templates/%s.html' % (theme, template_path), url_for=url_for, **kwargs), status_code
+            return render_template("%s/templates/%s.html" % (theme, template_path), url_for=url_for, **kwargs), status_code
         except TemplateNotFound as e:
             return "Template \"%s\" not found" % str(e)
         except Exception as ex:
@@ -92,18 +93,18 @@ class ThemeController:
                 data.append(theme)
 
         for d in data:
-            self.data[d.options['theme_name']] = d.options
+            self.data[d.options["theme_name"]] = d.options
 
     def _validate(self, theme_name):
-        path = ''
+        path = ""
 
         try:
             if theme_name in self.data:
-                raise Exception('Duplicate theme. Is it already added?')
+                raise Exception("Duplicate theme. Is it already added?")
 
-            path = '%s/theme.json' % theme_name
+            path = "%s/theme.json" % theme_name
 
-            options = ''.join(utils.file_read(path))
+            options = "".join(utils.file_read(path))
             blob = utils.is_json(options)
             theme_name = Theme(name=theme_name, data=blob)
 

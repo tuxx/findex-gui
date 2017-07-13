@@ -5,19 +5,23 @@ from datetime import datetime
 from flask import request
 import humanfriendly
 import sqlalchemy_zdb
+from findex_gui.bin.config import config
+sqlalchemy_zdb.ES_HOST = config("findex:elasticsearch:host")
 from sqlalchemy_zdb import ZdbColumn
 from sqlalchemy_zdb.types import FULLTEXT
 
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.attributes import flag_modified, InstrumentedAttribute
 from sqlalchemy import (
-    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP, ForeignKey, Table, Column,
-    SMALLINT, ARRAY)
+    Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP,
+    ForeignKey, Table, Column, SMALLINT, ARRAY
+)
 from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
 from sqlalchemy.ext.declarative import declarative_base
 
 from findex_common.static_variables import ResourceStatus, FileProtocols, FileCategories
-from findex_common.utils import rand_str
+from findex_common.crawl import make_resource_search_column
+from findex_common.utils import random_str
 from findex_common.utils_time import TimeMagic
 from findex_common import static_variables
 from findex_gui.web import locales, app
@@ -150,6 +154,11 @@ class Resource(BASE, Extended):
     date_crawl_start = Column(DateTime())
     date_crawl_end = Column(DateTime())
 
+    # this search column will be used for front-end
+    # searching capabilities, it will include:
+    # "SERVER_ADDRESS, SERVER_NAME, DISPLAY_URL, PROTOCOL(str)"
+    search = ZdbColumn(FULLTEXT(), nullable=False)
+
     basepath = Column(String(), nullable=True, default="")
 
     def __init__(self, server, protocol, port, display_url, basepath):
@@ -158,6 +167,10 @@ class Resource(BASE, Extended):
         self.display_url = display_url
         self.protocol = protocol
         self.basepath = basepath
+        self.search = make_resource_search_column(server_address=server.address,
+                                                  server_name=server.name,
+                                                  display_url=display_url,
+                                                  resource_port=port)
 
     @property
     def protocol_human(self):
@@ -415,7 +428,7 @@ class User(BASE, AuthUser, Extended):
     username = Column(String(16), unique=True, nullable=False)
     realname = Column(String(128), nullable=True, info={"json_exclude": True})
     password = Column(String(120), nullable=False, info={"json_exclude": True})
-    salt = Column(String(16), default=rand_str(16), info={"json_exclude": True})
+    salt = Column(String(32), default=random_str(16), info={"json_exclude": True})
 
     created = Column(DateTime(), default=datetime.utcnow, nullable=False)
     modified = Column(DateTime(), default=datetime.utcnow, nullable=False)
@@ -437,7 +450,7 @@ class User(BASE, AuthUser, Extended):
             else:
                 self.locale = "en"
             with app.app_context():
-                self.set_and_encrypt_password(password=password, salt=rand_str(16))
+                self.set_and_encrypt_password(password=password, salt=random_str(16))
 
     def __getstate__(self):
         """used by flask.auth lib"""
@@ -447,7 +460,7 @@ class User(BASE, AuthUser, Extended):
             "created": self.created,
             "modified": self.modified,
             "locale": self.locale,
-            "admin": self.is_admin(),
+            "admin": self.admin,
             "roles": self.roles
         }
 
@@ -456,9 +469,6 @@ class User(BASE, AuthUser, Extended):
         that do not propagate changes, are committed correctly
         by SQLAlchemy upon flush."""
         flag_modified(self, "roles")
-
-    def is_admin(self):
-        return True if self.role == 0 and isinstance(self.role, int) else False
 
     @staticmethod
     def make_valid_username(username):
@@ -526,7 +536,7 @@ class Post(BASE, Extended):
 class Files(BASE, Extended):
     __tablename__ = "files"
 
-    id = Column(BigInteger, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
     resource_id = ZdbColumn(Integer())
 
@@ -624,4 +634,3 @@ class Files(BASE, Extended):
     @property
     def file_url(self):
         return "%s%s" % (self.file_path, self.file_name_human)
-

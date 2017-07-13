@@ -563,3 +563,41 @@ def read_kv_conf(filepath):
         ret[a][b] = ret[a].get(b, {})
         ret[a][b][c] = value
     return ret
+
+
+def generate_crawl_config(bot_name: str,
+                          db_host: str,
+                          db_port: int,
+                          db_name: str,
+                          db_user: str,
+                          db_pass: str,
+                          db_max_bulk_inserts: int,
+                          amqp_username: str,
+                          amqp_password: str,
+                          amqp_host: str,
+                          amqp_vhost: str,
+                          amqp_queue_name: str,
+                          amqp_queue_size: str):
+    from jinja2 import Environment
+    from findex_gui.bin.misc import cwd
+    f = open(cwd("conf/crawl.conf"), "r")
+    template = f.read()
+    f.close()
+
+    rendered = Environment().from_string(template).render(
+        bot_name=bot_name,
+        db_host=db_host,
+        db_port=db_port,
+        db_db=db_name,
+        db_user=db_user,
+        db_pass=db_pass,
+        db_max_bulk_inserts=db_max_bulk_inserts,
+        amqp_username=amqp_username,
+        amqp_password=amqp_password,
+        amqp_vhost=amqp_vhost,
+        amqp_host=amqp_host,
+        amqp_queue_name=amqp_queue_name,
+        amqp_queue_size=amqp_queue_size
+    )
+
+    return rendered

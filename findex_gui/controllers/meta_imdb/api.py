@@ -2,7 +2,7 @@ import flask
 from flask import abort
 
 from findex_gui.web import app
-from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
+from findex_gui.bin.api import FindexApi, api_arg
 from findex_gui.controllers.meta_imdb.controller import MetaImdbController
 
 

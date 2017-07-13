@@ -1,5 +1,5 @@
 from findex_gui.web import app
-from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
+from findex_gui.bin.api import FindexApi, api_arg
 from findex_gui.controllers.user.decorators import admin_required
 from findex_gui.controllers.options.options import OptionsController
 
@@ -8,10 +8,9 @@ KEYS = [
 ]
 
 
-# @TODO: ADMIN REQUIRED ON THESE !!
-
 @app.route("/api/v2/admin/option_get", methods=["POST"])
-@findex_api(
+@admin_required
+@FindexApi(
     api_arg("key", type=str, required=True, help="a key is required")
 )
 def api_admin_option_get(data):
@@ -23,8 +22,26 @@ def api_admin_option_get(data):
     return Exception("Unknown key \'%s\'" % data["key"])
 
 
+@app.route("/api/v2/admin/test_reachability", methods=["POST"])
+@admin_required
+@FindexApi(
+    api_arg("address", type=str, required=True, help="Address"),
+    api_arg("port", type=int, required=True, help="Port"),
+    api_arg("protocol", type=int, required=True, help="Protocol"),
+    api_arg("user", type=str, required=False, help="User"),
+    api_arg("pwd", type=str, required=False, help="Pwd"),
+    api_arg("auth_type", type=str, required=False, help="Auth type"),
+)
+def api_admin_test_reachability(data):
+    """verify address/port reachability"""
+    from findex_gui.bin.reachability import TestReachability
+    result = TestReachability.test(**data)
+    return result
+
+
 @app.route("/api/v2/admin/option_set", methods=["POST"])
-@findex_api(
+@admin_required
+@FindexApi(
     api_arg("key", type=str, required=True, help="Key is required"),
     api_arg("val", type=str, required=True, help="Value is required")
 )
@@ -35,4 +52,4 @@ def api_admin_option_set(data):
         return "Unknown key \'%s\'" % data["key"]
 
     OptionsController.set(key=data["key"], val=data["val"])
-    return flask.jsonify(**{"message": "key set"})
+    return "key set"

@@ -1,12 +1,12 @@
 import flask
 from findex_gui.web import app
 
-from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
+from findex_gui.bin.api import FindexApi, api_arg
 from findex_gui.controllers.tasks.tasks import TaskController
 
 
 @app.route("/api/v2/task/add", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("name", type=str, required=True, help="Server name"),
     api_arg("owner_id", type=int, required=False, help="Server IPV4 string"),
     api_arg("options", type=dict, required=False, help="task options")
@@ -19,7 +19,7 @@ def api_task_add(data):
 
 
 @app.route("/api/v2/task/get", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("by_owner", type=int, required=False, help="Filter on resources that owner id owns")
 )
 def api_task_get(data):
@@ -28,7 +28,7 @@ def api_task_get(data):
 
 
 @app.route("/api/v2/task/assign_resource_group", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("task_id", type=int, required=True, help="the task id"),
     api_arg("resourcegroup_id", type=int, required=True, help="the task id")
 )
@@ -38,7 +38,7 @@ def api_task_assign_resource_group(data):
 
 
 @app.route("/api/v2/task/add", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("task_id", type=int, required=True, help="the task id"),
     api_arg("resourcegroup_id", type=int, required=True, help="the task id")
 )

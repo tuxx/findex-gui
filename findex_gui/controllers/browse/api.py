@@ -2,13 +2,12 @@ import flask
 
 from datetime import datetime
 from findex_gui.controllers.user.user import UserController
-from findex_gui.controllers.helpers import findex_api
-from findex_gui.controllers.helpers import ApiArgument as api_arg
+from findex_gui.bin.api import FindexApi, api_arg
 from findex_gui.orm.queries import Findex
 from findex_gui.web import app, locales
 
 
-@app.route('/api/v2/browse/servers', methods=['GET'])
+@app.route("/api/v2/browse/servers", methods=["GET"])
 def api_browse_servers():
     if UserController.is_admin():
         resources = [resource.get_json() for resource in Findex().get_resources()]

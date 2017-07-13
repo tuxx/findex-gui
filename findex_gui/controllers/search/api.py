@@ -2,7 +2,7 @@ import flask
 
 from findex_gui.web import app
 from findex_gui.controllers.search.search import SearchController
-from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
+from findex_gui.bin.api import FindexApi, api_arg
 
 from findex_common.static_variables import FileCategories
 
@@ -15,7 +15,7 @@ def api_search_get(key):
 
 
 @app.route("/api/v2/search/<string:key>", methods=["POST"])
-@findex_api(
+@FindexApi(
     api_arg("file_categories", type=list,
             help="A list of options: %s" % ", ".join(FileCategories().get_names())),
     api_arg("file_extensions", type=list,

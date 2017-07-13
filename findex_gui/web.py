@@ -44,7 +44,7 @@ db = Database()
 db.connect()
 db.bootstrap()
 
-from findex_gui.controllers.themes import ThemeController
+from findex_gui.bin.themes import ThemeController
 themes = ThemeController()
 
 # init routes
@@ -56,12 +56,12 @@ def root():
     posts = PostController.get(limit=5, offset=0)
     return themes.render("main/home", posts=posts)
 
-from findex_gui.controllers.admin import routes
 from findex_gui.controllers.search import routes
 from findex_gui.controllers.browse import routes
 from findex_gui.controllers.relay import routes
 from findex_gui.controllers.user import routes
 from findex_gui.controllers.meta_imdb import routes
+from findex_gui.controllers.admin import routes
 
 from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api
@@ -71,3 +71,4 @@ from findex_gui.controllers.resources import api
 from findex_gui.controllers.tasks import api
 from findex_gui.controllers.meta_imdb import api
 from findex_gui.controllers.posts import api
+from findex_gui.controllers.admin import api

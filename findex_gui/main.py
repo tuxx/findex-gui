@@ -97,7 +97,11 @@ def findex_main():
     """
     try:
         print("""Usage: findex [OPTION]...
-  web           runs the web interface
+  web                       runs the web interface
+  test_db                   test db connection
+  view_config               view the configuration file(s)
+  view_stats                view some stats
+  generate_crawl_config     generate findex-crawl configuration
         """)
     except KeyboardInterrupt:
         print("w00t")
@@ -156,6 +160,87 @@ def main(ctx, debug, quiet, nolog, maxcount, user, cwd):
         # Deal with an unhandled exception.
         message = " ".join(platform.linux_distribution())
         print(message, traceback.format_exc())
+
+
+@main.command()
+@click.pass_context
+def test_db(ctx):
+    import psycopg2
+    dsn = config("findex:database:connection")
+
+    try:
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor()
+    except:
+        print(red("Could not connect to the database via \"%s\"" % dsn))
+        return
+    try:
+        cur.execute("""SELECT 1;""")
+        one = cur.fetchone()
+        assert one[0] == 1
+    except:
+        print(red("Database Error"))
+    print(green("Database OK"))
+
+
+@main.command()
+@click.pass_context
+def view_config(ctx):
+    from findex_gui.bin.config import config
+    print("config location: %s" % cwd())
+    print("application_root: %s" % config("findex:findex:application_root"))
+    print("debug: %s" % str(config("findex:findex:debug")))
+    print("async: %s" % config("findex:findex:async"))
+    print("database: %s" % config("findex:database:connection"))
+    print("rabbitmq_username: %s" % config("findex:rabbitmq:username"))
+    print("rabbitmq_host: %s" % config("findex:rabbitmq:host"))
+    print("rabbitmq_vhost: %s" % config("findex:rabbitmq:virtual_host"))
+    print("rabbitmq_queue_name: %s" % config("findex:rabbitmq:queue_name"))
+
+
+@main.command()
+@click.pass_context
+def view_stats(ctx):
+    print(red("Yet to be implemented"))
+
+
+@main.command()
+@click.pass_context
+def generate_crawl_config(ctx):
+    logo(version)
+    from findex_gui.bin.config import generate_crawl_config
+    from findex_common.utils import random_str
+    db = config("findex:database:connection")
+    spl = db[db.find("://") + 3:].split(":")
+    spl_ = spl[1].split("@")
+    spl__ = spl[2].split("/")
+
+    db_host = spl_[1]
+    db_user = spl[0]
+    db_pass = spl_[1]
+    db_port = int(spl__[0])
+    db_name = spl__[1]
+
+    crawl_config = generate_crawl_config(
+        bot_name="bot_%s" % random_str(8),
+        db_host=db_host,
+        db_port=db_port,
+        db_name=db_name,
+        db_user=db_user,
+        db_pass=db_pass,
+        db_max_bulk_inserts=1000,
+        amqp_username=config("findex:rabbitmq:username"),
+        amqp_password=config("findex:rabbitmq:password"),
+        amqp_host=config("findex:rabbitmq:host"),
+        amqp_vhost=config("findex:rabbitmq:virtual_host"),
+        amqp_queue_name=config("findex:rabbitmq:queue_name"),
+        amqp_queue_size=config("findex:rabbitmq:queue_size"),
+    )
+
+    print("Save the following as `settings.py`")
+    print("="*26)
+    print(crawl_config)
+    print("=" * 26)
 
 
 @main.command()

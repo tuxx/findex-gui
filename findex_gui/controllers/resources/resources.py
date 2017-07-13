@@ -1,4 +1,7 @@
+from sqlalchemy_zdb import ZdbQuery
+
 from findex_gui.web import db, locales, auth
+from findex_gui.bin.config import config
 from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server
 from findex_gui.controllers.user.roles import role_req, check_role
 from findex_gui.controllers.user.user import UserController
@@ -22,8 +25,27 @@ class ResourceController:
     @staticmethod
     @role_req("RESOURCE_VIEW")
     def get_resources(uid: int = None, name: str = None, address: str = None,
-                      port: int = None, limit: int = None, by_owner: int = None):
-        q = db.session.query(Resource)
+                      port: int = None, limit: int = None, offset: int = None,
+                      by_owner: int = None, search: str = None, protocol: int = None):
+        """
+        Fetches some resources
+        :param uid:
+        :param name:
+        :param address:
+        :param port:
+        :param limit:
+        :param offset:
+        :param by_owner:
+        :param protocol:
+        :param search: performs a fulltext search on column 'search' which
+        includes: IP/DOMAIN, NAME, DISPLAY_URL, PROTOCOL
+        :return:
+        """
+        # normal sqla or zdb?
+        if search and config("findex:elasticsearch:enabled"):
+            q = ZdbQuery(Resource, session=db.session)
+        else:
+            q = db.session.query(Resource)
 
         if isinstance(by_owner, int):
             q = q.filter(Resource.created_by_id == by_owner)
@@ -31,7 +53,10 @@ class ResourceController:
         if isinstance(uid, int):
             q = q.filter(Resource.id == uid)
 
-        if isinstance(address, str):
+        if isinstance(protocol, int):
+            q = q.filter(Resource.protocol == protocol)
+
+        if isinstance(address, str) and address:
             qs = Server.query
             server = qs.filter(Server.address == address).first()
             if not server:
@@ -41,13 +66,19 @@ class ResourceController:
         if isinstance(port, int):
             q = q.filter(Resource.port == port)
 
-        if isinstance(name, str):
+        if isinstance(search, str) and search:
+            q = q.filter(Resource.search.like(search))
+
+        if isinstance(name, str) and name:
             qs = Server.query
             server = qs.filter(Server.name == name).first()
             if not server:
                 raise Exception("Could not find server")
 
             q = q.filter(Resource.server_id == server.id)
+
+        if offset and isinstance(offset, int):
+            q = q.offset(offset)
 
         if limit and isinstance(limit, int):
             q = q.limit(limit)
@@ -57,8 +88,8 @@ class ResourceController:
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_CREATE")
     def add_resource(resource_port, resource_protocol, server_name=None, server_address=None, server_id=None,
-                     description="", display_url="/", basepath="", recursive_sizes=True,
-                     auth_user=None, auth_pass=None, auth_type=None, web_user_agent=static_variables.user_agent,
+                     description="", display_url="/", basepath="/", recursive_sizes=True,
+                     auth_user=None, auth_pass=None, auth_type=None, user_agent=static_variables.user_agent,
                      throttle_connections=False):
         """
         Adds a local or remote file resource
@@ -74,7 +105,7 @@ class ResourceController:
         :param auth_user: resource user authentication 'str'
         :param auth_pass: resource pass authentication 'str'
         :param auth_type: resource type authentication 'str'
-        :param web_user_agent: The string to identify ourselves with against the service 'str'
+        :param user_agent: The string to identify ourselves with against the service 'str'
         :param throttle_connections: Wait X seconds between each request/connection 'int'
         :return: resource
         """
@@ -95,16 +126,16 @@ class ResourceController:
                 raise FindexException("invalid port")
             _server = ResourceController.add_server(name=server_name,
                                                     hostname=server_address)
+        if not basepath:
+            basepath = "/"
+        elif not basepath.startswith("/") and len(basepath) > 1:
+            basepath = "/%s" % basepath
+
         if _server.parents:
             for parent in _server.parents:
                 if parent.port == resource_port and parent.protocol == resource_protocol \
                         and parent.basepath == basepath:
-                    raise FindexException("Duplicate resource previously defined with resource id: %d" % parent.id)
-
-        if basepath.endswith("/"):
-            basepath = basepath[:-1]
-        elif not basepath.startswith("/") and len(basepath) > 1:
-            basepath = "/%s" % basepath
+                    raise FindexException("Duplicate resource previously defined with resource id \"%d\"" % parent.id)
 
         resource = Resource(server=_server,
                             protocol=resource_protocol,
@@ -117,7 +148,7 @@ class ResourceController:
         if auth_user and auth_pass:
             rm.set_auth(auth_user, auth_pass, auth_type)
         rm.recursive_sizes = recursive_sizes
-        rm.web_user_agent = web_user_agent
+        rm.web_user_agent = user_agent
         rm.throttle_connections = throttle_connections
         resource.meta = rm
 

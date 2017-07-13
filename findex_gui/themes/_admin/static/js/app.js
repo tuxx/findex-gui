@@ -42,7 +42,7 @@ $.AdminLTE.options = {
     //General animation speed for JS animated elements such as box collapse/expand and
     //sidebar treeview slide up/down. This options accepts an integer as milliseconds,
     //'fast', 'normal', or 'slow'
-    animationSpeed: 500,
+    animationSpeed: 100,
     //Sidebar push menu toggle button selector
     sidebarToggleSelector: "[data-toggle='offcanvas']",
     //Activate sidebar push menu
@@ -744,3 +744,16 @@ function _init() {
         });
     };
 }(jQuery));
+
+
+function msgbox_error(msg){
+    $("div.box-body").prepend(`
+    <div class="col-xs-4 no-padding">
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4><i class="icon fa fa-ban"></i> Error!</h4>
+            ${msg}
+        </div>
+    </div>
+    `);
+}

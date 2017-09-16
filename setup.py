@@ -106,7 +106,8 @@ do_setup(
         "pysocks",
         "python-magic",
         "requests==2.13.0",
-        "markupsafe"
+        "markupsafe",
+        "sqlalchemy-json"
     ],
     setup_requires=[
         "pytest-runner",

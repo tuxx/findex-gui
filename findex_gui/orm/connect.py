@@ -212,3 +212,23 @@ class Database(object):
         except psycopg2.OperationalError as e:
             print('Failed to connect to %s: %s' % (dsn, e))
             raise psycopg2.OperationalError("Ran out of database servers - exiting")
+
+    @staticmethod
+    def parse_connection_string(dsn):
+        db = dsn
+        spl = db[db.find("://") + 3:].split(":")
+        spl_ = spl[1].split("@")
+        spl__ = spl[2].split("/")
+
+        db_host = spl_[1]
+        db_user = spl[0]
+        db_pass = spl_[1]
+        db_port = int(spl__[0])
+        db_name = spl__[1]
+        return {
+            "host": db_host,
+            "user": db_user,
+            "pwd": db_pass,
+            "port": db_port,
+            "name": db_name
+        }

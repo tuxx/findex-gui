@@ -16,15 +16,15 @@ from sqlalchemy import (
     Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP,
     ForeignKey, Table, Column, SMALLINT, ARRAY
 )
-from sqlalchemy_utils import JSONType, IPAddressType, force_auto_coercion
+from sqlalchemy_utils import IPAddressType, force_auto_coercion
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy_json import MutableJson
 
 from findex_common.static_variables import ResourceStatus, FileProtocols, FileCategories
 from findex_common.crawl import make_resource_search_column
 from findex_common.utils import random_str
 from findex_common.utils_time import TimeMagic
 from findex_common import static_variables
-from findex_gui.web import locales, app
 from findex_gui.controllers.auth.auth import AuthUser, get_current_user_data
 from findex_gui.controllers.user.roles import RolesType
 
@@ -94,7 +94,7 @@ class Extended(object):
         """
         rtn = []
         for column in cls.get_columns(zombodb_only=zombodb_only):
-            if isinstance(column.type, JSONType): column_type = "JSON"
+            if isinstance(column.type, MutableJson): column_type = "JSON"
             else: column_type = column.type
             rtn.append("%s %s" % (column.name, column_type))
         return ",\n\t".join(rtn)
@@ -217,7 +217,7 @@ class ResourceMeta(BASE, Extended):
     relay_enabled = Column(Boolean, default=False, nullable=False)
 
     recursive_sizes = Column(Boolean, nullable=False, default=False)
-    file_distribution = Column(JSONType, nullable=True)
+    file_distribution = Column(MutableJson, nullable=True)
     throttle_connections = Column(Boolean, nullable=False, default=False)
 
     banner = Column(String(), nullable=True)
@@ -288,7 +288,7 @@ class Task(BASE, Extended):
     description = Column(String(), nullable=True)
     uid_frontend = Column(String(), nullable=True)  # @TODO change to false?
     owner_id = Column(Integer(), ForeignKey("users.id"))
-    options = Column(JSONType())
+    options = Column(MutableJson())
 
     crawlers = relationship("Crawler", secondary=task_crawlers)
     groups = relationship("ResourceGroup", secondary=task_groups)
@@ -347,7 +347,7 @@ class Options(BASE, Extended):
     id = Column(Integer, primary_key=True)
 
     key = Column(String())
-    val = Column(JSONType())
+    val = Column(MutableJson())
 
     def __init__(self, key, val):
         self.key = key
@@ -440,6 +440,7 @@ class User(BASE, AuthUser, Extended):
     locale = Column(String(8), default="en")
 
     def __init__(self, *args, **kwargs):
+        from findex_gui.web import locales, app
         kwargs["username"] = self.make_valid_username(kwargs.get("username"))
         super(User, self).__init__(*args, **kwargs)
 
@@ -553,7 +554,7 @@ class Files(BASE, Extended):
 
     searchable = ZdbColumn(FULLTEXT(41))
 
-    meta_info = ZdbColumn(JSONType())
+    meta_info = ZdbColumn(MutableJson())
     meta_imdb_id = ZdbColumn(SMALLINT())
     meta_imdb = None
     # meta_imdb_id = ZdbColumn(ForeignKey(MetaImdb.id))

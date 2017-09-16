@@ -105,7 +105,7 @@ do_setup(
         "IPy==0.83",
         "pysocks",
         "python-magic",
-        "requests==2.13.0",
+        "requests[security]",
         "markupsafe",
         "sqlalchemy-json"
     ],

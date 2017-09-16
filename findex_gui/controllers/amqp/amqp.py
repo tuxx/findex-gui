@@ -10,29 +10,32 @@ from findex_gui.controllers.options.options import OptionsController
 
 
 class AmqpController:
-    def __init__(self, amqp_name):
-        self.amqp_name = amqp_name
+    def __init__(self, username: str, password: str, host: str, vhost:str, queue: str, port: int = 5672):
+        self.connection, self.channel = AmqpController.connect(
+            username=username,
+            password=password,
+            host=host,
+            vhost=vhost,
+            queue=queue,
+            port=port
+        )
 
-        self.connected = False
-        self._connection = None
-        self._channel = None
+    @staticmethod
+    def connect(username: str, password: str, host: str, vhost:str, queue: str, port: int = 5672):
+        """
+        Connects to an AMQP server
+        :return: connection, channel
+        """
+        creds = credentials.PlainCredentials(username=username, password=password, erase_on_connect=True)
+        params = pika.ConnectionParameters(host=host, port=port, virtual_host=vhost, credentials=creds)
 
-    def connect_via_name(self, amqp_name):
-        from findex_gui.controllers.options.options import OptionsController
-
-        OptionsController.get('amqp')
-
-    def connect(self):
-        creds = credentials.PlainCredentials(username=self.username, password=self.password, erase_on_connect=True)
-        params = pika.ConnectionParameters(host=self.host, port=5672, virtual_host=self.vhost, credentials=creds)
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
-        channel.queue_declare(queue=self.queue_name, durable=True)
-
-    def
+        channel.queue_declare(queue=queue, durable=True)
+        return connection, channel
 
     def is_connected(self):
-        return self.connection is not None and self.channel is not None
+        return self._connection is not None and self._channel is not None
 
     @staticmethod
     def id_generator(size=6, chars=string.ascii_uppercase + string.digits):

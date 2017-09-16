@@ -74,6 +74,8 @@ class ThemeController:
             return "Template \"%s\" not found" % str(e)
         except Exception as ex:
             print(ex)
+            if config("findex:findex:debug"):
+                return "Jinja2 error!\n\n%s" % str(ex)
             return "Jinja2 error!"
 
     def get_active(self):

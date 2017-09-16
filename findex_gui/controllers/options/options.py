@@ -7,11 +7,11 @@ from findex_gui.orm.models import Options
 
 class OptionsController:
     @staticmethod
-    def get(key):
+    def get(key: str):
         return Options.query.filter(Options.key == key).first()
 
     @staticmethod
-    def set(key, val):
+    def set(key: str, val):
         option = Options.query.filter(Options.key == key).first()
 
         if key == 'theme_active':

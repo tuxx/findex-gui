@@ -22,7 +22,7 @@ def api_admin_option_get(data):
     return Exception("Unknown key \'%s\'" % data["key"])
 
 
-@app.route("/api/v2/admin/test_reachability", methods=["POST"])
+@app.route("/api/v2/admin/server/test", methods=["POST"])
 @admin_required
 @FindexApi(
     api_arg("address", type=str, required=True, help="Address"),
@@ -32,7 +32,25 @@ def api_admin_option_get(data):
     api_arg("pwd", type=str, required=False, help="Pwd"),
     api_arg("auth_type", type=str, required=False, help="Auth type"),
 )
-def api_admin_test_reachability(data):
+def api_admin_server_test_reachability(data):
+    """verify address/port reachability"""
+    from findex_gui.bin.reachability import TestReachability
+    result = TestReachability.test(**data)
+    return result
+
+
+@app.route("/api/v2/admin/amqp/test", methods=["POST"])
+@admin_required
+@FindexApi(
+    api_arg("name", type=str, required=True, help="Name of the AMQP broker"),
+    api_arg("address", type=str, required=True, help="Address"),
+    api_arg("port", type=int, required=True, help="Port"),
+    api_arg("broker", type=str, required=True, help="The AMQP broker, default: rabbitmq"),
+    api_arg("user", type=str, required=True, help="User"),
+    api_arg("passwd", type=str, required=True, help="Pwd"),
+    api_arg("vhost", type=str, required=True, help="Pwd"),
+)
+def api_admin_amqp_test_reachability(data):
     """verify address/port reachability"""
     from findex_gui.bin.reachability import TestReachability
     result = TestReachability.test(**data)

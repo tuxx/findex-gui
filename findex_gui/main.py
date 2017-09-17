@@ -100,6 +100,7 @@ def findex_main():
   web                       runs the web interface
   test_db                   test db connection
   view_config               view the configuration file(s)
+  edit_config               edit configuration items
   view_stats                view some stats
   generate_crawl_config     generate findex-crawl configuration
         """)
@@ -196,6 +197,20 @@ def view_config(ctx):
     print("rabbitmq_host: %s" % config("findex:rabbitmq:host"))
     print("rabbitmq_vhost: %s" % config("findex:rabbitmq:virtual_host"))
     print("rabbitmq_queue_name: %s" % config("findex:rabbitmq:queue_name"))
+
+
+@main.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
+@click.pass_context
+def edit_config(ctx):
+    args = {z.split('=', 1)[0]: z.split('=', 1)[1] for z in ctx.args}
+    for k, value in args.items():
+        section, key = k.split('.', 1)
+        Config.configuration['findex'][section][key].default = value
+    write_findex_conf()
+    print(green("Config modified"))
 
 
 @main.command()

@@ -1,0 +1,10 @@
+- name: deploy elasticsearch
+  hosts:
+    - elasticsearch
+  sudo: yes
+  serial: 1
+  any_errors_fatal: yes
+  roles:
+    - base
+    - users
+    - elasticsearch

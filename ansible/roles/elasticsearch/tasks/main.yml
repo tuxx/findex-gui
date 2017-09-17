@@ -1,0 +1,37 @@
+- name: set swappiness
+  sysctl: name=vm.swappiness value=1 state=present
+
+- name: add elasticsearch repo key
+  apt_key: url=https://packages.elastic.co/GPG-KEY-elasticsearch state=present
+
+- name: add the elasticsearch apt repo
+  apt_repository: repo="deb http://packages.elastic.co/elasticsearch/1.7/debian stable main" state=present
+
+- name: install elasticsearch + stuff
+  apt: name={{ item }} state=present
+  with_items:
+    - openjdk-7-jre-headless
+    - elasticsearch
+
+- name: copy more elasticsearch configuration
+  copy: src=default_elasticsearch dest=/etc/default/elasticsearch
+
+- name: copy elasticsearch configuration
+  template: src=elasticsearch.yml dest=/etc/elasticsearch/elasticsearch.yml
+  notify:
+    - start elasticsearch
+
+- name: download zombodb-es-plugin-3.1.12.zip
+  get_url:
+    url="https://github.com/zombodb/zombodb/releases/download/v3.1.12/zombodb-es-plugin-3.1.12.zip"
+    dest="/tmp/zombodb-es-plugin-3.1.12.zip"
+
+- name: install zombodb-es-plugin-3.1.12.zip
+  shell:
+    cmd: /usr/share/elasticsearch/bin/plugin -r zombodb && /usr/share/elasticsearch/bin/plugin -i zombodb -u file:///tmp/zombodb-es-plugin-3.1.12.zip
+  args:
+    executable: /bin/bash
+  become_user: root
+  notify:
+    - start elasticsearch
+    - restart elasticsearch

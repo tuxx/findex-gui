@@ -1,13 +1,11 @@
+- name: set the max open file descriptors
+  sysctl: name=fs.file-max value=64000 state=present
+
+- name: set the max map count
+  sysctl: name=vm.max_map_count value=262144 state=present
+
 - name: switch to Google DNS
   copy: src=resolv dest=/etc/resolv.conf
-
-#- name: fu networking
-#  shell:
-#    cmd: /etc/init.d/networking restart
-#  args:
-#    executable: /bin/bash
-#  become_user: root
-#  ignore_errors: yes
 
 - name: installing alternative (dutch) apt repos
   copy: src=sources.list dest=/etc/apt/sources.list
@@ -21,6 +19,7 @@
     - nload
     - build-essential
     - nmap
+    - wget
     - gcc
     - ngrep
     - git

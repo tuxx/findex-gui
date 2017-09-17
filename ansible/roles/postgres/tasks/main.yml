@@ -1,0 +1,65 @@
+- name: fu hostfile
+  copy: src=hostfile dest=/etc/hosts
+
+- name: install postgres + stuff
+  apt: name={{ item }} state=present
+  with_items:
+    - postgresql-client-9.5
+    - postgresql-9.5
+    - libpq-dev
+    - python-psycopg2
+
+- name: add pg_hba.conf
+  copy: src=pg_hba.conf dest=/etc/postgresql/9.5/main/pg_hba.conf
+  tags: postgres
+
+- name: add postgres.conf
+  template: src=postgresql.conf dest=/etc/postgresql/9.5/main/postgresql.conf
+  tags: postgres
+
+- name: Download ZomboDB
+  get_url:
+    url="https://github.com/zombodb/zombodb/releases/download/v3.1.12/zombodb_jessie_pg95-3.1.12_amd64.deb"
+    dest="/tmp/zombodb_jessie_pg95-3.1.12_amd64.deb"
+
+- name: Install ZomboDB
+  apt: deb="/tmp/zombodb_jessie_pg95-3.1.12_amd64.deb"
+  sudo: true
+
+- name: Clean ZomboDB deb
+  file:
+    state: absent
+    path: "/tmp/zombodb_jessie_pg95-3.1.12_amd64.deb"
+
+- name: restart postgresql server
+  shell:
+    cmd: service postgresql restart
+  args:
+    executable: /bin/bash
+  become_user: root
+
+- name: Create findex database
+  postgresql_db:
+    name: findex
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    login_host: localhost
+    login_user: postgres
+
+- name: Create findex database user
+  postgresql_user:
+    db: findex
+    name: findex
+    password: oughtToChangeThis
+    priv: ALL
+    login_host: localhost
+    login_user: postgres
+
+- name: Enable ZomboDB extension inside postgres
+  shell:
+    cmd: psql -U postgres -h localhost -d findex -c "CREATE EXTENSION zombodb;"
+  args:
+    executable: /bin/bash
+  become_user: root
+  ignore_errors: yes

@@ -13,7 +13,6 @@
       private: no
   roles:
     - base
-    - build_tools
     - users
     - nginx
     - gui

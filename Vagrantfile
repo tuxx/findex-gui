@@ -12,6 +12,9 @@ Vagrant.configure(2) do |config|
         gui_config.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "2048"]
             vb.customize ["modifyvm", :id, "--cpus", "1"]
+            vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+            vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+            vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
         end
         gui_config.vm.provision "ansible" do |ansible|
             ansible.verbose = "v"
@@ -19,17 +22,24 @@ Vagrant.configure(2) do |config|
         end
     end
 
-    config.vm.define :db do |db_config|
-        db_config.vm.host_name = "db"
-        db_config.vm.network "private_network", ip:"192.168.1.11"
-        db_config.vm.provider :virtualbox do |vb|
+    config.vm.define :postgres do |postgres_config|
+        postgres_config.vm.host_name = "postgres.findex"
+        postgres_config.vm.network "private_network", ip:"192.168.1.11"
+        postgres_config.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "2048"]
             vb.customize ["modifyvm", :id, "--cpus", "2"]
+            vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+            vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+            vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+        end
+        postgres_config.vm.provision "ansible" do |ansible|
+            ansible.verbose = "v"
+            ansible.playbook = "ansible/postgres.yml"
         end
     end
 
     config.vm.define :amqp do |amqp_config|
-        amqp_config.vm.host_name = "db"
+        amqp_config.vm.host_name = "amqp.findex"
         amqp_config.vm.network "private_network", ip:"192.168.1.12"
         amqp_config.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "512"]

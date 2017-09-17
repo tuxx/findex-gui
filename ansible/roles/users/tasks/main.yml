@@ -1,0 +1,10 @@
+- name: add groups
+  group: name={{ item }} state=present
+  with_items:
+    - findex
+
+- name: add findex user
+  user: name=findex group=findex shell=/bin/bash
+
+- name: add findex user to sudoers
+  copy: src=findex-sudoers dest=/etc/sudoers.d/findex

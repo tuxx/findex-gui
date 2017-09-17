@@ -1,0 +1,20 @@
+- name: deploy findex-gui
+  hosts:
+    - gui
+  sudo: yes
+  serial: 1
+  any_errors_fatal: yes
+  vars:
+    git_repo: findex-gui
+    git_branch: master
+  vars_prompt:
+      prompt: "Which branch to deploy?"
+      default: master
+      private: no
+  roles:
+    - base
+    - build_tools
+    - users
+    - nginx
+    - gui
+

@@ -4,6 +4,7 @@ Vagrant.require_version ">= 1.9.7"
 
 Vagrant.configure(2) do |config|
     config.vm.box = "debian/jessie64"
+    config.vm.synced_folder ".", "/vagrant", disabled: true
 
     config.vm.define :gui do |gui_config|
         gui_config.vm.host_name = "gui"
@@ -13,7 +14,8 @@ Vagrant.configure(2) do |config|
             vb.customize ["modifyvm", :id, "--cpus", "1"]
         end
         gui_config.vm.provision "ansible" do |ansible|
-            ansible.playbook = "playbook.yml"
+            ansible.verbose = "v"
+            ansible.playbook = "ansible/gui.yml"
         end
     end
 

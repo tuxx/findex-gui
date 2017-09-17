@@ -1,0 +1,49 @@
+- name: installing alternative (dutch) apt repos
+  copy: src=sources.list dest=/etc/apt/sources.list
+  become_user: root
+
+- name: update apt
+  shell: apt-get update
+  args:
+    executable: /bin/bash
+  become_user: root
+
+- name: install base requirements
+  apt: name={{ item }} state=present
+  with_items:
+    - ntp
+    - curl
+    - nmap
+    - gcc
+    - ngrep
+    - git
+    - screen
+    - python-dev
+    - python3-dev
+    - python-pip
+    - python-virtualenv
+    - python3-pip
+    - libffi-dev
+    - libssl-dev
+
+- name: start ntp on boot
+  service: name=ntp state=started enabled=yes
+  when: ansible_virtualization_type != "virtualbox"
+
+- name: stop ntp on virtualbox machines
+  service: name=ntp state=stopped enabled=no
+  when: ansible_virtualization_type == "virtualbox"
+
+- name: Add PostgreSQL repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' state=present
+  sudo: yes
+
+- name: Add PostgreSQL repository key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+  sudo: yes
+
+- name: update apt
+  shell: apt-get update
+  args:
+    executable: /bin/bash
+  become_user: root

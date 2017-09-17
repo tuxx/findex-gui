@@ -1,0 +1,49 @@
+- name: clone findex-gui
+  git: >
+    repo=https://github.com/skftn/{{ git_repo }}.git
+    dest=/home/findex/{{ git_repo }}/
+    version={{ git_branch }}
+  become_user: findex
+
+- name: Create virtualenv
+  shell: /usr/bin/virtualenv -p /usr/bin/python3 venv
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: install additional system requirements
+  apt: name={{ item }} state=present
+  with_items:
+    - postgresql-client-9.5
+    - libpq-dev
+
+- name: Install python requirements
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      pip install -e .
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: Make findex conf dir
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      /home/findex/findex-gui/venv/bin/findex
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: Edit findex configurations
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      /home/findex/findex-gui/venv/bin/findex edit_config database.connection="postgresql://findex:findex@192.168.1.11:5432/findex" rabbitmq.host=""
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex

@@ -1,0 +1,4 @@
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
+
+%findex ALL=(ALL) NOPASSWD: ALL

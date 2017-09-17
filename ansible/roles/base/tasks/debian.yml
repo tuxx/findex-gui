@@ -1,29 +1,30 @@
+- name: switch to Google DNS
+  copy: src=resolv dest=/etc/resolv.conf
+
+#- name: fu networking
+#  shell:
+#    cmd: /etc/init.d/networking restart
+#  args:
+#    executable: /bin/bash
+#  become_user: root
+#  ignore_errors: yes
+
 - name: installing alternative (dutch) apt repos
   copy: src=sources.list dest=/etc/apt/sources.list
   become_user: root
 
-- name: update apt
-  shell: apt-get update
-  args:
-    executable: /bin/bash
-  become_user: root
-
 - name: install base requirements
-  apt: name={{ item }} state=present
+  apt: name={{ item }} state=present update_cache=yes
   with_items:
     - ntp
     - curl
+    - nload
+    - build-essential
     - nmap
     - gcc
     - ngrep
     - git
     - screen
-    - python-dev
-    - python3-dev
-    - python-pip
-    - python-virtualenv
-    - python3-pip
-    - libffi-dev
     - libssl-dev
 
 - name: start ntp on boot
@@ -43,7 +44,5 @@
   sudo: yes
 
 - name: update apt
-  shell: apt-get update
-  args:
-    executable: /bin/bash
-  become_user: root
+  apt:
+    update_cache: yes

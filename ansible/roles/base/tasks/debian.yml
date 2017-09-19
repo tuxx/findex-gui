@@ -1,5 +1,6 @@
 - name: set the max open file descriptors
   sysctl: name=fs.file-max value=64000 state=present
+  become_user: root
 
 - name: set the max map count
   sysctl: name=vm.max_map_count value=262144 state=present
@@ -14,11 +15,12 @@
 - name: install base requirements
   apt: name={{ item }} state=present update_cache=yes
   with_items:
-    - ntp
+    - net-tools
     - curl
+    - nmap
+    - aptitude
     - nload
     - build-essential
-    - nmap
     - wget
     - gcc
     - ngrep
@@ -26,20 +28,12 @@
     - screen
     - libssl-dev
 
-- name: start ntp on boot
-  service: name=ntp state=started enabled=yes
-  when: ansible_virtualization_type != "virtualbox"
-
-- name: stop ntp on virtualbox machines
-  service: name=ntp state=stopped enabled=no
-  when: ansible_virtualization_type == "virtualbox"
-
-- name: Add PostgreSQL repository
-  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' state=present
-  sudo: yes
-
 - name: Add PostgreSQL repository key
   apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+  sudo: yes
+
+- name: Add PostgreSQL repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' state=present
   sudo: yes
 
 - name: update apt

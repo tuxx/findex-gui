@@ -1,17 +1,17 @@
 - name: set swappiness
   sysctl: name=vm.swappiness value=1 state=present
 
-- name: add elasticsearch repo key
-  apt_key: url=https://packages.elastic.co/GPG-KEY-elasticsearch state=present
+- name: install openjdk
+  apt: name=openjdk-8-jre-headless state=present
 
-- name: add the elasticsearch apt repo
-  apt_repository: repo="deb http://packages.elastic.co/elasticsearch/1.7/debian stable main" state=present
+- name: download elasticsearch-1.7.6.deb
+  get_url:
+    url="https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.6.deb"
+    dest="/tmp/elasticsearch-1.7.6.deb"
 
-- name: install elasticsearch + stuff
-  apt: name={{ item }} state=present
-  with_items:
-    - openjdk-7-jre-headless
-    - elasticsearch
+- name: install elasticsearch-1.7.6.deb
+  apt: deb="/tmp/elasticsearch-1.7.6.deb"
+  sudo: true
 
 - name: copy more elasticsearch configuration
   copy: src=default_elasticsearch dest=/etc/default/elasticsearch
@@ -35,3 +35,8 @@
   notify:
     - start elasticsearch
     - restart elasticsearch
+
+- name: add elasticsearch to system boot
+  service:
+    name: elasticsearch
+    enabled: yes

@@ -3,7 +3,7 @@
 Vagrant.require_version ">= 1.9.7"
 
 Vagrant.configure(2) do |config|
-    config.vm.box = "debian/jessie64"
+    config.vm.box = "debian/stretch64"
     config.vm.synced_folder ".", "/vagrant", disabled: true
 
     config.vm.define :gui do |gui_config|

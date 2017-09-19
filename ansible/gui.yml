@@ -1,8 +1,8 @@
 - name: deploy findex-gui
   hosts:
     - gui
-  sudo: yes
   serial: 1
+  become: yes
   any_errors_fatal: yes
   vars:
     git_repo: findex-gui
@@ -16,4 +16,3 @@
     - users
     - nginx
     - gui
-

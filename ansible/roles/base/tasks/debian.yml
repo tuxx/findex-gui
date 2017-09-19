@@ -28,6 +28,10 @@
     - screen
     - libssl-dev
 
+- name: install setfacl support
+  become: yes
+  apt: pkg=acl
+
 - name: Add PostgreSQL repository key
   apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
   sudo: yes

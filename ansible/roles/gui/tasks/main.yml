@@ -5,9 +5,6 @@
     version={{ git_branch }}
   become_user: findex
 
-- name: setting findex-gui directory permissions
-  command: chown -R findex:findex /home/findex/{{ git_repo }}/
-
 - name: install additional system requirements for findex-gui
   apt: name={{ item }} state=present
   with_items:
@@ -57,4 +54,3 @@
     chdir: /home/findex/findex-gui
     executable: /bin/bash
   become_user: findex
-

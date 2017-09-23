@@ -1,10 +1,10 @@
-- name: deploy postgres
+- name: deploy elasticsearch
   hosts:
-    - postgres
+    - elasticsearch
   become: yes
   serial: 1
   any_errors_fatal: yes
   roles:
     - base
     - users
-    - postgres
+    - elasticsearch

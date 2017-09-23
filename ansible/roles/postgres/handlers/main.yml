@@ -1,7 +1,7 @@
 - name: restart postgresql
-  sudo: yes
-  service: name=postgresql enabled=yes state=restarted
+  become_user: root
+  service: name=postgresql state=restarted
 
 - name: reload postgresql
-  sudo: yes
+  become_user: root
   service: name=postgresql enabled=yes state=reloaded

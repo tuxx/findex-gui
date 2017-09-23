@@ -29,16 +29,47 @@ Requirements
 ### Screenshot
 [![pic](http://i.imgur.com/WpTTkxx.png)](w0w)
 
-### Installation
+Installation
+------------
 
-Please follow the [manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) document. It should include all the steps involved in getting `findex-gui` running.
+**warning: findex is still in development and not in alpha mode.**
 
-As for Docker, containers will be provided soon.
+[manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) (not recommended).
 
+### Vagrant
 
+The easiest way to get findex up and running is via vagrant.
 
-### Streetcred
-- Volkskrant (http://i.imgur.com/9oqlKU2.png) (dutch)
-- Security.nl (dutch): [Duizenden openstaande FTP-servers in Nederland](https://www.security.nl/posting/440684)
-- Motherboard (dutch) [440 terabytes aan Nederlandse privébestanden zijn nu makkelijk doorzoekbaar](https://motherboard.vice.com/nl/article/440-terabytes-aan-nederlandse-privbestanden-zijn-nu-makkelijk-doorzoekbaar)
-- [@hdmoore](http://i.imgur.com/nyP0EEq.png)
+The current Vagrant/ansible configuration spawns 3 machines:
+
+```
+192.168.1.10 - findex-gui
+192.168.1.11 - Postgres
+192.168.1.12 - Elasticsearch
+```
+
+To get up and running:
+
+```sh
+$ ansible --version
+ansible 2.3.2.0
+
+$ vagrant -v
+Vagrant 2.0.0
+
+$ vagrant up postgres
+$ vagrant up elasticsearch
+$ vagrant up gui
+
+# start findex-gui
+$ vagrant ssh gui
+$ sudo su
+$ su findex
+$ cd findex-gui
+$ source venv/bin/activate
+$ findex web --host 192.168.1.10 --port 3030
+```
+
+The web interface can now be reached: `http://192.168.1.10:3030`
+
+In the future, more versatile deployment options will be provided.

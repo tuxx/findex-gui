@@ -17,6 +17,10 @@ app.config['APPLICATION_ROOT'] = config("findex:findex:application_root")
 app.config['TEMPLATES_AUTO_RELOAD'] = config("findex:findex:debug")
 SECRET_KEY = config("findex:findex:secret_token")
 
+# ISO 8601 datetimes
+from findex_gui.bin.utils import ApiJsonEncoder
+app.json_encoder = ApiJsonEncoder
+
 # setup translations
 babel = Babel(app)
 locales = {

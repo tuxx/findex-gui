@@ -1,14 +1,15 @@
-from findex_gui.web import app
+from datetime import datetime, date
+
 import flask
 
-# remove this ~ setup a proper Jinja2 environment
-# patch flask.url_for(), prepend APPLICATION_ROOT
-# https://github.com/pallets/flask/issues/1714
 from flask import url_for as _url_for, request
 from flask import redirect as _redirect
-flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1],
-                                                  _url_for(*args, **kwargs))
+from flask.json import JSONEncoder
 
+from findex_gui.web import app
+
+# dirty flask.url_for() monkey patch.
+flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1], _url_for(*args, **kwargs))
 
 def redirect(*args, **kwargs):
     __redirect = _redirect(*args, **kwargs)
@@ -17,16 +18,10 @@ def redirect(*args, **kwargs):
 flask.redirect = redirect
 
 
-def get_request_data():
-    '''Fetch incoming request data'''
-    data = {}
-    if request.args:
-        data = request.args
-
-    if request.json:
-        for k, v in request.json.items():
-            data[k] = v
-    elif request.form:
-        for k, v in request.form.items():
-            data[k] = v
-    return data
+class ApiJsonEncoder(JSONEncoder):
+    '''Custom JSON encoder for flask.jsonify that returns ISO 8601
+    strings which can be parsed in javascript with Date.parse()'''
+    def default(self, obj):
+        if isinstance(obj, (date, datetime)):
+            return obj.isoformat()
+        return super().default(obj)

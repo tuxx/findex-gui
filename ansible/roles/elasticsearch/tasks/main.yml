@@ -11,7 +11,6 @@
 
 - name: install elasticsearch-1.7.6.deb
   apt: deb="/tmp/elasticsearch-1.7.6.deb"
-  sudo: true
 
 - name: copy more elasticsearch configuration
   copy: src=default_elasticsearch dest=/etc/default/elasticsearch
@@ -21,14 +20,14 @@
   notify:
     - start elasticsearch
 
-- name: download zombodb-es-plugin-3.1.12.zip
+- name: download zombodb-es-plugin-3.1.15.zip
   get_url:
-    url="https://github.com/zombodb/zombodb/releases/download/v3.1.12/zombodb-es-plugin-3.1.12.zip"
-    dest="/tmp/zombodb-es-plugin-3.1.12.zip"
+    url="https://github.com/zombodb/zombodb/releases/download/v3.1.15/zombodb-es-plugin-3.1.15.zip"
+    dest="/tmp/zombodb-es-plugin-3.1.15.zip"
 
-- name: install zombodb-es-plugin-3.1.12.zip
+- name: install zombodb-es-plugin-3.1.15.zip
   shell:
-    cmd: /usr/share/elasticsearch/bin/plugin -r zombodb && /usr/share/elasticsearch/bin/plugin -i zombodb -u file:///tmp/zombodb-es-plugin-3.1.12.zip
+    cmd: /usr/share/elasticsearch/bin/plugin -r zombodb && /usr/share/elasticsearch/bin/plugin -i zombodb -u file:///tmp/zombodb-es-plugin-3.1.15.zip
   args:
     executable: /bin/bash
   become_user: root

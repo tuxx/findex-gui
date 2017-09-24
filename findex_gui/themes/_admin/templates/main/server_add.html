@@ -5,10 +5,10 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Add Server
+                Add Servers
             </h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Add Server</a></li>
+                <li><a href="#"><i class="fa fa-dashboard"></i> Add Servers</a></li>
                 <li><a href="#">List</a></li>
             </ol>
         </section>
@@ -16,7 +16,45 @@
         <!-- Main content -->
         <section class="content">
             <div class="row">
-                <div class="col-xs-5">
+                <div class="col-md-12">
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <i class="fa fa-question"></i>
+
+                            <h3 class="box-title">Description</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <p>
+                                This page lets you add servers to Findex for crawling in 3 ways:
+                            </p>
+                            <ul>
+                                <li>Manually adding one server</li>
+                                <li>Scanning for servers via nmap</li>
+                                <li>Programmatically adding a bulk of servers</li>
+                            </ul>
+
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <p>
+                                        Please note that for all options, the added servers will not be indexed right
+                                        way,
+                                        instead they will be assigned to a server group called <code>default</code> (see also;
+                                        menu item <b>Servers->Groups</b>).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- ./col -->
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h2 class="page-header">Add Server</h2>
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs">
                             <li class="active"><a href="#host" data-toggle="tab">Endpoint</a></li>
@@ -29,11 +67,11 @@
                                 <section id="new">
                                     <div class="row">
                                         <div class="col-md-12">
-                                        <form id="add" class="">
-                                            {% for field in form_add %}
-                                                {{ macros.render_field(field) }}
-                                            {% endfor %}
-                                        </form>
+                                            <form id="add" class="">
+                                                {% for field in form_add %}
+                                                    {{ macros.render_field(field) }}
+                                                {% endfor %}
+                                            </form>
                                         </div>
                                     </div>
                                 </section>
@@ -62,13 +100,88 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <hr>
+                            <div class="btn-group" role="group" aria-label="submit">
+                                <button type="button" id="test_reachability" class="btn btn-secondary">Test
+                                    reachability
+                                </button>
+                                <button type="button" id="submit" class="btn btn-primary">Submit Server</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h2 class="page-header">Add Nmap Rule</h2>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#nmap_rule" data-toggle="tab">Rule</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="nmap_rule">
+                                <section id="new">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <form id="nmap_add" class="">
+                                            <fieldset disabled>
+                                                {% for field in form_nmap_rule_add %}
+                                                    {{ macros.render_field(field) }}
+                                                {% endfor %}
+
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <label for="nmap_cmd" class="control-label">
+                                                                <label for="nmap_cmd">Command
+                                                                    <small>(manually modifyable)</small>
+                                                                </label>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <textarea style="background:#e8e8e8;" class="form-control"
+                                                                      id="nmap_cmd" name="nmap_cmd"
+                                                                      type="text"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <script>
+                                                        $(document).ready(function () {
+                                                            function gen_nmap_cmd() {
+                                                                let hosts = $('form#nmap_add input#hosts').val();
+                                                                let ports = $('form#nmap_add input#ports').val();
+                                                                if (hosts === "" || ports === "") return;
+
+                                                                let cmd = Resources.nmap_cmd(hosts, ports);
+
+                                                                $('form#nmap_add textarea#nmap_cmd').val(cmd);
+                                                            }
+
+                                                            $.each(["hosts", "ports"], function (i, obj) {
+                                                                $(`form#nmap_add input#${obj}`).on('input', function (e) {
+                                                                    gen_nmap_cmd();
+                                                                });
+                                                            });
+
+                                                            gen_nmap_cmd();
+                                                        });
+                                                    </script>
+                                                </div>
+                                            </fieldset>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="row_msg" class="row" style="display:none;">
-                <div class="col-xs-5">
+                <div class="col-xs-6">
                     <div class="box">
                         <div class="box-body">
                             <span style="color:red;font-weight:bold;" id="msg_error">Error: Duplicate resource previously defined with resource id: 4</span>
@@ -79,41 +192,55 @@
             </div>
 
             <div class="row">
-                <div class="col-xs-5">
-                    <div class="box">
-                        <div class="box-body">
-                            <div class="btn-group" role="group" aria-label="submit" style="float:right;">
-                                <button type="button" id="test_reachability" class="btn btn-secondary">Test reachability</button>
-                                <button type="button" id="submit" class="btn btn-primary">Submit</button>
-                            </div>
+                <div class="col-md-12">
+                    <h2 class="page-header">Programmatically</h2>
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <i class="fa fa-fast-forward"></i>
+
+                            <h3 class="box-title">Adding via API</h3>
                         </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <p>
+                                URL: <code>/api/v2/resource/add</code><br><br>
+                                Authentication via HTTP BASIC or cookie required.
+                            </p>
+                            <h4>Curl Example</h4>
+                            <pre style="white-space: pre-wrap;">
+curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-Agent: Curl' -H 'Content-Type: application/json' -H 'Accept: */*' --data-binary '{"server_name":"debian","server_address":"ftp.debian.org","resource_port":"21","resource_protocol":"0","basepath":"/debian/tools/","display_url":"","recursive_sizes":"y","throttle_connections":"-1","user_agent":"Wow Cool User Agent","auth_user":"","auth_pass":"","auth_type":"0"}' --compressed
+                            </pre>
+                        </div>
+                        <!-- /.box-body -->
                     </div>
+                    <!-- /.box -->
                 </div>
             </div>
         </section>
         <!-- /.content -->
     </div>
     <script>
-        $(document).ready(function(){
-            function msg_add(msg){
+        $(document).ready(function () {
+            function msg_add(msg) {
                 $("#row_msg").css("display", "block");
                 $("#msg_error").html("");
                 $("#msg_success").html(`${msg}`);
             }
 
-            function msg_add_err(msg){
+            function msg_add_err(msg) {
                 $("#row_msg").css("display", "block");
                 $("#msg_success").html("");
                 $("#msg_error").html(`Error: ${msg}`);
             }
 
-            var get_form_data = function(selector){
-                return $(selector).serializeArray().reduce(function(obj, item) {
+            var get_form_data = function (selector) {
+                return $(selector).serializeArray().reduce(function (obj, item) {
                     obj[item.name] = item.value;
                     return obj;
-            }, {})};
+                }, {})
+            };
 
-            $("#submit").click(function(){
+            $("#submit").click(function () {
                 let form_add = get_form_data("form#add");
                 let form_options = get_form_data("form#options");
                 let form_auth = get_form_data("form#auth");
@@ -121,11 +248,11 @@
                 let data = extend(form_add, form_options);
                 data = extend(data, form_auth);
 
-                FindexGui.api("/resource/add", "POST", data).then(function(result){
-                    goto_uri(url_for("/admin/servers"));
-                }).fail(function(result){
+                FindexGui.api("/resource/add", "POST", data).then(function (result) {
+                    //goto_uri(url_for("/admin/servers"));
+                }).fail(function (result) {
                     let msg = FindexGui.api_unpack_error(result);
-                    if(msg){
+                    if (msg) {
                         msg_add_err(msg);
                     } else {
                         msg_add_err(`Could not add resource`);
@@ -133,28 +260,28 @@
                 });
             });
 
-            $("#test_reachability").click(function(){
+            $("#test_reachability").click(function () {
                 let form_add = get_form_data("form#add");
                 let form_auth = get_form_data("form#auth");
                 let data = extend(form_add, form_auth);
                 data = extend(data, form_auth);
 
                 let d = {
-                    "port": parseInt(data.resource_port),
-                    "protocol": data.resource_protocol,
-                    "address": data.server_address,
-                    "user": data.auth_user,
-                    "pwd": data.auth_pass,
+                    "resource_port": parseInt(data.resource_port),
+                    "resource_protocol": data.resource_protocol,
+                    "server_address": data.server_address,
+                    "auth_user": data.auth_user,
+                    "auth_pass": data.auth_pass,
                     "auth_type": data.auth_type
                 };
 
-                FindexGui.api("/admin/server/test", "POST", d).then(function(result){
-                    if(result.data == true){
-                        msg_add("All good chief!");
+                FindexGui.api("/admin/server/test", "POST", d).then(function (result) {
+                    if (result.data == true) {
+                        msg_add("All Gucci");
                     } else {
                         msg_add_err("Unreachable");
                     }
-                }).fail(function(result){
+                }).fail(function (result) {
                     console.log(result);
                     msg_add_err("Unreachable");
                 });

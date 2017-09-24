@@ -21,13 +21,12 @@ KEYS = [
     parameter("auth_pass", type=str, required=False),
     parameter("auth_type", type=str, required=False)
 )
-def api_admin_server_test_reachability(server_address, resource_port ,resource_protocol,
+def api_admin_server_test_reachability(server_address, basepath,
+                                       resource_port, resource_protocol,
                                        auth_user, auth_pass, auth_type):
     """
     Test if server can be reached.
-    :param server_name: Server name
     :param server_address: ipv4 'str' - clean hostname or IP
-    :param server_id: server DB id
     :param resource_port: valid port number
     :param resource_protocol: valid protocol number 'int' - see `findex_common.static_variables.FileProtocols`
     :param basepath: the absolute crawl root path 'str'
@@ -37,8 +36,8 @@ def api_admin_server_test_reachability(server_address, resource_port ,resource_p
     :return:
     """
     from findex_gui.bin.reachability import TestReachability
-    result = TestReachability.test(server_address, resource_port ,resource_protocol,
-                                   auth_user, auth_pass, auth_type)
+    result = TestReachability.test(server_address, resource_port, resource_protocol,
+                                   basepath, auth_user, auth_pass, auth_type)
     return result
 
 

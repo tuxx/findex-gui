@@ -29,8 +29,8 @@
                                         <th style="width: 30px;">Location</th>
                                         <th style="width: 80px;">Protocol</th>
                                         <th>Files</th>
-                                        <th>Date added</th>
-                                        <th>Last crawl</th>
+                                        <th>Added</th>
+                                        <th>Updated</th>
                                         <th>Options</th>
                                         <th>Group</th>
                                         <th style="width: 30px;"></th>
@@ -41,8 +41,10 @@
                             </div>
 
                             <div class="col-md-12 no-padding">
-                                <a href="#">
-                                    <button style="float:right;" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#add_modal">+</button>
+                                <a href="server/add">
+                                    <button style="float:right;" type="button" class="btn btn-success btn-sm"
+                                            data-toggle="modal" data-target="#add_modal"
+                                            href="">+</button>
                                 </a>
                             </div>
                         </div>
@@ -54,8 +56,7 @@
 
     <style>
         table#fancytable_servers tbody tr:hover{
-            background: #f5f5f5;
-            cursor: pointer;
+            background: #f9f9f9;
         }
     </style>
 
@@ -73,7 +74,7 @@
                     let resource_id = $($(this).parent().find("td")[1]).html();
 
                     $(this).html(`
-                        <a href="${url_for(`/admin/server_remove/${resource_id}`)}">
+                        <a href="${url_for(`/admin/server/remove/${resource_id}`)}">
                             <span class="fa fa-remove" style="color:red;font-size:16px;float:right;"></span>
                         </a>
                     `);
@@ -88,11 +89,11 @@
                 return `<tr data-id="${record.location}">${tr}</tr>`;
             }
 
-            $("body").on("click", "table#fancytable_servers tr", function(v, o) {
-                let resource_id = $(this).attr("data-id");
-                let redir = url_for(`/admin/server/${resource_id}`);
-                goto_uri(redir);
-            });
+{#            $("body").on("click", "table#fancytable_servers tr", function(v, o) {#}
+{#                let resource_id = $(this).attr("data-id");#}
+{#                let redir = url_for(`/admin/server/${resource_id}`);#}
+{#                goto_uri(redir);#}
+{#            });#}
 
             let api = url_for("/api/v2/resource/get");
             let target = table;

@@ -17,4 +17,8 @@ class Resources {
             "user_id": user_id
         });
     }
+
+    static nmap_cmd(ports, hosts){
+        return `nmap -sT -PN -T4 -p${ports} -oG - ${hosts}`
+    }
 }

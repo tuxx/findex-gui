@@ -1,4 +1,4 @@
-import flask
+from flask import jsonify
 from flask_yoloapi import endpoint, parameter
 
 from findex_gui.web import app
@@ -50,23 +50,24 @@ def api_resource_add_post(server_name, server_address, server_id,
     :param throttle_connections: Wait X seconds between each request/connection 'int'
     :return: resource
     """
-    resource = ResourceController.add_resource(server_name, server_address, server_id,
-                                               resource_port, resource_protocol,
-                                               auth_user, auth_pass, auth_type,
-                                               user_agent, recursive_sizes, basepath,
-                                               display_url, description)
+    resource = ResourceController.add_resource(
+        server_name=server_name, server_address=server_address, server_id=server_id,
+        resource_port=resource_port, resource_protocol=resource_protocol,
+        auth_user=auth_user, auth_pass=auth_pass, auth_type=auth_type,
+        user_agent=user_agent, recursive_sizes=recursive_sizes,
+        basepath=basepath, display_url=display_url, description=description)
     return "resource added with id: %d" % resource.id
 
 
 @app.route("/api/v2/resource/get", methods=["GET"])
 @endpoint.api(
     parameter("by_owner", type=int, required=False, default=None),
-    parameter("perPage", type=int, required=False, default=10),
-    parameter("page", type=int, required=False, default=0),
+    parameter("perPage", type=int, required=False, default=None),
+    parameter("page", type=int, required=False, default=None),
     # parameter("queries[search]", type=str, required=False)
-    parameter("queries", type=str, required=False, default=None)
+    parameter("search", type=str, required=False, default=None)
 )
-def api_resource_get(by_owner, perPage, page, queries):
+def api_resource_get(by_owner, perPage, page, search):
     """
     Get resources.
     :param by_owner: Filter on resources by owner id
@@ -75,18 +76,16 @@ def api_resource_get(by_owner, perPage, page, queries):
     :param queries: hmmz
     :return:
     """
-    # @TODO: shit is fucked atm
     args = {}
-    if data.get("perPage"):
-        args["limit"] = data.get("perPage")
-        if data.get("page"):
-            args["offset"] = (data.get("page") - 1) * data.get("perPage")
-    if data.get("by_owner"):
-        args["by_owner"] = data.get("by_owner")
+    if perPage:
+        args["limit"] = perPage
+        if page:
+            args["offset"] = (page - 1) * perPage
+    if by_owner:
+        args["by_owner"] = by_owner
 
     # sanitize search query
-    if data.get("queries[search]"):
-        search = data.get("queries[search]")
+    if search:
         if search.isdigit():
             args["port"] = int(search)
         elif search and len(search) <= 40:
@@ -119,18 +118,18 @@ def api_resource_get(by_owner, perPage, page, queries):
             "location": resource.resource_id,
             "protocol": resource.protocol_human,
             "files": resource.meta.file_count,
-            "date_added": resource.date_added_ago,
-            "last_crawl": resource.date_crawl_end_ago,
-            "options": "ehh",
+            "added": resource.date_added_ago,
+            "updated": resource.date_crawl_end_ago,
+            "options": None,
             "group": "Default"
         }
         records.append(item)
 
-    return {
+    return jsonify({
         "records": records,
         "queryRecordCount": records_total,
         "totalRecordCount": len(records)
-    }
+    })
 
 
 @app.route("/api/v2/resource/remove", methods=["POST"])

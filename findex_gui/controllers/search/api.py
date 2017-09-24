@@ -26,7 +26,7 @@ def api_search_get(key):
     parameter("autocomplete", type=bool),
 )
 def api_search_post(key: str, file_categories: list = None, file_extensions: list = None, file_size: list = None,
-                    file_type: str = "both", page: int = 0, per_page: int = 30,
+                    file_type: str = "both", page: int = 0, per_page: int = 30, lazy_search=False,
                     autocomplete: bool = False):
     """
     Search!
@@ -43,6 +43,8 @@ def api_search_post(key: str, file_categories: list = None, file_extensions: lis
     :return:
     """
     controller = SearchController()
-    result = controller.search(key, file_categories, file_extensions, file_size,
-                               file_type, page, per_page, autocomplete)
+    result = controller.search(key=key, file_categories=file_categories,
+                               file_extensions=file_extensions, file_size=file_size,
+                               file_type=file_type, page=page, per_page=per_page,
+                               autocomplete=autocomplete, lazy_search=lazy_search)
     return result.get_json()

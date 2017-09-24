@@ -4,7 +4,8 @@ from findex_gui.web import app, themes
 from findex_gui.bin.themes import render_template
 from findex_gui.controllers.resources.resources import ResourceController
 from findex_gui.controllers.user.decorators import admin_required
-from findex_gui.controllers.admin.forms.server import FormServerAdd, FormServerAddOptions, FormServerAddAuthentication
+from findex_gui.controllers.admin.forms.server import (
+    FormServerAdd, FormServerAddOptions, FormServerAddAuthentication, NmapRuleAdd)
 from findex_gui.controllers.admin.forms.amqp import FormAmqpAdd
 
 @admin_required
@@ -26,11 +27,13 @@ def admin_server_add():
     server_add = FormServerAdd(request.form)
     server_options = FormServerAddOptions(request.form)
     server_auth = FormServerAddAuthentication(request.form)
+    nmap_rule_add = NmapRuleAdd(request.form)
 
     return themes.render("main/server_add", theme="_admin",
                          form_add=server_add,
                          form_auth=server_auth,
-                         form_options=server_options)
+                         form_options=server_options,
+                         form_nmap_rule_add=nmap_rule_add)
 
 @admin_required
 def admin_amqp_list():

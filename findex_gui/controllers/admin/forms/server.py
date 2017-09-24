@@ -8,7 +8,7 @@ class FormServerAddOptions(Form):
     display_url = StringField("Display URL", default="")
 
     recursive_sizes = BooleanField("Recursive directory sizes", default=True)
-    throttle_connections = IntegerField("Throttle connections (seconds)", default=0)
+    throttle_connections = IntegerField("Throttle connections (seconds)", default=-1)
     user_agent = StringField("User Agent", default=user_agent)
 
 
@@ -32,3 +32,9 @@ class FormServerAdd(Form):
     resource_port = IntegerField("Port", default=21)
     resource_protocol = SelectField("Protocol", validators=[DataRequired()], choices=sorted([(v, k.upper()) for k, v in FileProtocols().data.items()]))
 
+
+class NmapRuleAdd(Form):
+    rule_name = StringField("Rule Name", [DataRequired], default="nmap_")
+    hosts = StringField("IP Address/Range", [DataRequired()], default="127.0.0.1/32")
+    ports = StringField("Ports", default="21")
+    timeout = IntegerField("Scan Timeout", default=-1)

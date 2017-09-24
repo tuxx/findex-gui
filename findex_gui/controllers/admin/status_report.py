@@ -48,7 +48,6 @@ class AdminStatusReport:
 
         from pip.operations import freeze
         _packages = freeze.freeze()
-        #_packages = os.popen("pip freeze").read().split("\n")
         packages = []
         for _package in _packages:
             _package = _package.strip()

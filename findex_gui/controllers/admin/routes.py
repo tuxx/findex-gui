@@ -9,13 +9,9 @@ from findex_gui.controllers.admin.forms.amqp import FormAmqpAdd
 
 @admin_required
 def admin_home():
-    return themes.render("main/home", theme="_admin")
-
-@admin_required
-def admin_status_report():
     from findex_gui.controllers.admin.status_report import AdminStatusReport
     blob = AdminStatusReport.status()
-    return themes.render("main/status_report", theme="_admin", data=blob)
+    return themes.render("main/home", theme="_admin", data=blob)
 
 @admin_required
 def admin_servers():
@@ -64,6 +60,5 @@ app.add_url_rule("/admin/server/add", view_func=admin_server_add)
 app.add_url_rule("/admin/appearance", view_func=admin_appearance)
 app.add_url_rule("/admin/server/<path:server_id>", view_func=admin_server_edit)
 app.add_url_rule("/admin/server/remove/<browse:args>", view_func=admin_server_remove)
-app.add_url_rule("/admin/status", view_func=admin_status_report)
 app.add_url_rule("/admin/amqp", view_func=admin_amqp_list)
 app.add_url_rule("/admin/amqp/add", view_func=admin_amqp_add)

@@ -9,16 +9,17 @@ from findex_common.exceptions import FindexException, DatabaseException
 class TaskController:
     @staticmethod
     @role_req("ADMIN")
-    def add_task(name, owner_id=None, options={}, log_error=True, **kwargs):
+    def add_task(name, owner_id=None, options=None, log_error=True, **kwargs):
         if not isinstance(owner_id, int):
             owner = UserController.get_current_user()
         else:
             owner = UserController.user_view(uid=owner_id)
             if not owner:
                 raise FindexException("faulty owner_id")
-
         if not isinstance(name, str):
             raise FindexException("faulty parameters")
+        if not isinstance(options, dict):
+            options = {}
 
         task = Task(name=name, owner=owner)
 
@@ -106,7 +107,7 @@ class TaskController:
 
     @staticmethod
     @role_req("ADMIN")
-    def remove_resource_group(task_id, resourcegroup_id, **kwargs):
+    def remove_resource_group(task_id: int, resourcegroup_id: int, **kwargs):
         if not isinstance(task_id, int) or not isinstance(resourcegroup_id, int):
             raise FindexException("faulty parameters")
-
+        # @TODO: actually make this function

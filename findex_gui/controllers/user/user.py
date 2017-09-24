@@ -115,6 +115,7 @@ class UserController:
         bauth = request.authorization
         if "username" not in bauth or "password" not in bauth or not bauth["username"] or not bauth["password"]:
             raise FindexException("username/password not supplied")
+
         username = bauth["username"]
         password = bauth["password"]
 

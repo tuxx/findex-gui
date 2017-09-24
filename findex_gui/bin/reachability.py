@@ -4,11 +4,12 @@ from ftplib import FTP
 
 class TestReachability:
     @staticmethod
-    def test(address: str, port: int, protocol: int, user: str = None, pwd: str = None, auth_type=None):
+    def test(server_address: str, resource_port: int, resource_protocol: int,
+             auth_user: str = None, auth_pass: str = None, auth_type=None):
         protocols = {
             0: TestReachability.ftp
         }
-        return protocols[protocol](address, port, user, pwd)
+        return protocols[resource_protocol](server_address, resource_port, auth_user, auth_pass)
 
     @staticmethod
     def ftp(address, port, user=None, pwd=None, auth_type=None):

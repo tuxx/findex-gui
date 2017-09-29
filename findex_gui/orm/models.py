@@ -11,7 +11,7 @@ from sqlalchemy_zdb import ZdbColumn
 from sqlalchemy_zdb.types import FULLTEXT
 
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.orm.attributes import flag_modified, InstrumentedAttribute
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import (
     Integer, String, Boolean, DateTime, BigInteger, Index, TIMESTAMP,
     ForeignKey, Table, Column, SMALLINT, ARRAY
@@ -25,82 +25,12 @@ from findex_common.crawl import make_resource_search_column
 from findex_common.utils import random_str
 from findex_common.utils_time import TimeMagic
 from findex_common import static_variables
+from findex_gui.bin.utils import Extended
 from findex_gui.controllers.auth.auth import AuthUser, get_current_user_data
 from findex_gui.controllers.user.roles import RolesType
 
 BASE = declarative_base(name="Model")
 force_auto_coercion()
-
-
-class Extended(object):
-    def get(self, column, default=None):
-        if hasattr(self, column):
-            val = getattr(self, column)
-            if val:
-                return val
-        return default
-
-    def get_json(self, depth=0):
-        if depth > 1:
-            return
-
-        json = {}
-        for k, v in self.__class__.__dict__.items():
-            if k.startswith("_"):
-                continue
-            if not issubclass(v.__class__, (property, InstrumentedAttribute)):
-                continue
-
-            if isinstance(v, InstrumentedAttribute):
-                if "json_exclude" in v.info and v.info["json_exclude"]:
-                    value = "***"
-                else:
-                    value = getattr(self, k)
-            else:
-                value = getattr(self, k)
-
-            if issubclass(value.__class__, BASE):
-                value = value.get_json(depth + 1)
-            if isinstance(value, list):
-                _value = []
-                for _v in value:
-                    if hasattr(_v, "get_json"):
-                        _value.append(_v.get_json(depth + 1))
-                    else:
-                        _value.append(str(_v))
-                json[k] = _value
-            else:
-                json[k] = value
-        return json
-
-    @classmethod
-    def get_columns(cls, zombodb_only=False):
-        """
-        Returns the columns for a given sqlalchemy model
-        :param zombodb_only: only return columns marked for zombodb
-        :return: list of columns
-        """
-        columns = list(cls.__table__.columns)
-        if zombodb_only:
-            columns = [c for c in columns if isinstance(c, ZdbColumn)]
-        return columns
-
-    @classmethod
-    def get_columns_as_ddl(cls, zombodb_only=False):
-        """
-        Returns the column(s) DDL for a given sqlalchemy model
-        :param zombodb_only: only return columns marked for zombodb
-        :return:
-        """
-        rtn = []
-        for column in cls.get_columns(zombodb_only=zombodb_only):
-            if isinstance(column.type, MutableJson): column_type = "JSON"
-            else: column_type = column.type
-            rtn.append("%s %s" % (column.name, column_type))
-        return ",\n\t".join(rtn)
-
-    def __repr__(self):
-        return "%s" % self.__class__
 
 
 class Server(BASE, Extended):

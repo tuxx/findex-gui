@@ -17,14 +17,19 @@
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="box box-solid">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Description</h3>
+                    <div class="box box-solid collapsed-box">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Help</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                         <!-- /.box-header -->
                         <div class="box-body">
                             <p>
-                                This page lets you add servers to Findex for crawling in 3 ways:
+                                This page lets you add servers to Findex for crawling in 2 ways:
                             </p>
                             <ul>
                                 <li>Manually adding one server</li>
@@ -205,7 +210,7 @@ curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-A
                 data = extend(data, form_auth);
 
                 FindexGui.api("/resource/add", "POST", data).then(function (result) {
-                    //goto_uri(url_for("/admin/servers"));
+                    goto_uri(url_for("/admin/server/overview"));
                 }).fail(function (result) {
                     let msg = FindexGui.api_unpack_error(result);
                     if (msg) {

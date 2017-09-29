@@ -565,3 +565,14 @@ class Files(BASE, Extended):
     @property
     def file_url(self):
         return "%s%s" % (self.file_path, self.file_name_human)
+
+
+class NmapRule(BASE, Extended):
+    __tablename__ = "nmap_rules"
+
+    id = Column(SMALLINT, primary_key=True)
+    rule = Column(String(), nullable=False, unique=True)
+    date_added = Column(DateTime(), default=datetime.now(), nullable=False)
+
+    def __init__(self, rule):
+        self.rule = rule

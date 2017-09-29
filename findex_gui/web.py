@@ -58,6 +58,7 @@ from findex_gui.controllers.relay import routes
 from findex_gui.controllers.user import routes
 from findex_gui.controllers.meta_imdb import routes
 from findex_gui.controllers.admin import routes
+from findex_gui.controllers.admin.server import routes
 app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('search_home'), code=302))
 
 from findex_gui.controllers.search import api
@@ -69,3 +70,6 @@ from findex_gui.controllers.tasks import api
 from findex_gui.controllers.meta_imdb import api
 from findex_gui.controllers.news import api
 from findex_gui.controllers.admin import api
+from findex_gui.controllers.nmap import api
+from findex_gui.controllers.amqp import api
+from findex_gui.controllers.admin.server import api

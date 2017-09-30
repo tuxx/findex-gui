@@ -7,3 +7,7 @@
     margin-bottom: 20px;
     display: block;
 }
+
+.skin-black-light .sidebar-menu > li > a {
+    font-weight: 400;
+}

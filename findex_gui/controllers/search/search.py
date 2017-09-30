@@ -14,9 +14,9 @@ from findex_common.static_variables import FileCategories, FileProtocols
 
 class SearchController:
     @staticmethod
-    def search(key: str, file_categories: list = [], file_extensions: list = [], file_size: list = [],
+    def search(key: str, file_categories: list = None, file_extensions: list = None, file_size: list = None,
                file_type: str = "both", page: int = 0, per_page: int = 30,
-               autocomplete: bool = False):
+               autocomplete: bool = False, lazy_search=False):
         """
         Search database.
         :param key: str

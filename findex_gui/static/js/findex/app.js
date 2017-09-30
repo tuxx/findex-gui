@@ -61,7 +61,7 @@ class FancyTable {
      * @param {function} func_rowWriter - function responsible for drawing html rows
      * @param {function} func_drawErrorMsg - function responsible for drawing error messages
      */
-    static init(api, target, func_rowWriter, func_drawErrorMsg){
+    static init(api, target, func_rowWriter, func_drawErrorMsg, search_disabled){
         if(func_drawErrorMsg) {
             target.bind('dynatable:ajax:error', function (e, dynatable) {
                 func_drawErrorMsg("Could not fetch rows.");
@@ -87,6 +87,10 @@ class FancyTable {
                 perPageSelect: true
             }
         };
+
+        if(search_disabled){
+            data.features.search = false;
+        }
 
         if(func_rowWriter){
             if(!data.hasOwnProperty("writers")){

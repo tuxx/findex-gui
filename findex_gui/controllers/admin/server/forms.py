@@ -8,7 +8,7 @@ class FormServerAddOptions(Form):
     display_url = StringField("Display URL", default="")
 
     recursive_sizes = BooleanField("Recursive directory sizes", default=True)
-    throttle_connections = IntegerField("Throttle connections (seconds)", default=0)
+    throttle_connections = IntegerField("Throttle connections (seconds)", default=-1)
     user_agent = StringField("User Agent", default=user_agent)
 
 
@@ -21,14 +21,8 @@ class FormServerAddAuthentication(Form):
     ])
 
 
-class SigninForm(Form):
-    username = StringField("Username", [validators.required])
-    password = PasswordField("Password", [validators.required])
-
-
 class FormServerAdd(Form):
     server_name = StringField("Name", [validators.Length(min=4, max=25)])
     server_address = StringField("Address/Hostname", [DataRequired()])
     resource_port = IntegerField("Port", default=21)
     resource_protocol = SelectField("Protocol", validators=[DataRequired()], choices=sorted([(v, k.upper()) for k, v in FileProtocols().data.items()]))
-

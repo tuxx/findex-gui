@@ -89,16 +89,17 @@ do_setup(
     },
     install_requires=[
         "gevent==1.2.1",
-        "flask==0.12",
+        "flask==0.12.2",
         "click",
         "findex_common",
         "flask-wtf==0.14.2",
         "flask-auth==0.85",
+        "flask-yoloapi==0.0.6",
         "psycopg2==2.7.1",
         "sqlalchemy>=1.1.6",
         "sqlalchemy-utils>=0.32.13",
         "sqlalchemy-zdb>=0.1.0",
-        "jinja2==2.9.5",
+        "jinja2",
         "furl==0.5.7",
         "flask-babel",
         "humanfriendly==3.2",
@@ -119,6 +120,6 @@ do_setup(
         "pytest-django",
         "pytest-pythonpath",
         "mock==2.0.0",
-        "responses==0.5.1",
+        "responses==0.5.1"
     ],
 )

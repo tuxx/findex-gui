@@ -2,3 +2,8 @@
     padding:10px;
     width:100%;
 }
+
+.dynatable-per-page{
+    margin-bottom: 20px;
+    display: block;
+}

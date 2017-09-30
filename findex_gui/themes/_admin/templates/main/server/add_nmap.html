@@ -1,0 +1,167 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+    {% import '_admin/templates/helpers/_macros.html' as macros %}
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Add Nmap Rule
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Add Nmap Rule</a></li>
+                <li><a href="#">List</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Description</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <p>
+                                Submit a Nmap rule.
+                            </p>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- ./col -->
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h2 class="page-header">Add Nmap Rule</h2>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#nmap_rule" data-toggle="tab">Rule</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="nmap_rule">
+                                <section id="new">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <form id="nmap_add" class="">
+                                                <fieldset enabled>
+                                                    {% for field in form_nmap_rule_add %}
+                                                        {{ macros.render_field(field) }}
+                                                    {% endfor %}
+
+                                                    <div class="form-group">
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <label for="rule" class="control-label">
+                                                                    <label for="rule">Command
+                                                                        <small>(manually modifyable)</small>
+                                                                    </label>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <style>
+                                                                    .nmap_code{
+                                                                        font-size: 100%;
+                                                                        color: #c7254e;
+                                                                        background-color: #f9f2f4;
+                                                                        border-radius: 4px;
+                                                                        resize: none;
+                                                                    }
+                                                                </style>
+                                                                <textarea class="form-control nmap_code"
+                                                                          id="rule" name="rule"
+                                                                          spellcheck="false"
+                                                                          type="text"></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <script>
+                                                            $(document).ready(function () {
+                                                                function gen_nmap_cmd() {
+                                                                    let hosts = $('form#nmap_add input#hosts').val();
+                                                                    let ports = $('form#nmap_add input#ports').val();
+                                                                    if (hosts === "" || ports === "") return;
+
+                                                                    let cmd = Resources.nmap_cmd(hosts, ports);
+
+                                                                    $('form#nmap_add textarea#rule').val(cmd);
+                                                                }
+
+                                                                $.each(["hosts", "ports"], function (i, obj) {
+                                                                    $(`form#nmap_add input#${obj}`).on('input', function (e) {
+                                                                        gen_nmap_cmd();
+                                                                    });
+                                                                });
+
+                                                                gen_nmap_cmd();
+                                                            });
+                                                        </script>
+                                                    </div>
+                                                </fieldset>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <hr>
+
+                            <div class="text-right">
+                                <div class="pull-left" id="error" style="margin-top:12px;margin-bottom:12px; display: none;">
+                                    <span style="color:red;font-weight:bold;" id="msg_error">Javascript disabled?</span>
+                                    <span style="color:green;font-weight:bold;" id="msg_success"></span>
+                                </div>
+                                <div class="btn-group" role="group" aria-label="submit">
+                                    <button type="button" id="submit" class="btn btn-primary">Submit Rule</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+    <script>
+        $(document).ready(function () {
+            function msg_add(msg) {
+                $("#error").css("display", "block");
+                $("#msg_error").html("");
+                $("#msg_success").html(`${msg}`);
+            }
+
+            function msg_add_err(msg) {
+                $("#error").css("display", "block");
+                $("#msg_success").html("");
+                $("#msg_error").html(`Error: ${msg}`);
+            }
+
+            var get_form_data = function (selector) {
+                return $(selector).serializeArray().reduce(function (obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {})
+            };
+
+            $("#submit").click(function () {
+                let data = get_form_data("form#nmap_add");
+
+                FindexGui.api("/admin/server/nmap/add", "POST", data).then(function (result) {
+                    goto_uri(url_for("/admin/server/overview"));
+                }).fail(function (result) {
+                    let msg = FindexGui.api_unpack_error(result);
+                    if (msg) {
+                        msg_add_err(msg);
+                    } else {
+                        msg_add_err(`Could not add resource`);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

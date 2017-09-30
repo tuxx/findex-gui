@@ -207,8 +207,9 @@ class Database(object):
         # random.shuffle(self.hosts)
         # for host in self.hosts:
         dsn = config("findex:database:connection")
+        logging.info("connecting to: %s" % dsn)
         try:
-            return psycopg2.connect(dsn)
+            return psycopg2.connect(dsn, connect_timeout=3)
         except psycopg2.OperationalError as e:
             print('Failed to connect to %s: %s' % (dsn, e))
             raise psycopg2.OperationalError("Ran out of database servers - exiting")

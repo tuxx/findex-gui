@@ -1,0 +1,135 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Overview
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class=""><a href="#servers" data-toggle="tab">Servers</a></li>
+                            <li class="active"><a href="#nmap_rules" data-toggle="tab">Nmap Rules</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane" id="servers">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="fancytable_servers" class="display table table-bordered"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th style="width: 150px;">Name</th>
+                                                <th style="width: 30px;">Location</th>
+                                                <th style="width: 80px;">Protocol</th>
+                                                <th>Files</th>
+                                                <th>Added</th>
+                                                <th>Updated</th>
+                                                <th>Options</th>
+                                                <th>Group</th>
+                                                <th style="width: 30px;"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane active" id="nmap_rules">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="fancytable_nmap" class="display table table-bordered"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Rule</th>
+                                                <th>Last Scanned</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <style>
+        table#fancytable_servers tbody tr:hover{
+            background: #f9f9f9;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            // @TODO: auto-refresh
+            // https://www.dynatable.com/#configuration
+            // https://github.com/alfajango/jquery-dynatable/issues/180
+            let table_server_overview = $("#fancytable_servers");
+            let table_server_nmap = $("#fancytable_nmap");
+
+            // insert some buttons for the last column
+            table_server_overview.bind('dynatable:afterUpdate', function(e, dynatable){
+                let columns = $(e.target).find("tbody > tr > td:last-child");
+                $.each(columns, function(i, obj){
+                    let resource_id = $($(this).parent().find("td")[1]).html();
+
+                    $(this).html(`
+                        <a href="${url_for(`/admin/server/remove/${resource_id}`)}">
+                            <span class="fa fa-remove" style="color:red;font-size:16px;float:right;"></span>
+                        </a>
+                    `);
+                });
+            });
+
+            table_server_nmap.bind('dynatable:afterUpdate', function(e, dynatable){
+                let columns = $(e.target).find("tbody > tr > td");
+
+                let code = $(columns[1]).html();
+                $(columns[1]).html(`<code>${code}</code>`);
+
+                $.each(columns, function(i, obj){
+                    let wow = $($(this).parent().find("td")[1]);
+
+
+                });
+            });
+
+            function defaultRowWriter(rowIndex, record, columns, cellWriter) {
+                var tr = "";
+                for (var i = 0, len = columns.length; i < len; i++) {
+                    tr += cellWriter(columns[i], record);
+                }
+                return `<tr data-id="${record.location}">${tr}</tr>`;
+            }
+
+//            $("body").on("click", "table#fancytable_servers tr", function(v, o) {
+//                let resource_id = $(this).attr("data-id");
+//                let redir = url_for(`/admin/server/${resource_id}`);
+//                goto_uri(redir);
+//            });
+
+            FancyTable.init(url_for("/api/v2/resource/get"), table_server_overview, defaultRowWriter, msgbox_error);
+            FancyTable.init(url_for("/api/v2/admin/server/nmap/get"), table_server_nmap, defaultRowWriter, msgbox_error, true);
+        });
+    </script>
+
+{% endblock %}

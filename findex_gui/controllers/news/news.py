@@ -3,7 +3,7 @@ from findex_gui.orm.models import Post, User
 from findex_gui.controllers.user.roles import role_req
 
 
-class PostController:
+class NewsController:
     @staticmethod
     @role_req("ADMIN")
     def add(content: str, title: str, current_user: User):

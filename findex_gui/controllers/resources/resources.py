@@ -165,7 +165,7 @@ class ResourceController:
         db.session.commit()
         db.session.flush()
 
-        return True
+        return resource
 
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_REMOVE", "RESOURCE_CREATE")

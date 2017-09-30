@@ -572,7 +572,17 @@ class NmapRule(BASE, Extended):
 
     id = Column(SMALLINT, primary_key=True)
     rule = Column(String(), nullable=False, unique=True)
+    name = Column(String(), nullable=False, unique=True)
+    output = Column(String(), nullable=True, default="")
     date_added = Column(DateTime(), default=datetime.now(), nullable=False)
+    date_scanned = Column(DateTime(), nullable=True)
 
-    def __init__(self, rule):
+    def __init__(self, rule, name):
         self.rule = rule
+        self.name = name
+
+    @property
+    def last_scanned(self):
+        if not self.date_scanned:
+            return "Not scanned yet"
+        return TimeMagic().ago_dt(self.date_scanned)

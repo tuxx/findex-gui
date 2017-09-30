@@ -18,7 +18,7 @@ class Resources {
         });
     }
 
-    static nmap_cmd(ports, hosts){
-        return `nmap -sT -PN -T4 -p${ports} -oG - ${hosts}`
+    static nmap_cmd(hosts, ports){
+        return `nmap --max-rtt-timeout 200ms -sT -PN -T5 -p${ports} -oG - ${hosts}`
     }
 }

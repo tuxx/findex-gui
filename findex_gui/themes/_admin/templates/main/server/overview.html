@@ -5,11 +5,11 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Servers
+                Overview
             </h1>
             <ol class="breadcrumb">
                 <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
-                <li><a href="#">List</a></li>
+                <li><a href="#">Overview</a></li>
             </ol>
         </section>
 
@@ -17,35 +17,53 @@
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="box">
-                        <!-- /.box-header -->
-                        <div class="box-body" style="margin-top:10px;">
-                            <div class="col-md-12 no-padding">
-                                <table id="fancytable_servers" class="display table table-bordered"
-                                       cellspacing="0" width="100%">
-                                    <thead>
-                                    <tr>
-                                        <th style="width: 150px;">Name</th>
-                                        <th style="width: 30px;">Location</th>
-                                        <th style="width: 80px;">Protocol</th>
-                                        <th>Files</th>
-                                        <th>Added</th>
-                                        <th>Updated</th>
-                                        <th>Options</th>
-                                        <th>Group</th>
-                                        <th style="width: 30px;"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class=""><a href="#servers" data-toggle="tab">Servers</a></li>
+                            <li class="active"><a href="#nmap_rules" data-toggle="tab">Nmap Rules</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane" id="servers">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="fancytable_servers" class="display table table-bordered"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th style="width: 150px;">Name</th>
+                                                <th style="width: 30px;">Location</th>
+                                                <th style="width: 80px;">Protocol</th>
+                                                <th>Files</th>
+                                                <th>Added</th>
+                                                <th>Updated</th>
+                                                <th>Options</th>
+                                                <th>Group</th>
+                                                <th style="width: 30px;"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-md-12 no-padding">
-                                <a href="server/add">
-                                    <button style="float:right;" type="button" class="btn btn-success btn-sm"
-                                            data-toggle="modal" data-target="#add_modal"
-                                            href="">+</button>
-                                </a>
+                            <div class="tab-pane active" id="nmap_rules">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="fancytable_nmap" class="display table table-bordered"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Rule</th>
+                                                <th>Last Scanned</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -65,10 +83,11 @@
             // @TODO: auto-refresh
             // https://www.dynatable.com/#configuration
             // https://github.com/alfajango/jquery-dynatable/issues/180
-            let table = $("#fancytable_servers");
+            let table_server_overview = $("#fancytable_servers");
+            let table_server_nmap = $("#fancytable_nmap");
 
             // insert some buttons for the last column
-            table.bind('dynatable:afterUpdate', function(e, dynatable){
+            table_server_overview.bind('dynatable:afterUpdate', function(e, dynatable){
                 let columns = $(e.target).find("tbody > tr > td:last-child");
                 $.each(columns, function(i, obj){
                     let resource_id = $($(this).parent().find("td")[1]).html();
@@ -81,6 +100,19 @@
                 });
             });
 
+            table_server_nmap.bind('dynatable:afterUpdate', function(e, dynatable){
+                let columns = $(e.target).find("tbody > tr > td");
+
+                let code = $(columns[1]).html();
+                $(columns[1]).html(`<code>${code}</code>`);
+
+                $.each(columns, function(i, obj){
+                    let wow = $($(this).parent().find("td")[1]);
+
+
+                });
+            });
+
             function defaultRowWriter(rowIndex, record, columns, cellWriter) {
                 var tr = "";
                 for (var i = 0, len = columns.length; i < len; i++) {
@@ -89,17 +121,14 @@
                 return `<tr data-id="${record.location}">${tr}</tr>`;
             }
 
-{#            $("body").on("click", "table#fancytable_servers tr", function(v, o) {#}
-{#                let resource_id = $(this).attr("data-id");#}
-{#                let redir = url_for(`/admin/server/${resource_id}`);#}
-{#                goto_uri(redir);#}
-{#            });#}
+//            $("body").on("click", "table#fancytable_servers tr", function(v, o) {
+//                let resource_id = $(this).attr("data-id");
+//                let redir = url_for(`/admin/server/${resource_id}`);
+//                goto_uri(redir);
+//            });
 
-            let api = url_for("/api/v2/resource/get");
-            let target = table;
-            let func_rowWriter = defaultRowWriter;
-            let func_drawErrorMsg = msgbox_error;
-            FancyTable.init(api, target, func_rowWriter, func_drawErrorMsg);
+            FancyTable.init(url_for("/api/v2/resource/get"), table_server_overview, defaultRowWriter, msgbox_error);
+            FancyTable.init(url_for("/api/v2/admin/server/nmap/get"), table_server_nmap, defaultRowWriter, msgbox_error, true);
         });
     </script>
 

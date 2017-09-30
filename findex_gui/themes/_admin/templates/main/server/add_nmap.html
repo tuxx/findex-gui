@@ -48,7 +48,7 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <form id="nmap_add" class="">
-                                                <fieldset disabled>
+                                                <fieldset enabled>
                                                     {% for field in form_nmap_rule_add %}
                                                         {{ macros.render_field(field) }}
                                                     {% endfor %}
@@ -56,8 +56,8 @@
                                                     <div class="form-group">
                                                         <div class="row">
                                                             <div class="col-md-12">
-                                                                <label for="nmap_cmd" class="control-label">
-                                                                    <label for="nmap_cmd">Command
+                                                                <label for="rule" class="control-label">
+                                                                    <label for="rule">Command
                                                                         <small>(manually modifyable)</small>
                                                                     </label>
                                                                 </label>
@@ -65,8 +65,18 @@
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-md-12">
-                                                                <textarea style="background:#e8e8e8;" class="form-control"
-                                                                          id="nmap_cmd" name="nmap_cmd"
+                                                                <style>
+                                                                    .nmap_code{
+                                                                        font-size: 100%;
+                                                                        color: #c7254e;
+                                                                        background-color: #f9f2f4;
+                                                                        border-radius: 4px;
+                                                                        resize: none;
+                                                                    }
+                                                                </style>
+                                                                <textarea class="form-control nmap_code"
+                                                                          id="rule" name="rule"
+                                                                          spellcheck="false"
                                                                           type="text"></textarea>
                                                             </div>
                                                         </div>
@@ -79,7 +89,7 @@
 
                                                                     let cmd = Resources.nmap_cmd(hosts, ports);
 
-                                                                    $('form#nmap_add textarea#nmap_cmd').val(cmd);
+                                                                    $('form#nmap_add textarea#rule').val(cmd);
                                                                 }
 
                                                                 $.each(["hosts", "ports"], function (i, obj) {
@@ -98,17 +108,18 @@
                                     </div>
                                 </section>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div id="row_msg" class="row" style="display:none;">
-                <div class="col-xs-6">
-                    <div class="box">
-                        <div class="box-body">
-                            <span style="color:red;font-weight:bold;" id="msg_error">Error: Duplicate resource previously defined with resource id: 4</span>
-                            <span style="color:green;font-weight:bold;" id="msg_success"></span>
+                            <hr>
+
+                            <div class="text-right">
+                                <div class="pull-left" id="error" style="margin-top:12px;margin-bottom:12px; display: none;">
+                                    <span style="color:red;font-weight:bold;" id="msg_error">Javascript disabled?</span>
+                                    <span style="color:green;font-weight:bold;" id="msg_success"></span>
+                                </div>
+                                <div class="btn-group" role="group" aria-label="submit">
+                                    <button type="button" id="submit" class="btn btn-primary">Submit Rule</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -119,13 +130,13 @@
     <script>
         $(document).ready(function () {
             function msg_add(msg) {
-                $("#row_msg").css("display", "block");
+                $("#error").css("display", "block");
                 $("#msg_error").html("");
                 $("#msg_success").html(`${msg}`);
             }
 
             function msg_add_err(msg) {
-                $("#row_msg").css("display", "block");
+                $("#error").css("display", "block");
                 $("#msg_success").html("");
                 $("#msg_error").html(`Error: ${msg}`);
             }
@@ -138,15 +149,10 @@
             };
 
             $("#submit").click(function () {
-                let form_add = get_form_data("form#add");
-                let form_options = get_form_data("form#options");
-                let form_auth = get_form_data("form#auth");
+                let data = get_form_data("form#nmap_add");
 
-                let data = extend(form_add, form_options);
-                data = extend(data, form_auth);
-
-                FindexGui.api("/resource/add", "POST", data).then(function (result) {
-                    //goto_uri(url_for("/admin/servers"));
+                FindexGui.api("/admin/server/nmap/add", "POST", data).then(function (result) {
+                    goto_uri(url_for("/admin/server/overview"));
                 }).fail(function (result) {
                     let msg = FindexGui.api_unpack_error(result);
                     if (msg) {
@@ -154,33 +160,6 @@
                     } else {
                         msg_add_err(`Could not add resource`);
                     }
-                });
-            });
-
-            $("#test_reachability").click(function () {
-                let form_add = get_form_data("form#add");
-                let form_auth = get_form_data("form#auth");
-                let data = extend(form_add, form_auth);
-                data = extend(data, form_auth);
-
-                let d = {
-                    "resource_port": parseInt(data.resource_port),
-                    "resource_protocol": data.resource_protocol,
-                    "server_address": data.server_address,
-                    "auth_user": data.auth_user,
-                    "auth_pass": data.auth_pass,
-                    "auth_type": data.auth_type
-                };
-
-                FindexGui.api("/admin/server/test", "POST", d).then(function (result) {
-                    if (result.data == true) {
-                        msg_add("All Gucci");
-                    } else {
-                        msg_add_err("Unreachable");
-                    }
-                }).fail(function (result) {
-                    console.log(result);
-                    msg_add_err("Unreachable");
                 });
             });
         });

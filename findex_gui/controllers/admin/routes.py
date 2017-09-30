@@ -44,7 +44,7 @@ def admin_news_edit(uid):
     if not uid.isdigit():
         raise Exception("uid must be an integer")
     post = NewsController.get(uid=int(uid))
-    return themes.render("main/news/edit", theme="_admin", post=post)
+    return themes.render("main/news/edit_add", theme="_admin", post=post)
 
 @app.route("/admin/news/remove/<path:uid>")
 @admin_required

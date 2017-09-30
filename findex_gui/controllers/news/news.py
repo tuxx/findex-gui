@@ -38,7 +38,7 @@ class NewsController:
         if isinstance(content, str):
             result.content = content
         if isinstance(title, str):
-            result.output = title
+            result.title = title
         db.session.commit()
         db.session.flush()
         return True

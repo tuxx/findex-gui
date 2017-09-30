@@ -178,7 +178,6 @@ class ResourceGroup(BASE, Extended):
     removable = Column(Boolean, nullable=False, default=True)
 
     parents = relationship("Resource", back_populates="group")
-    #tasks = relationship("Task", back_populates="group")
 
     def __init__(self, name, description, removable=True):
         self.name = self.make_valid_groupname(name)
@@ -191,44 +190,6 @@ class ResourceGroup(BASE, Extended):
         if not groupname:
             raise Exception("group name cannot be empty or invalid")
         return groupname
-
-
-task_crawlers = Table(
-    "_task_crawlers",
-    BASE.metadata,
-    Column("task_id", Integer(), ForeignKey("tasks.id")),
-    Column("id", Integer(), ForeignKey("crawlers.id"))
-)
-
-task_groups = Table(
-    "_task_groups",
-    BASE.metadata,
-    Column("task_id", Integer(), ForeignKey("tasks.id")),
-    Column("id", Integer(), ForeignKey("resource_group.id"))
-)
-
-
-class Task(BASE, Extended):
-    __tablename__ = "tasks"
-
-    id = Column(Integer(), primary_key=True)
-
-    name = Column(String(), nullable=False, unique=True)
-    added = Column(DateTime(), default=datetime.utcnow, nullable=False)
-    description = Column(String(), nullable=True)
-    uid_frontend = Column(String(), nullable=True)  # @TODO change to false?
-    owner_id = Column(Integer(), ForeignKey("users.id"))
-    options = Column(MutableJson())
-
-    crawlers = relationship("Crawler", secondary=task_crawlers)
-    groups = relationship("ResourceGroup", secondary=task_groups)
-
-    ix_name = Index("ix_tasks_name", name)
-    ix_uid_frontend = Index("ix_tasks_uid_frontend", uid_frontend)
-
-    def __init__(self, name, owner):
-        self.name = name
-        self.owner_id = owner.id
 
 
 class Crawler(BASE, Extended):

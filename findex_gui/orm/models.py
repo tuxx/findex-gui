@@ -463,6 +463,10 @@ class Post(BASE, Extended):
     def ago(self):
         return TimeMagic().ago_dt(self.date_added)
 
+    @property
+    def date_added_human(self):
+        return self.date_added.strftime("%d %b %Y %H:%M")
+
 
 class Files(BASE, Extended):
     __tablename__ = "files"

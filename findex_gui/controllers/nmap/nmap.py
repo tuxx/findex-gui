@@ -1,10 +1,12 @@
 import os
 from findex_gui.web import db
 from findex_gui.orm.models import NmapRule
+from findex_gui.controllers.user.roles import role_req
 
 
 class NmapController:
     @staticmethod
+    @role_req("ADMIN")
     def get(uid: str = None, limit: int = None, offset: int = None):
         q = db.session.query(NmapRule)
         if uid:
@@ -18,6 +20,7 @@ class NmapController:
         return q.all()
 
     @staticmethod
+    @role_req("ADMIN")
     def add(cmd: str, name: str):
         if isinstance(name, str) and not name:
             raise Exception("name cannot be empty")
@@ -33,6 +36,7 @@ class NmapController:
             raise
 
     @staticmethod
+    @role_req("ADMIN")
     def remove(uid):
         try:
             result = db.session.query(NmapRule).filter(NmapRule.id == uid).first()
@@ -46,6 +50,7 @@ class NmapController:
             raise
 
     @staticmethod
+    @role_req("ADMIN")
     def update(uid: str, name: str = None, rule: str = None, output: str = None):
         try:
             result = db.session.query(NmapRule).filter(NmapRule.id == uid).first()
@@ -64,6 +69,7 @@ class NmapController:
             raise
 
     @staticmethod
+    @role_req("ADMIN")
     def scan(cmd):
         """unsafe method, should only be called by the admin"""
         hosts = []

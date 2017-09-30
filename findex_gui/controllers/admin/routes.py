@@ -4,6 +4,7 @@ from findex_gui.web import app, themes
 from findex_gui.controllers.resources.resources import ResourceController
 from findex_gui.controllers.amqp.forms import FormAmqpAdd
 from findex_gui.controllers.user.decorators import admin_required
+from findex_gui.controllers.news.news import NewsController
 
 
 #
@@ -20,6 +21,38 @@ def admin_home():
 @admin_required
 def admin_appearance():
     return themes.render("main/appearance", theme="_admin")
+
+#
+# News
+#
+
+@app.route("/admin/news/overview")
+@admin_required
+def admin_news():
+    posts = NewsController.get(limit=10)
+    return themes.render("main/news/overview", theme="_admin", posts=posts)
+
+
+@app.route("/admin/news/add")
+@admin_required
+def admin_news_add():
+    return themes.render("main/news/edit_add", theme="_admin")
+
+@app.route("/admin/news/edit/<path:uid>")
+@admin_required
+def admin_news_edit(uid):
+    if not uid.isdigit():
+        raise Exception("uid must be an integer")
+    post = NewsController.get(uid=int(uid))
+    return themes.render("main/news/edit", theme="_admin", post=post)
+
+@app.route("/admin/news/remove/<path:uid>")
+@admin_required
+def admin_news_remove(uid):
+    if not uid.isdigit():
+        raise Exception("uid must be an integer")
+    NewsController.remove(uid=int(uid))
+    return redirect(url_for("admin_news"))
 
 #
 # AMQP

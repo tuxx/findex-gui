@@ -9,10 +9,10 @@ from flask import url_for as _url_for
 from flask import redirect as _redirect
 from flask.json import JSONEncoder
 
-from findex_gui.web import app
-
-# dirty flask.url_for() monkey patch.
-flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1], _url_for(*args, **kwargs))
+def dirty_url_for():
+    """dirty flask.url_for() monkey patch."""
+    from findex_gui.web import app
+    flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1], _url_for(*args, **kwargs))
 
 def redirect(*args, **kwargs):
     __redirect = _redirect(*args, **kwargs)
@@ -117,6 +117,7 @@ def pip_freeze():
     return packages
 
 def get_pip_freeze():
+    from findex_gui.web import app
     if not app.config['PIP_FREEZE']:
         app.config['PIP_FREEZE'] = (datetime.now(), pip_freeze())
 

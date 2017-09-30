@@ -22,6 +22,9 @@ SECRET_KEY = config("findex:findex:secret_token")
 from findex_gui.bin.utils import ApiJsonEncoder
 app.json_encoder = ApiJsonEncoder
 
+from findex_gui.bin.utils import dirty_url_for
+dirty_url_for()
+
 # setup translations
 babel = Babel(app)
 locales = {

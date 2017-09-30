@@ -4,9 +4,10 @@ from collections import OrderedDict
 
 from sqlalchemy.sql import text
 
-from findex_gui.web import db
+from findex_gui.web import db, app
 from findex_gui.bin.config import config
 from findex_gui.bin.misc import version, cwd
+from findex_gui.bin.utils import get_pip_freeze
 from findex_gui.controllers.amqp.amqp import AmqpController
 
 
@@ -46,20 +47,11 @@ class AdminStatusReport:
             ("queue_name", _amqp["queue_name"])
         ])
 
-        from pip.operations import freeze
-        _packages = freeze.freeze()
-        packages = []
-        for _package in _packages:
-            _package = _package.strip()
-            if not _package:
-                continue
-            if _package.startswith("-e"):
-                packages.append(("-e", _item(_package[3:])))
-            else:
-                _pack, _ver = _package.split("==", 1)
-                packages.append((_pack, _item(_ver)))
+        freezed_date, freezed_packages = get_pip_freeze()
+        freezed_title = "Python Packages (`pip freeze` @ %s)" % freezed_date.strftime("%Y-%m-%d %H:%M")
+        data[freezed_title] = OrderedDict(
+            [(f[0], _item(f[1])) for f in freezed_packages])
 
-        data["pip"] = OrderedDict(packages)
         return data
 
     @staticmethod

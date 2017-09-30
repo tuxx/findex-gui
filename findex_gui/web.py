@@ -15,6 +15,7 @@ app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
 app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
 app.config['APPLICATION_ROOT'] = config("findex:findex:application_root")
 app.config['TEMPLATES_AUTO_RELOAD'] = config("findex:findex:debug")
+app.config['PIP_FREEZE'] = []
 SECRET_KEY = config("findex:findex:secret_token")
 
 # ISO 8601 datetimes
@@ -57,6 +58,7 @@ from findex_gui.controllers.browse import routes
 from findex_gui.controllers.relay import routes
 from findex_gui.controllers.user import routes
 from findex_gui.controllers.meta_imdb import routes
+from findex_gui.controllers.news import routes
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.admin.server import routes
 app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('search_home'), code=302))

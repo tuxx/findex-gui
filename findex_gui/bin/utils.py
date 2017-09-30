@@ -99,3 +99,28 @@ class Extended(object):
 
     def __repr__(self):
         return "%s" % self.__class__
+
+
+def pip_freeze():
+    from pip.operations import freeze
+    _packages = freeze.freeze()
+    packages = []
+    for _package in _packages:
+        _package = _package.strip()
+        if not _package:
+            continue
+        if _package.startswith("-e"):
+            packages.append(["-e", _package[3:]])
+        else:
+            _pack, _ver = _package.split("==", 1)
+            packages.append([_pack, _ver])
+    return packages
+
+def get_pip_freeze():
+    if not app.config['PIP_FREEZE']:
+        app.config['PIP_FREEZE'] = (datetime.now(), pip_freeze())
+
+    if (datetime.now() - app.config['PIP_FREEZE'][0]).days >= 2:
+        # refresh the pip freeze output every 2 days
+        app.config['PIP_FREEZE'] = (datetime.now(), pip_freeze())
+    return app.config["PIP_FREEZE"]

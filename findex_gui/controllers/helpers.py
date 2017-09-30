@@ -25,7 +25,7 @@ def after_request(r):
 
 @app.errorhandler(404)
 def error(e):
-    if request != "GET" or request.headers.get("Content-Type", "") == "application/json":
+    if request.method != "GET" or request.headers.get("Content-Type", "") == "application/json":
         return jsonify({"data": str(e)}), 404
 
     from findex_gui.web import themes

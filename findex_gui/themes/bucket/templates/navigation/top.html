@@ -16,6 +16,7 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li class="file_counter">{{ ('{:,}').format(env['db_file_count']) }}</li>
+                <li><a href="{{ url_for("news")}}"><i class="fa fa-book fa-fw"></i> {{ _('News') }}</a></li>
                 <li><a href="{{ url_for("search_home")}}"><i class="fa fa-search fa-fw"></i> {{ _('Search') }}</a></li>
                 <li><a href="{{ url_for("browse_home")}}"><i class="fa fa-th-list fa-fw"></i> {{ _('Browse') }}</a></li>
                 <li><a href="{{ url_for("meta_popcorn")}}"><i class="fa fa-film fa-fw"></i> Popcorn</a></li>
@@ -42,15 +43,14 @@
                         </a>
 
                         <ul class="dropdown-menu">
-                            <li><a href={{ url_for("user_cp") }}>User CP</a></li>
-                            <li><a href={{ url_for("logout") }}>Logout</a></li>
-                            <!--admin-->
-                            {% if user.role == 0 %}
+                            {% if user.admin %}
                                 <li role="separator" class="divider"></li>
                                 <li class="dropdown-header">Admin Panel</li>
-                                <li><a href={{ url_for("/admin") }}>Home</a></li>
-                                <li><a href={{ url_for("/admin/appearance") }}>Appearance</a></li>
+                                <li><a href={{ url_for("admin_home") }}>Admin Panel</a></li>
                             {% endif %}
+
+                            <li><a href={{ url_for("user_cp") }}>User CP</a></li>
+                            <li><a href={{ url_for("logout") }}>Logout</a></li>
                         </ul>
                     </li>
                 {% endif %}

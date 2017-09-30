@@ -141,13 +141,6 @@
                 $("#msg_error").html(`Error: ${msg}`);
             }
 
-            var get_form_data = function (selector) {
-                return $(selector).serializeArray().reduce(function (obj, item) {
-                    obj[item.name] = item.value;
-                    return obj;
-                }, {})
-            };
-
             $("#submit").click(function () {
                 let data = get_form_data("form#nmap_add");
 

@@ -61,7 +61,7 @@ from findex_gui.controllers.meta_imdb import routes
 from findex_gui.controllers.news import routes
 from findex_gui.controllers.admin import routes
 from findex_gui.controllers.admin.server import routes
-app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('search_home'), code=302))
+app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('news_home'), code=302))
 
 from findex_gui.controllers.search import api
 from findex_gui.controllers.session import api

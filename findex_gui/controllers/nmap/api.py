@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_yoloapi import endpoint, parameter
+from sqlalchemy import func
 
 from findex_gui.web import app, db
 from findex_gui.orm.models import NmapRule
@@ -42,18 +43,14 @@ def api_admin_server_nmap_get(uid, perPage, page):
         args["limit"] = perPage
         if page:
             args["offset"] = (page - 1) * perPage
+    if isinstance(uid, str) and uid:
+        args["uid"] = uid
 
     resources = NmapController.get(**args)
+    record_count = db.session.query(func.count(NmapRule.id)).scalar()
 
-    from sqlalchemy import func
-
-    # total_count = select([func.count()]).select_from(NmapRule)
-    # records_total = db.session.execute(total_count)
-
-    e = db.session.query(func.count(NmapRule.id)).scalar()
-    e = ""
     return jsonify({
         "records": resources,
-        "queryRecordCount": e,
+        "queryRecordCount": record_count,
         "totalRecordCount": len(resources)
     })

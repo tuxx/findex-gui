@@ -17,3 +17,10 @@ function msgbox_error(msg){
     </div>
     `);
 }
+
+var get_form_data = function (selector) {
+    return $(selector).serializeArray().reduce(function (obj, item) {
+        obj[item.name] = item.value;
+        return obj;
+    }, {})
+};

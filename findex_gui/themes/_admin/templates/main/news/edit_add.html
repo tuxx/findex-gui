@@ -1,0 +1,128 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                News
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> News</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        {% set uid = post.id if post is defined else -1 %}
+        {% set content = post.content if post is defined else "" %}
+        {% set title = post.title if post is defined else "" %}
+        {% set date_added = post.date_added_human if post is defined else "" %}
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li><a href="#" id="btn_overview" data-toggle="tab">Overview</a></li>
+                            <li class="active"><a href="#news" data-toggle="tab">Add/Edit News</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="news">
+
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <form id="news_post" role="form" lpformnum="2" _lpchecked="1">
+                                            <!-- text input -->
+                                            <div class="form-group">
+                                                <label>News Title</label>
+                                                <input type="text" name="title" class="form-control" placeholder="The news title" value="{{ title }}">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>News Date</label>
+                                                <input type="text" class="form-control" value="{{ date_added }}" disabled="">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Content</label>
+                                                <textarea class="textarea" name="content" placeholder="Place some text here" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{{ content }}</textarea>
+                                            </div>
+
+                                        </form>
+                                        <div class="box-footer text-right">
+                                            <div class="btn-group" role="group" aria-label="submit">
+                                                <button type="button" id="btn_back" class="btn btn-secondary">Go Back</button>
+                                                <button type="button" id="btn_submit" class="btn btn-primary">Submit News</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let post_uid = {{ uid }};
+            $('.textarea').wysihtml5();
+
+            $('#btn_overview').click(function(){
+                goto_uri(url_for('/admin/news/overview'));
+            });
+
+            $('button#btn_submit').click(function(){
+                let data = get_form_data("form#news_post");
+
+                // updating existing post or new one?
+                if(post_uid >= 1){
+                    data.uid = post_uid;
+
+                    update_post(data);
+                } else {
+                    new_post(data);
+                }
+
+            });
+
+            $('button#btn_back').click(function(){
+                goto_uri(url_for('/admin/news/overview'));
+            });
+
+            function update_post(data){
+                FindexGui.api("/news/update", "POST", data).then(function (result) {
+                    goto_uri(url_for("/admin/news/overview"));
+                }).fail(function (result) {
+                    let msg = FindexGui.api_unpack_error(result);
+
+                    if (msg) {
+                        msg_add_err(msg);
+                    } else {
+                        msg_add_err(`Could not add news`);
+                    }
+                });
+            }
+
+            function new_post(data){
+                FindexGui.api("/news/add", "POST", data).then(function (result) {
+                    goto_uri(url_for("/admin/news/overview"));
+                }).fail(function (result) {
+                    let msg = FindexGui.api_unpack_error(result);
+
+                    if (msg) {
+                        msg_add_err(msg);
+                    } else {
+                        msg_add_err(`Could not add news`);
+                    }
+                });
+            }
+        });
+    </script>
+
+{% endblock %}

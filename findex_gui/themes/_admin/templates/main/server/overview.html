@@ -19,12 +19,12 @@
                 <div class="col-md-12">
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs">
-                            <li class=""><a href="#servers" data-toggle="tab">Servers</a></li>
-                            <li class="active"><a href="#nmap_rules" data-toggle="tab">Nmap Rules</a></li>
+                            <li class="active"><a href="#servers" data-toggle="tab">Servers</a></li>
+                            <li class=""><a href="#nmap_rules" data-toggle="tab">Nmap Rules</a></li>
                         </ul>
 
                         <div class="tab-content">
-                            <div class="tab-pane" id="servers">
+                            <div class="tab-pane active" id="servers">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table id="fancytable_servers" class="display table table-bordered"
@@ -48,7 +48,7 @@
                                 </div>
                             </div>
 
-                            <div class="tab-pane active" id="nmap_rules">
+                            <div class="tab-pane" id="nmap_rules">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table id="fancytable_nmap" class="display table table-bordered"
@@ -105,12 +105,6 @@
 
                 let code = $(columns[1]).html();
                 $(columns[1]).html(`<code>${code}</code>`);
-
-                $.each(columns, function(i, obj){
-                    let wow = $($(this).parent().find("td")[1]);
-
-
-                });
             });
 
             function defaultRowWriter(rowIndex, record, columns, cellWriter) {

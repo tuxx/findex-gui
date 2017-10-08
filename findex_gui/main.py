@@ -299,7 +299,8 @@ def web(ctx, args, host, port, uwsgi, nginx):
         bind_port = port
 
         def run_sync():
-            from findex_gui.web import app
+            from findex_gui.web import create_app
+            app = create_app()
             app.run(debug=app_debug, host=bind_host, port=bind_port, use_reloader=False)
 
         def run_async():
@@ -307,8 +308,9 @@ def web(ctx, args, host, port, uwsgi, nginx):
             monkey.patch_all()
 
             from gevent.pywsgi import WSGIServer
-            from findex_gui.web import app
+            from findex_gui.web import create_app
 
+            app = create_app()
             http_server = WSGIServer((bind_host, bind_port), app)
             print(green(" * Running on http://%s:%s/ (Press CTRL+C to quit)") % (bind_host, str(bind_port)))
             http_server.serve_forever()

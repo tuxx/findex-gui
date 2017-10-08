@@ -1,4 +1,3 @@
-from flask import jsonify
 from flask_yoloapi import endpoint, parameter
 
 from findex_gui.web import app

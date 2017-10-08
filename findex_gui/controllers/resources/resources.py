@@ -90,7 +90,7 @@ class ResourceController:
     def add_resource(resource_port, resource_protocol, server_name=None, server_address=None, server_id=None,
                      description="", display_url="/", basepath="/", recursive_sizes=True,
                      auth_user=None, auth_pass=None, auth_type=None, user_agent=static_variables.user_agent,
-                     throttle_connections=False):
+                     throttle_connections=-1, current_user=None):
         """
         Adds a local or remote file resource
         :param server_name: Server name
@@ -152,7 +152,15 @@ class ResourceController:
         rm.throttle_connections = throttle_connections
         resource.meta = rm
 
-        current_user = UserController.get_current_user(apply_timeout=False)
+        if isinstance(current_user, int):
+            current_user = db.session.query(User).filter(User.admin == True).first()
+        elif current_user is None:
+            current_user = UserController.get_current_user(apply_timeout=False)
+        elif isinstance(current_user, User):
+            pass
+        else:
+            raise Exception("bad type for parameter current_user")
+
         if not current_user:
             raise FindexException("Could not fetch the current user")
 

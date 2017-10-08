@@ -148,7 +148,7 @@ class ResourceMeta(BASE, Extended):
 
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(MutableJson, nullable=True)
-    throttle_connections = Column(Boolean, nullable=False, default=False)
+    throttle_connections = Column(Integer, nullable=False, default=False)
 
     banner = Column(String(), nullable=True)
     response_time = Column(Integer(), nullable=True)

@@ -28,30 +28,29 @@ def api_admin_server_nmap_remove(uid):
 @app.route("/api/v2/admin/server/nmap/get", methods=["GET"])
 @endpoint.api(
     parameter("uid", type=str, required=False),
-    parameter("perPage", type=int, required=False, default=None),
-    parameter("page", type=int, required=False, default=None)
+    parameter("limit", type=int, default=10),
+    parameter("offset", type=int, default=0)
 )
-def api_admin_server_nmap_get(uid, perPage, page):
+def api_admin_server_nmap_get(uid, limit, offset):
     """
-    Get resources.
+    Get nmap rules.
     :param uid: nmap uid
-    :param perPage:
-    :param page:
+    :param limit:
+    :param offset:
     :return: nmap_rule object
     """
-    args = {}
-    if perPage:
-        args["limit"] = perPage
-        if page:
-            args["offset"] = (page - 1) * perPage
+    args = {
+        "limit": limit,
+        "offset": offset
+    }
     if isinstance(uid, str) and uid:
         args["uid"] = uid
 
     scan_results = NmapController.get(**args)
     record_count = db.session.query(func.count(NmapRule.id)).scalar()
 
-    return jsonify({
+    return {
         "records": scan_results,
         "queryRecordCount": record_count,
         "totalRecordCount": len(scan_results)
-    })
+    }

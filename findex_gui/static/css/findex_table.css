@@ -1,0 +1,42 @@
+.fintable-input-group .input-group-addon{
+    background: white !important;
+}
+.fintable-input-search {
+    max-width: 240px;
+    float: right;
+}
+.fintable-input-search .form-control{
+    border-right:0;
+    box-shadow:0 0 0;
+    border-color:#ccc;
+}
+.fintable-input-search button{
+    border:0;
+    background:transparent;
+}
+
+.fintable-header {
+    margin-bottom: 6px;
+}
+
+.fintable .pagination{
+    margin-top:0;
+    margin-bottom: 6px;
+}
+
+.fintable .metrics{
+    font-size:12px;
+    padding-top:6px;
+    color:grey;
+    text-align:right
+}
+
+.fintable .metrics .err{
+    color: red;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.fintable table{
+    margin-bottom: 10px;
+}

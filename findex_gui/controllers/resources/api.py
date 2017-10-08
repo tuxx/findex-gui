@@ -70,25 +70,24 @@ def api_resource_add_post(server_name, server_address, server_id, resource_port,
 @app.route("/api/v2/resource/get", methods=["GET"])
 @endpoint.api(
     parameter("by_owner", type=int, required=False, default=None),
-    parameter("perPage", type=int, required=False, default=None),
-    parameter("page", type=int, required=False, default=None),
-    # parameter("queries[search]", type=str, required=False)
+    parameter("limit", type=int, default=10),
+    parameter("offset", type=int, default=0),
     parameter("search", type=str, required=False, default=None)
 )
-def api_resource_get(by_owner, perPage, page, search):
+def api_resource_get(by_owner, limit, offset, search):
     """
     Get resources.
     :param by_owner: Filter on resources by owner id
-    :param perPage:
-    :param page:
-    :param queries: hmmz
+    :param limit:
+    :param offset:
+    :param search: hmmz
     :return:
     """
-    args = {}
-    if perPage:
-        args["limit"] = perPage
-        if page:
-            args["offset"] = (page - 1) * perPage
+    args = {
+        "limit": limit,
+        "offset": offset
+    }
+
     if by_owner:
         args["by_owner"] = by_owner
 
@@ -133,11 +132,11 @@ def api_resource_get(by_owner, perPage, page, search):
         }
         records.append(item)
 
-    return jsonify({
+    return {
         "records": records,
         "queryRecordCount": records_total,
         "totalRecordCount": len(records)
-    })
+    }
 
 
 @app.route("/api/v2/resource/remove", methods=["POST"])

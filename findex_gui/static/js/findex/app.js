@@ -7,12 +7,13 @@ class FindexGui {
         let _data = {
             url: `${APPLICATION_ROOT}api/v2${url}`,
             type: method,
-            contentType: 'application/json',
+            data: data,
             timeout: 15500
         };
 
-        if (method == "POST") {
-            _data.data = JSON.stringify(data);
+        if (method != "GET") {
+            if(typeof _data.data !== 'undefined') _data.data = JSON.stringify(data);
+            _data.contentType = 'application/json'
         }
 
         return $.ajax(_data).then(function(data){

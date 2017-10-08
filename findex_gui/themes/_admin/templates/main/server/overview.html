@@ -24,7 +24,7 @@
                         </ul>
 
                         <div class="tab-content">
-                            <div class="tab-pane active" id="servers">
+                            <div class="tab-pane" id="servers">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table id="fancytable_servers" class="display table table-bordered"
@@ -48,7 +48,7 @@
                                 </div>
                             </div>
 
-                            <div class="tab-pane" id="nmap_rules">
+                            <div class="tab-pane active" id="nmap_rules">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table id="fancytable_nmap" class="display table table-bordered"
@@ -57,6 +57,7 @@
                                             <tr>
                                                 <th>Name</th>
                                                 <th>Rule</th>
+                                                <th>Result</th>
                                                 <th>Last Scanned</th>
                                             </tr>
                                             </thead>
@@ -122,7 +123,7 @@
 //            });
 
             FancyTable.init(url_for("/api/v2/resource/get"), table_server_overview, defaultRowWriter, msgbox_error);
-            FancyTable.init(url_for("/api/v2/admin/server/nmap/get"), table_server_nmap, defaultRowWriter, msgbox_error, true);
+            var cool_table = FancyTable.init(url_for("/api/v2/admin/server/nmap/get"), table_server_nmap, defaultRowWriter, msgbox_error, true);
         });
     </script>
 

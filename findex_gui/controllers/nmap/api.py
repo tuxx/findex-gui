@@ -11,10 +11,11 @@ from findex_gui.controllers.nmap.nmap import NmapController
 @admin_required
 @endpoint.api(
     parameter("rule", type=str, required=True),
-    parameter("name", type=str, required=True)
+    parameter("name", type=str, required=True),
+    parameter("interval", type=int, required=False, default=86400),
 )
-def api_admin_server_nmap_add(rule, name):
-    return NmapController.add(cmd=rule, name=name)
+def api_admin_server_nmap_add(rule, name, interval):
+    return NmapController.add(cmd=rule, name=name, interval=interval)
 
 @app.route("/api/v2/admin/server/nmap/delete", methods=["POST"])
 @admin_required
@@ -46,11 +47,11 @@ def api_admin_server_nmap_get(uid, perPage, page):
     if isinstance(uid, str) and uid:
         args["uid"] = uid
 
-    resources = NmapController.get(**args)
+    scan_results = NmapController.get(**args)
     record_count = db.session.query(func.count(NmapRule.id)).scalar()
 
     return jsonify({
-        "records": resources,
+        "records": scan_results,
         "queryRecordCount": record_count,
-        "totalRecordCount": len(resources)
+        "totalRecordCount": len(scan_results)
     })

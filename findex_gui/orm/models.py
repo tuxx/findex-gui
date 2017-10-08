@@ -76,7 +76,7 @@ class Resource(BASE, Extended):
     description = Column(String(), nullable=True)
 
     port = Column(Integer(), nullable=False)
-    protocol = Column(Integer(), nullable=False)
+    protocol = Column(Integer(), nullable=True)
 
     display_url = Column(String(), nullable=False)
 
@@ -176,6 +176,9 @@ class ResourceGroup(BASE, Extended):
     description = Column(String, nullable=True)
     added = Column(DateTime(), default=datetime.utcnow, nullable=False)
     removable = Column(Boolean, nullable=False, default=True)
+
+    # default: 1 day
+    crawl_interval = Column(Integer(), nullable=False, default=86400)
 
     parents = relationship("Resource", back_populates="group")
 
@@ -538,13 +541,15 @@ class NmapRule(BASE, Extended):
     id = Column(SMALLINT, primary_key=True)
     rule = Column(String(), nullable=False, unique=True)
     name = Column(String(), nullable=False, unique=True)
-    output = Column(String(), nullable=True, default="")
+    output = Column(MutableJson(), nullable=True, default={"data": {}})
     date_added = Column(DateTime(), default=datetime.now(), nullable=False)
     date_scanned = Column(DateTime(), nullable=True)
+    scan_interval = Column(Integer(), default=86400)
 
-    def __init__(self, rule, name):
+    def __init__(self, rule, name, interval):
         self.rule = rule
         self.name = name
+        self.scan_interval = interval
 
     @property
     def last_scanned(self):

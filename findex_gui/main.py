@@ -102,7 +102,8 @@ def findex_main():
   view_config               view the configuration file(s)
   edit_config               edit configuration items
   view_stats                view some stats
-  generate_crawl_config     generate findex-crawl configuration
+  generate_crawl_config     generate findex-crawl configuration (output to stdout)
+  scheduler                 runs the scheduler for firing crawl/scan tasks
         """)
     except KeyboardInterrupt:
         print("w00t")
@@ -218,6 +219,14 @@ def edit_config(ctx):
 def view_stats(ctx):
     print(red("Yet to be implemented"))
 
+
+@main.command()
+@click.pass_context
+def scheduler(ctx):
+    print(red("Yet to be implemented"))
+    findex_init(logging.DEBUG, ctx)
+    from findex_gui.controllers.tasks.loop import worker
+    worker()
 
 @main.command()
 @click.pass_context

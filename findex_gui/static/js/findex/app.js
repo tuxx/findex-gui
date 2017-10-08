@@ -98,6 +98,6 @@ class FancyTable {
             }
             data["writers"]["_rowWriter"] = func_rowWriter;
         }
-        target.dynatable(data);
+        return target.dynatable(data);
     }
 }

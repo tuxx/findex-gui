@@ -21,14 +21,16 @@ class NmapController:
 
     @staticmethod
     @role_req("ADMIN")
-    def add(cmd: str, name: str):
+    def add(cmd: str, name: str, interval: int):
         if isinstance(name, str) and not name:
             raise Exception("name cannot be empty")
         elif isinstance(cmd, str) and not cmd:
             raise Exception("rule or cmd cannot be empty")
+        elif not isinstance(interval, int):
+            raise Exception("interval must be int")
 
         try:
-            db.session.add(NmapRule(rule=cmd, name=name))
+            db.session.add(NmapRule(rule=cmd, name=name, interval=interval))
             db.session.commit()
             db.session.flush()
             return True
@@ -68,20 +70,3 @@ class NmapController:
         except:
             raise
 
-    @staticmethod
-    @role_req("ADMIN")
-    def scan(cmd):
-        """unsafe method, should only be called by the admin"""
-        hosts = []
-        try:
-            results = os.popen("%s | grep open" % cmd).read()
-            for line in [line.rstrip().lower() for line in results.split("\n") if line]:
-                if not line.startswith("host: "):
-                    continue
-                spl = line.split(" ")
-                host = spl[1]
-                port = int(spl[3].split("/")[0])
-                hosts.append([host, port])
-        except Exception:
-            pass
-        return hosts

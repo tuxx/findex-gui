@@ -106,7 +106,7 @@ class ResourceController:
         :param auth_pass: resource pass authentication 'str'
         :param auth_type: resource type authentication 'str'
         :param user_agent: The string to identify ourselves with against the service 'str'
-        :param throttle_connections: Wait X seconds between each request/connection 'int'
+        :param throttle_connections: Wait X millisecond(s) between each request/connection 'int'
         :return: resource
         """
         if server_id:

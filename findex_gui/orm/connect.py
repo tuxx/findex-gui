@@ -25,10 +25,13 @@ class Database(object):
                                    pool_size=300,
                                    echo=config("findex:findex:debug"))
 
-    def connect(self):
+    def connect(self, echo=None):
+        if echo is None:
+            echo = config("findex:findex:debug")
+
         self.engine = create_engine("postgresql+psycopg2://",
                                     pool=self.pool,
-                                    echo=config("findex:findex:debug"))
+                                    echo=echo)
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=True,
                                                    expire_on_commit=True,

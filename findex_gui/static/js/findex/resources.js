@@ -19,6 +19,6 @@ class Resources {
     }
 
     static nmap_cmd(hosts, ports){
-        return `nmap --max-rtt-timeout 200ms -sT -PN -T5 -p${ports} -oG - ${hosts}`
+        return `nmap -n --open --max-rtt-timeout 200ms -sV -PN -T5 -p${ports} -oG - ${hosts}`
     }
 }

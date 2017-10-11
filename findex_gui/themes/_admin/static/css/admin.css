@@ -11,3 +11,7 @@
 .skin-black-light .sidebar-menu > li > a {
     font-weight: 400;
 }
+
+.treeview-menu > li > a > .fa, .treeview-menu > li > a > .glyphicon, .treeview-menu > li > a > .ion {
+    display: none;
+}

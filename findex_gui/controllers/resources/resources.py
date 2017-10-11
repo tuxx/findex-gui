@@ -3,12 +3,11 @@ from sqlalchemy_zdb import ZdbQuery
 from findex_gui.web import db, locales, auth
 from findex_gui.bin.config import config
 from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server
-from findex_gui.controllers.user.roles import role_req, check_role
+from findex_gui.controllers.user.roles import role_req
 from findex_gui.controllers.user.user import UserController
 from findex_common.exceptions import DatabaseException, FindexException
 from findex_common.utils import is_ipv4, resolve_hostname
 from findex_common import static_variables
-from findex_common.utils_time import TimeMagic
 
 
 class ResourceController:

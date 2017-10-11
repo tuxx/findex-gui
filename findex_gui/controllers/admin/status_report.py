@@ -39,13 +39,13 @@ class AdminStatusReport:
             ("size on disk", AdminStatusReport.database_get_size()),
         ])
 
-        _amqp = AdminStatusReport.amqp_get_credentials()
-        data["rabbitmq"] = OrderedDict([
-            ("username", _amqp["username"]),
-            ("host", _amqp["host"]),
-            ("vhost", _amqp["vhost"]),
-            ("queue_name", _amqp["queue_name"])
-        ])
+        # _amqp = AdminStatusReport.amqp_get_credentials()
+        # data["rabbitmq"] = OrderedDict([
+        #     ("username", _amqp["username"]),
+        #     ("host", _amqp["host"]),
+        #     ("vhost", _amqp["vhost"]),
+        #     ("queue_name", _amqp["queue_name"])
+        # ])
 
         freezed_date, freezed_packages = get_pip_freeze()
         freezed_title = "Python Packages (`pip freeze` @ %s)" % freezed_date.strftime("%Y-%m-%d %H:%M")

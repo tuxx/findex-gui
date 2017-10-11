@@ -136,14 +136,14 @@ class ResourceMeta(BASE, Extended):
     file_count = Column(Integer(), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=0)
 
-    auth_user = Column(String, nullable=True, info={"exclude_json": True})
-    auth_pass = Column(String, nullable=True, info={"exclude_json": True})
-    auth_type = Column(String, nullable=True)
+    auth_user = Column(String(), nullable=True, info={"exclude_json": True})
+    auth_pass = Column(String(), nullable=True, info={"exclude_json": True})
+    auth_type = Column(String(), nullable=True)
 
-    web_user_agent = Column(String, nullable=True)
+    web_user_agent = Column(String(), nullable=True)
 
-    relay_user_agent = Column(String, nullable=True)
-    relay_proxy = Column(String, nullable=True)
+    relay_user_agent = Column(String(), nullable=True)
+    relay_proxy = Column(String(), nullable=True)
     relay_enabled = Column(Boolean, default=False, nullable=False)
 
     recursive_sizes = Column(Boolean, nullable=False, default=False)
@@ -172,8 +172,8 @@ class ResourceGroup(BASE, Extended):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False, unique=True)
-    description = Column(String, nullable=True)
+    name = Column(String(), nullable=False, unique=True)
+    description = Column(String(), nullable=True)
     added = Column(DateTime(), default=datetime.utcnow, nullable=False)
     removable = Column(Boolean, nullable=False, default=True)
 
@@ -204,35 +204,28 @@ class Crawler(BASE, Extended):
     crawler_name = Column(String(), nullable=False, unique=True)
     heartbeat = Column(TIMESTAMP())
 
-    amqp_id = Column(Integer, ForeignKey("amqp.id"), nullable=False)
-    amqp = relationship("Amqp", back_populates="crawlers")
+    mq_id = Column(Integer, ForeignKey("mq.id"), nullable=False)
+    mq = relationship("Mq", back_populates="crawlers")
 
 
-class Amqp(BASE, Extended):
-    __tablename__ = "amqp"
+class Mq(BASE, Extended):
+    __tablename__ = "mq"
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False, unique=True)
-    host = Column(String, nullable=False)
-    port = Column(Integer, nullable=False)
-    vhost = Column(String, nullable=False)
-    queue = Column(String, nullable=False)
+    name = Column(String(), nullable=False, unique=True)
+    host = Column(String(), nullable=False)
+    port = Column(Integer(), nullable=False)
+    vhost = Column(String(), nullable=False)
+    queue = Column(String(), nullable=False)
+    broker_type = Column(String(), nullable=False, default="rabbitmq")
+    ssl = Column(Boolean(), nullable=True, default=False)
 
-    auth_user = Column(String, nullable=False, info={"exclude_json": True})
-    auth_pass = Column(String, info={"exclude_json": True})
+    auth_user = Column(String(), nullable=False, info={"exclude_json": True})
+    auth_pass = Column(String(), info={"exclude_json": True})
 
     added = Column(DateTime(), default=datetime.utcnow)
-    crawlers = relationship("Crawler", back_populates="amqp")
-
-    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.queue_name = queue_name
-        self.virtual_host = virtual_host
+    crawlers = relationship("Crawler", back_populates="mq")
 
 
 class Options(BASE, Extended):
@@ -542,7 +535,7 @@ class NmapRule(BASE, Extended):
     rule = Column(String(), nullable=False, unique=True)
     name = Column(String(), nullable=False, unique=True)
     output = Column(MutableJson(), nullable=True, default={"data": {}})
-    date_added = Column(DateTime(), default=datetime.now(), nullable=False)
+    date_added = Column(DateTime(), default=datetime.utcnow, nullable=False)
     date_scanned = Column(DateTime(), nullable=True)
     status = Column(Integer, nullable=False, default=0)
 
@@ -571,7 +564,7 @@ class Logging(BASE, Extended):
     message = Column(String(), nullable=False)
     data = Column(MutableJson(), nullable=True)
     author = Column(String(), nullable=False)
-    date_added = Column(DateTime, nullable=False, default=datetime.now())
+    date_added = Column(DateTime, nullable=False, default=datetime.utcnow)
     log_level = Column(Integer(), nullable=False, default=0)  # 1: warning 2: error
 
     ix_author = Index("ix_resource_author", author)

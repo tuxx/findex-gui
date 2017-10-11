@@ -11,7 +11,6 @@ class NmapController:
         q = db.session.query(NmapRule)
         if uid:
             return q.filter(NmapRule.id == uid).first()
-
         if isinstance(limit, int):
             q = q.limit(limit)
         if isinstance(offset, int):

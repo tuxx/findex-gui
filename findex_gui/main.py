@@ -226,7 +226,7 @@ def scheduler(ctx):
     print(red("Yet to be implemented"))
     findex_init(logging.DEBUG, ctx)
     from findex_gui.controllers.tasks.loop import worker
-    worker()
+    # worker()
 
 @main.command()
 @click.pass_context

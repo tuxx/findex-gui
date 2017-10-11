@@ -42,7 +42,7 @@ class Server(BASE, Extended):
     name = Column(String(64), unique=True, nullable=False)
     description = Column(String(4096), nullable=True)
 
-    parents = relationship("Resource", back_populates="server")
+    resources = relationship("Resource", back_populates="server")
 
     ix_address = Index("ix_resource_address", address)
     ix_name = Index("ix_resource_name", name)
@@ -62,13 +62,13 @@ class Resource(BASE, Extended):
     id = Column(Integer, primary_key=True)
 
     server_id = Column(Integer, ForeignKey("server.id"), nullable=False)
-    server = relationship("Server", back_populates="parents")
+    server = relationship("Server", back_populates="resources")
 
     meta_id = Column(Integer, ForeignKey("resource_meta.id"), nullable=False)
     meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
 
     group_id = Column(Integer, ForeignKey("resource_group.id"))
-    group = relationship("ResourceGroup", back_populates="parents")
+    group = relationship("ResourceGroup", back_populates="resources")
 
     created_by_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User")
@@ -177,10 +177,10 @@ class ResourceGroup(BASE, Extended):
     added = Column(DateTime(), default=datetime.utcnow, nullable=False)
     removable = Column(Boolean, nullable=False, default=True)
 
-    # default: 1 day
-    crawl_interval = Column(Integer(), nullable=False, default=86400)
+    crawl_interval = Column(Integer(), nullable=False, default=86400)  # default: 1 day
 
-    parents = relationship("Resource", back_populates="group")
+    resources = relationship("Resource", back_populates="group")
+    nmap_rules = relationship("NmapRule", back_populates="group")
 
     def __init__(self, name, description, removable=True):
         self.name = self.make_valid_groupname(name)
@@ -544,15 +544,35 @@ class NmapRule(BASE, Extended):
     output = Column(MutableJson(), nullable=True, default={"data": {}})
     date_added = Column(DateTime(), default=datetime.now(), nullable=False)
     date_scanned = Column(DateTime(), nullable=True)
-    scan_interval = Column(Integer(), default=86400)
+    status = Column(Integer, nullable=False, default=0)
 
-    def __init__(self, rule, name, interval):
+    crawl_interval = Column(Integer())
+
+    group_id = Column(Integer, ForeignKey("resource_group.id"))
+    group = relationship("ResourceGroup", back_populates="nmap_rules")
+
+    def __init__(self, rule, name, interval, group):
         self.rule = rule
         self.name = name
         self.scan_interval = interval
+        self.group = group
 
     @property
     def last_scanned(self):
         if not self.date_scanned:
             return "Not scanned yet"
         return TimeMagic().ago_dt(self.date_scanned)
+
+
+class Logging(BASE, Extended):
+    __tablename__ = "logging"
+
+    id = Column(Integer(), primary_key=True)
+    message = Column(String(), nullable=False)
+    data = Column(MutableJson(), nullable=True)
+    author = Column(String(), nullable=False)
+    date_added = Column(DateTime, nullable=False, default=datetime.now())
+    log_level = Column(Integer(), nullable=False, default=0)  # 1: warning 2: error
+
+    ix_author = Index("ix_resource_author", author)
+    ix_date = Index("ix_resource_date_added", date_added)

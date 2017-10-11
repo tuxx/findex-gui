@@ -89,8 +89,12 @@
             });
 
             function nmap_column_writer(column_name, value){
+                if(!value) return "";
                 if(column_name == "output") {
-                    let output = "";
+                    let output = "No data";
+                    if(!value.data.hasOwnProperty("output")) return output;
+                    if(!value.data.output) return output;
+                    output = "";
                     value.data.output.forEach(function (obj, i) {
                         output += `<code>${obj.host}:${obj.port}</code><br>`;
                     });

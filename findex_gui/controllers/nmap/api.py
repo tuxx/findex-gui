@@ -12,9 +12,11 @@ from findex_gui.controllers.nmap.nmap import NmapController
 @endpoint.api(
     parameter("rule", type=str, required=True),
     parameter("name", type=str, required=True),
-    parameter("interval", type=int, required=False, default=86400),
+    parameter("interval", type=str, required=False, default=None),
 )
 def api_admin_server_nmap_add(rule, name, interval):
+    if isinstance(interval, str) and not interval.isdigit():
+        interval = None
     return NmapController.add(cmd=rule, name=name, interval=interval)
 
 @app.route("/api/v2/admin/server/nmap/delete", methods=["POST"])

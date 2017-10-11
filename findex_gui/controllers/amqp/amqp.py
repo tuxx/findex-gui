@@ -5,12 +5,11 @@ import random
 import pika
 from pika import credentials
 from findex_common.static_variables import FileProtocols
-from findex_gui.bin.config import config
 from findex_gui.controllers.options.options import OptionsController
 
 
 class AmqpController:
-    def __init__(self, username: str, password: str, host: str, vhost:str, queue: str, port: int = 5672):
+    def __init__(self, username: str, password: str, host: str, vhost: str, queue: str, port: int = 5672):
         self.connection, self.channel = AmqpController.connect(
             username=username,
             password=password,
@@ -75,9 +74,3 @@ class AmqpController:
 
         print(" [x] Sent %s tasks to queue %s" % (str(len(tasks)), self.queue_name))
         self.connection.close()
-
-    @staticmethod
-    def get_credentials():
-        options_key = "amqp_credentials"
-        settings = OptionsController.get(options_key)
-        return settings

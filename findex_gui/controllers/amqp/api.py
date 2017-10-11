@@ -31,5 +31,5 @@ def api_admin_amqp_test_reachability(name, address, port, broker, user, password
     """
     """verify address/port reachability"""
     from findex_gui.bin.reachability import TestReachability
-    result = TestReachability.test(**data)
+    result = TestReachability.test(name=name, port=port)
     return result

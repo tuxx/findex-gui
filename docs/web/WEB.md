@@ -112,7 +112,7 @@ configuration as reported by the `findex web --nginx` command:
     server {
         listen localhost:8000;
 
-        # Cuckoo Web Interface
+        # Findex Web Interface
         location / {
             client_max_body_size 1G;
             uwsgi_pass  _uwsgi_findex_web;

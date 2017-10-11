@@ -14,7 +14,6 @@ themes = None
 
 db = Database()
 db.connect()
-db.bootstrap()
 
 def create_app():
     global app, auth, babel, locales, themes
@@ -57,6 +56,9 @@ def create_app():
     auth = Auth(app)
     auth.user_timeout = 604800
     auth.hash_algorithm = hashlib.sha256
+
+    # bootstrap db with default values
+    db.bootstrap()
 
     from findex_gui.bin.themes import ThemeController
     themes = ThemeController()

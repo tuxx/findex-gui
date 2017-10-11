@@ -131,8 +131,8 @@ class ResourceController:
         elif not basepath.startswith("/") and len(basepath) > 1:
             basepath = "/%s" % basepath
 
-        if _server.parents:
-            for parent in _server.parents:
+        if _server.resources:
+            for parent in _server.resources:
                 if parent.port == resource_port and parent.protocol == resource_protocol \
                         and parent.basepath == basepath:
                     raise FindexException("Duplicate resource previously defined with resource id \"%d\"" % parent.id)
@@ -204,7 +204,7 @@ class ResourceController:
         if auto_remove_server:
             # check for other server resource members before trying to delete
             server = resource.server
-            if [z for z in server.parents if z.id != resource_id]:
+            if [z for z in server.resources if z.id != resource_id]:
                 # cant remove server, it still has one or more member(s)
                 db.session.delete(resource)
             else:

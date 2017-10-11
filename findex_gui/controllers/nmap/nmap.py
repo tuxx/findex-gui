@@ -26,11 +26,16 @@ class NmapController:
             raise Exception("name cannot be empty")
         elif isinstance(cmd, str) and not cmd:
             raise Exception("rule or cmd cannot be empty")
-        elif not isinstance(interval, int):
-            raise Exception("interval must be int")
 
         try:
-            db.session.add(NmapRule(rule=cmd, name=name, interval=interval))
+            from findex_gui.orm.models import ResourceGroup
+            group = db.session.query(ResourceGroup)
+            group.filter(ResourceGroup.name == "Default")
+            group = group.first()
+            if not group:
+                raise Exception("group could not be found")
+
+            db.session.add(NmapRule(rule=cmd, name=name, interval=interval, group=group))
             db.session.commit()
             db.session.flush()
             return True

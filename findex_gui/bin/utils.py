@@ -110,7 +110,7 @@ def pip_freeze():
         if not _package:
             continue
         if _package.startswith("-e"):
-            packages.append(["-e", _package[3:]])
+            packages.append(["-e (#%d)" % len(packages), _package[3:]])
         else:
             _pack, _ver = _package.split("==", 1)
             packages.append([_pack, _ver])

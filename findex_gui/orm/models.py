@@ -182,6 +182,9 @@ class ResourceGroup(BASE, Extended):
     resources = relationship("Resource", back_populates="group")
     nmap_rules = relationship("NmapRule", back_populates="group")
 
+    mq_id = Column(Integer, ForeignKey("mq.id"), nullable=False)
+    mq = relationship("Mq", back_populates="groups")
+
     def __init__(self, name, description, removable=True):
         self.name = self.make_valid_groupname(name)
         self.removable = removable
@@ -204,9 +207,6 @@ class Crawler(BASE, Extended):
     crawler_name = Column(String(), nullable=False, unique=True)
     heartbeat = Column(TIMESTAMP())
 
-    mq_id = Column(Integer, ForeignKey("mq.id"), nullable=False)
-    mq = relationship("Mq", back_populates="crawlers")
-
 
 class Mq(BASE, Extended):
     __tablename__ = "mq"
@@ -225,7 +225,7 @@ class Mq(BASE, Extended):
     auth_pass = Column(String(), info={"exclude_json": True})
 
     added = Column(DateTime(), default=datetime.utcnow)
-    crawlers = relationship("Crawler", back_populates="mq")
+    groups = relationship("ResourceGroup", back_populates="mq")
 
 
 class Options(BASE, Extended):

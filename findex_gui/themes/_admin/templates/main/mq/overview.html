@@ -29,12 +29,12 @@
                                         <table id="mq" class="display table table-bordered" cellspacing="0" width="100%">
                                             <thead>
                                             <tr>
+                                                <th>Broker Type</th>
                                                 <th>Name</th>
                                                 <th>Host</th>
                                                 <th>Port</th>
                                                 <th>Vhost</th>
                                                 <th>Queue</th>
-                                                <th>Broker Type</th>
                                             </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -48,10 +48,21 @@
             </div>
         </section>
     </div>
-
     <style>
         table tbody tr:hover{
             background: #f9f9f9;
+        }
+
+        table tbody tr td:first-child > img{
+            height:22px;
+            float:left;
+        }
+
+        table tbody tr td:first-child > span{
+            margin-top: 2px;
+            display: block;
+            float: left;
+            margin-left: 6px;
         }
     </style>
 
@@ -60,8 +71,27 @@
             // @TODO: auto-refresh
             let table_amqp_overview = $("table#mq");
 
+            function mq_column_writer(column_name, value){
+                if(!value) return "";
+                if(column_name == "broker type") {
+                    let output = "";
+                    if(value == "rabbitmq"){
+                        output = `
+                            <img src="/static/img/logos/rabbitmq_small.png"/>
+                            <span>RabbitMQ</span>
+                        `;
+                    } else {
+                        output = value;
+                    }
+                    return output;
+                } else {
+                    return value;
+                }
+            }
+
             table_amqp_overview.fintable({
-                endpoint: "/admin/mq/get"
+                endpoint: "/admin/mq/get",
+                column_writer: mq_column_writer
             });
         });
     </script>

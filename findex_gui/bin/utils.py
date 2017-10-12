@@ -1,13 +1,13 @@
 from datetime import datetime, date
 
-import flask
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy_zdb import ZdbColumn
-from sqlalchemy_json import MutableJson
-
 from flask import url_for as _url_for
 from flask import redirect as _redirect
 from flask.json import JSONEncoder
+import flask
+
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy_zdb import ZdbColumn
+from sqlalchemy_json import MutableJson
 
 def dirty_url_for():
     """dirty flask.url_for() monkey patch."""
@@ -125,3 +125,16 @@ def get_pip_freeze():
         # refresh the pip freeze output every 2 days
         app.config['PIP_FREEZE'] = (datetime.now(), pip_freeze())
     return app.config["PIP_FREEZE"]
+
+
+def log_msg(msg: str, author, level: int = 1):
+    from findex_gui.orm.models import Logging
+    from findex_gui.web import db
+    print("[%s] %s" % (["INFO", "WARNING", "ERROR"][level], msg))
+    log = Logging()
+    log.author = author
+    log.message = msg
+    log.log_level = level
+    db.session.add(log)
+    db.session.commit()
+    db.session.flush()

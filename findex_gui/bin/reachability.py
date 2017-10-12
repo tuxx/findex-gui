@@ -1,6 +1,8 @@
 import requests
 from ftplib import FTP
 
+from findex_gui.controllers.amqp.amqp import AmqpConnectionController
+
 
 class TestReachability:
     @staticmethod
@@ -13,6 +15,7 @@ class TestReachability:
 
     @staticmethod
     def ftp(address, port, basepath='/', user=None, pwd=None, auth_type=None):
+        # @TODO: implement basepath/auth
         ftp = FTP()
         try:
             ftp.connect(address, port)

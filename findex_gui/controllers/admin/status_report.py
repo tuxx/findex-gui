@@ -8,7 +8,7 @@ from findex_gui.web import db, app
 from findex_gui.bin.config import config
 from findex_gui.bin.misc import version, cwd
 from findex_gui.bin.utils import get_pip_freeze
-from findex_gui.controllers.amqp.amqp import AmqpController
+# from findex_gui.controllers.amqp.amqp import AmqpController
 
 
 class AdminStatusReport:

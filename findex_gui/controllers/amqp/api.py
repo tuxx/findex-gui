@@ -4,6 +4,7 @@ from findex_gui.web import app
 from findex_gui.bin import validators
 from findex_gui.controllers.user.decorators import admin_required
 from findex_gui.controllers.amqp.amqp import MqController
+from findex_gui.controllers.amqp.amqp import AmqpConnectionController
 
 
 @app.route("/api/v2/admin/mq/add", methods=["POST"])
@@ -84,26 +85,25 @@ def api_admin_mq_get(uid, name, host, port, limit, offset, search):
 @app.route("/api/v2/admin/amqp/test", methods=["POST"])
 @admin_required
 @endpoint.api(
-    parameter("name", type=str, required=True),
-    parameter("address", type=str, required=True),
+    parameter("broker", type=str, required=True, default="rabbitmq", validator=validators.amqp_broker),
+    parameter("host", type=str, required=True),
     parameter("port", type=int, required=True),
-    parameter("broker", type=str, required=False, default= "rabbitmq", validator=validators.amqp_broker),
-    parameter("user", type=str, required=True),
-    parameter("passwd", type=str, required=True),
     parameter("vhost", type=str, required=True),
+    parameter("queue", type=str, required=True),
+    parameter("ssl", type=bool, required=False, default=False),
+    parameter("auth_user", type=str, required=True),
+    parameter("auth_pass", type=str, required=True)
 )
-def api_admin_mq_test(name, address, port, broker, user, password, vhost):
+def api_admin_mq_test(broker, host, port, vhost, queue, ssl, auth_user, auth_pass):
     """
     Test if a MQ broker can be reached.
-    :param name: Name of the MQ broker
-    :param address: 'mq' server address
+    :param host: 'mq' server address
     :param port: 'mq' server port
     :param broker: rabbitmq or another type of message broker
-    :param user: 'mq' user
-    :param password: 'mq' pwd
+    :param auth_user: 'mq' user
+    :param auth_pass: 'mq' pwd
     :param vhost: 'mq' vhost
     :return:
     """
-    from findex_gui.bin.reachability import TestReachability
-    result = TestReachability.test(name=name, port=port)
-    return result
+    if broker == "rabbitmq":
+        return AmqpConnectionController.test_amqp(auth_user, auth_pass, host, vhost, queue, port)

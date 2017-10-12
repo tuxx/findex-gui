@@ -6,6 +6,7 @@ from findex_gui.web import app, db
 from findex_gui.bin import validators
 from findex_gui.bin.reachability import TestReachability
 from findex_gui.orm.models import ResourceGroup
+from findex_gui.controllers.amqp.amqp import MqController
 from findex_gui.controllers.resources.resources import ResourceController
 from findex_gui.controllers.resources.groups import ResourceGroupController
 from findex_gui.controllers.user.decorators import admin_required
@@ -181,16 +182,25 @@ def api_admin_server_test_reachability(server_address, basepath,
                                    basepath, auth_user, auth_pass, auth_type)
     return result
 
-@app.route("/api/v2/resourcegroup/assign_amqp")
+@app.route("/api/v2/resourcegroup/add", methods=["POST"])
 @admin_required
 @endpoint.api(
-    parameter("resourcegroup_id", type=int, required=True),
-    parameter("amqp_id", type=int, required=True)
+    parameter("name", type=str, required=True),
+    parameter("description", type=str, required=False, default=None),
+    parameter("crawl_interval", type=int, required=True, default=86400),
+    parameter("amqp", type=str, required=False)
 )
-def api_admin_resourcegroup_assign_amqp(resourcegroup_id, amqp_id):
-    ResourceController.assign_amqp(resourcegroup_id, amqp_id)
-    return True
-
+def api_resourcegroup_add(name, description, crawl_interval, amqp):
+    """
+    Add a resource group.
+    :param name:
+    :param description:
+    :param crawl_interval:
+    :param amqp:
+    :return:
+    """
+    return ResourceGroupController.add(name=name, description=description,
+                                       crawl_interval=crawl_interval, amqp=amqp)
 
 @app.route("/api/v2/resourcegroup/get")
 @admin_required
@@ -201,7 +211,7 @@ def api_admin_resourcegroup_assign_amqp(resourcegroup_id, amqp_id):
 )
 def api_resourcegroup_get(limit, offset, search):
     """
-    Get resources.
+    Get resource groups.
     :param by_owner: Filter on resources by owner id
     :param limit:
     :param offset:
@@ -213,7 +223,13 @@ def api_resourcegroup_get(limit, offset, search):
         "offset": offset
     }
 
-    records = ResourceGroupController.get(limit=limit, offset=offset, search=search)
+    records = []
+    groups = ResourceGroupController.get(limit=limit, offset=offset, search=search)
+
+    for group in groups:
+        group_json = group.get_json()
+        group_json['date_added'] = group.date_added_human
+        records.append(group_json)
 
     # bleh
     args.pop('limit')
@@ -222,7 +238,17 @@ def api_resourcegroup_get(limit, offset, search):
     records_total = db.session.query(func.count(ResourceGroup.id)).scalar()
 
     return {
-        "records": records,
+        "records": groups,
         "queryRecordCount": records_total,
-        "totalRecordCount": len(records)
+        "totalRecordCount": len(groups)
     }
+
+@app.route("/api/v2/resourcegroup/assign_amqp")
+@admin_required
+@endpoint.api(
+    parameter("resourcegroup_id", type=int, required=True),
+    parameter("amqp_id", type=int, required=True)
+)
+def api_admin_resourcegroup_assign_amqp(resourcegroup_id, amqp_id):
+    ResourceGroupController.assign_amqp(resourcegroup_id, amqp_id)
+    return True

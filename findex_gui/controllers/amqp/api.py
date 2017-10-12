@@ -107,3 +107,4 @@ def api_admin_mq_test(broker, host, port, vhost, queue, ssl, auth_user, auth_pas
     """
     if broker == "rabbitmq":
         return AmqpConnectionController.test_amqp(auth_user, auth_pass, host, vhost, queue, port)
+

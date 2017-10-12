@@ -15,3 +15,7 @@
 .treeview-menu > li > a > .fa, .treeview-menu > li > a > .glyphicon, .treeview-menu > li > a > .ion {
     display: none;
 }
+
+.skin-black-light .sidebar-menu > li > a, .skin-black-light .sidebar-menu > li.active > a {
+    background-color: white;
+}

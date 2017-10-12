@@ -2,10 +2,30 @@ from sqlalchemy_utils import escape_like
 
 from findex_gui.web import db
 from findex_gui.orm.models import Resource, ResourceMeta, ResourceGroup, Server, Mq
+from findex_gui.controllers.amqp.amqp import MqController
 from findex_gui.controllers.user.roles import role_req
 
 
 class ResourceGroupController:
+    @staticmethod
+    @role_req("USER_REGISTERED", "RESOURCE_CREATE")
+    def add(name: str, description: str, crawl_interval: int = 86400,
+            amqp: str = None, removable: bool = True):
+        if not isinstance(crawl_interval, int):
+            raise Exception("crawl_interval must be integer")
+
+        group = ResourceGroup(name=name, description=description, removable=removable)
+        if isinstance(amqp, str) and amqp:
+            mq = MqController.get(name=amqp)
+            if not mq:
+                raise Exception("could not assign amqp name \'%s\' to new "
+                                "resource group because it does not exist")
+            group.mq = mq
+        db.session.add(group)
+        db.session.commit()
+        db.session.flush()
+        return True
+
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_CREATE")
     def remove(uid: int):
@@ -16,8 +36,8 @@ class ResourceGroupController:
             result = q.filter(ResourceGroup.id == uid).first()
             if not result:
                 return True
-            elif result.name == "Default":
-                raise Exception("cant remove the default group")
+            elif result.name == "Default" or result.removable is False:
+                raise Exception("cant remove this group")
             result.remove()
             db.session.commit()
             db.session.flush()

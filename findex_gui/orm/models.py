@@ -192,6 +192,10 @@ class ResourceGroup(BASE, Extended):
         self.removable = removable
         self.description = description
 
+    @property
+    def date_added_human(self):
+        return self.added.strftime("%d %b %Y %H:%M")
+
     @staticmethod
     def make_valid_groupname(groupname):
         groupname = re.sub("[^a-zA-Z0-9_\.]", "", groupname)

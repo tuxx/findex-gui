@@ -13,11 +13,11 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Add message queue
+                Add Server Group
             </h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Message Queue</a></li>
-                <li><a href="#">Add</a></li>
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
+                <li><a href="#">Add group</a></li>
             </ol>
         </section>
 
@@ -37,24 +37,8 @@
                         <!-- /.box-header -->
                         <div class="box-body">
                             <p>
-                                This page lets you add a "message broker" to Findex. One such broker is
-                                <a href="http://rabbitmq.com/">RabbitMQ</a>.
+                                This page lets you add a server group.
                             </p>
-                            <p>
-                                The following broker types are currently supported:
-
-                                <ul>
-                                    <li>RabbitMQ</li>
-                                </ul>
-                            </p>
-                            <p>
-                                After adding the broker, you may assign it to a
-                                <a id="href_resource_groups" href="">(resource) group</a>.
-                                <script>
-                                    $("#href_resource_groups").attr('href', url_for("/admin/server/overview#groups"));
-                                </script>
-                            </p>
-
                         </div>
                         <!-- /.box-body -->
                     </div>
@@ -120,7 +104,7 @@ r = requests.post('http://localhost:9200/api/v2/mq/add',
                 <div class="col-md-6">
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs">
-                            <li class="active"><a href="#host" data-toggle="tab">Endpoint</a></li>
+                            <li class="active"><a href="#host" data-toggle="tab">Add Group</a></li>
                         </ul>
 
                         <div class="tab-content">
@@ -140,9 +124,6 @@ r = requests.post('http://localhost:9200/api/v2/mq/add',
 
                             <hr>
                             <div class="btn-group" role="group" aria-label="submit">
-                                <button type="button" id="test_reachability" class="btn btn-secondary">Test
-                                    reachability
-                                </button>
                                 <button type="button" id="submit" class="btn btn-primary">Submit Server</button>
                             </div>
 
@@ -174,8 +155,8 @@ r = requests.post('http://localhost:9200/api/v2/mq/add',
             $("#submit").click(function () {
                 let form_add = get_form_data("form#add");
 
-                FindexGui.api("/admin/mq/add", "POST", form_add).then(function(result) {
-                    goto_uri(url_for("/admin/mq/overview"));
+                FindexGui.api("/resourcegroup/add", "POST", form_add).then(function(result) {
+                    goto_uri(url_for("/admin/server/overview#groups"));
                 }).fail(function (result) {
                     let msg = FindexGui.api_unpack_error(result);
                     if (msg) {
@@ -186,19 +167,19 @@ r = requests.post('http://localhost:9200/api/v2/mq/add',
                 });
             });
 
-            $("#test_reachability").click(function () {
-                let form_add = get_form_data("form#add");
-
-                FindexGui.api("/admin/amqp/test", "POST", form_add).then(function (result) {
-                    if (result.data == true) {
-                        msg_add("All Gucci");
-                    } else {
-                        msg_add_err("Unreachable or bad auth");
-                    }
-                }).fail(function (result) {
-                    console.log(result);
-                    msg_add_err("Unreachable or bad auth");
+            FindexGui.api("/admin/mq/get", "GET").then(function (result) {
+                if(!result.hasOwnProperty("data") || !result.data.hasOwnProperty("records")) throw "bad data";
+                let sel = $("form#add select#amqp");
+                result.data.records.forEach(function(obj, i){
+                    sel.append($('<option>', {
+                        value: obj.name,
+                        text : `${obj.name} (${obj.queue} - ${obj.auth_user}@${obj.host})`
+                    }));
                 });
+
+            }).fail(function (result) {
+                console.log(result);
+                msg_add_err("Unreachable");
             });
         });
     </script>

@@ -1,6 +1,14 @@
 {% extends "_admin/templates/base.html" %}
 {% block content %}
     {% import '_admin/templates/helpers/_macros.html' as macros %}
+    <style>
+        pre {
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-size: 12px;
+            font-family: monospace;
+        }
+    </style>
     <div class="content-wrapper" style="min-height: 946px;">
         <!-- Content Header (Page header) -->
         <section class="content-header">
@@ -13,24 +21,23 @@
             </ol>
         </section>
 
-        <!-- Main content -->
         <section class="content">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="box box-solid collapsed-box">
+                    <div class="box box-solid">
                         <div class="box-header with-border ">
-                            <h3 class="box-title">Help</h3>
+                            <h3 class="box-title">Description</h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse">
                                     <i class="fa fa-plus"></i>
                                 </button>
                             </div>
                         </div>
-                        <!-- /.box-header -->
                         <div class="box-body">
                             <p>
                                 This page lets you add servers to Findex for crawling in 2 ways:
                             </p>
+
                             <ul>
                                 <li>Manually adding one server</li>
                                 <li>Programmatically adding a bulk of servers</li>
@@ -48,16 +55,68 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /.box-body -->
                     </div>
-                    <!-- /.box -->
                 </div>
-                <!-- ./col -->
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-solid collapsed-box">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">API</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+<p>
+                                URL: <code>/api/v2/resource/add</code><br><br>
+                                Authentication via HTTP BASIC (or cookie) required.
+                            </p>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h4>Python</h4>
+                                    <pre>
+import requests
+
+data = {
+    "server_name": "debian",
+    "server_address": "ftp.debian.org",
+    "resource_port": "21",
+    "resource_protocol": "0",
+    "basepath": "/debian/tools/",
+    "display_url": "",
+    "recursive_sizes": "y",
+    "throttle_connections": "-1",
+    "user_agent": "Wow Cool User Agent",
+    "auth_user": "",
+    "auth_pass": "",
+    "auth_type": "0"
+}
+
+auth = ('root', 'changeme')
+
+r = requests.post('http://localhost:9200/api/v2/resource/add',
+                  json=data, auth=auth)
+
+                                    </pre>
+                                </div>
+                                <div class="col-md-12">
+                                    <h4>CURL</h4>
+                                    <pre>
+curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-Agent: Curl' -H 'Content-Type: application/json' -H 'Accept: */*' --data-binary '{"server_name":"debian","server_address":"ftp.debian.org","resource_port":"21","resource_protocol":"0","basepath":"/debian/tools/","display_url":"","recursive_sizes":"y","throttle_connections":"-1","user_agent":"Wow Cool User Agent","auth_user":"","auth_pass":"","auth_type":"0"}' --compressed
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6">
-                    <h2 class="page-header">&nbsp;</h2>
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs">
                             <li class="active"><a href="#host" data-toggle="tab">Endpoint</a></li>
@@ -115,61 +174,6 @@
                             <div id="error" style="margin-top:20px; display: none;">
                                 <span style="color:red;font-weight:bold;" id="msg_error">Javascript disabled?</span>
                                 <span style="color:green;font-weight:bold;" id="msg_success"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <style>
-                        pre {
-                            word-break: break-word;
-                            white-space: pre-wrap;
-                            font-size: 12px;
-                            font-family: monospace;
-                        }
-                    </style>
-                    <h2 class="page-header">Programmatically</h2>
-                    <div class="box box-solid">
-                        <div class="box-body api">
-                            <p>
-                                URL: <code>/api/v2/resource/add</code><br><br>
-                                Authentication via HTTP BASIC (or cookie) required.
-                            </p>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h4>Python</h4>
-                                    <pre>
-import requests
-
-data = {
-    "server_name": "debian",
-    "server_address": "ftp.debian.org",
-    "resource_port": "21",
-    "resource_protocol": "0",
-    "basepath": "/debian/tools/",
-    "display_url": "",
-    "recursive_sizes": "y",
-    "throttle_connections": "-1",
-    "user_agent": "Wow Cool User Agent",
-    "auth_user": "",
-    "auth_pass": "",
-    "auth_type": "0"
-}
-
-auth = ('root', 'changeme')
-
-r = requests.post('http://localhost:9200/api/v2/resource/add',
-                  json=data, auth=auth)
-
-                                    </pre>
-                                </div>
-                                <div class="col-md-12">
-                                    <h4>CURL</h4>
-                                    <pre>
-curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-Agent: Curl' -H 'Content-Type: application/json' -H 'Accept: */*' --data-binary '{"server_name":"debian","server_address":"ftp.debian.org","resource_port":"21","resource_protocol":"0","basepath":"/debian/tools/","display_url":"","recursive_sizes":"y","throttle_connections":"-1","user_agent":"Wow Cool User Agent","auth_user":"","auth_pass":"","auth_type":"0"}' --compressed
-                                    </pre>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -244,6 +248,21 @@ curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-A
                     console.log(result);
                     msg_add_err("Unreachable");
                 });
+            });
+
+            FindexGui.api("/resourcegroup/get", "GET").then(function (result) {
+                if(!result.hasOwnProperty("data") || !result.data.hasOwnProperty("records")) throw "bad data";
+                let sel = $("form#options select#auth_type");
+                result.data.records.forEach(function(obj, i){
+                    sel.append($('<option>', {
+                        value: obj.id,
+                        text : obj.name
+                    }));
+                });
+
+            }).fail(function (result) {
+                console.log(result);
+                msg_add_err("Unreachable");
             });
         });
     </script>

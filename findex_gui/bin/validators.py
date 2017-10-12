@@ -14,6 +14,13 @@ def server_protocol(value):
         if value not in protocol_ids:
             raise Exception("unkknown protocol id '%d', available: %s" % (value, map(str, protocol_ids)))
 
+def server_group(value):
+    from findex_gui.controllers.resources.groups import ResourceGroupController
+
+    result = ResourceGroupController.get(name=value)
+    if not result:
+        raise Exception("resource group by the name \'%s\' does not exist" % value)
+
 def strong_password(value):
     """better than nothing ;>"""
     min_length = 6

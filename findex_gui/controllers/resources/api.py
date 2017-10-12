@@ -1,10 +1,13 @@
 from flask_yoloapi import endpoint, parameter
+from sqlalchemy import func
 
 from findex_common.static_variables import FileProtocols
-from findex_gui.web import app
+from findex_gui.web import app, db
 from findex_gui.bin import validators
 from findex_gui.bin.reachability import TestReachability
+from findex_gui.orm.models import ResourceGroup
 from findex_gui.controllers.resources.resources import ResourceController
+from findex_gui.controllers.resources.groups import ResourceGroupController
 from findex_gui.controllers.user.decorators import admin_required
 
 @app.route("/api/v2/resource/add", methods=["POST"])
@@ -27,11 +30,13 @@ from findex_gui.controllers.user.decorators import admin_required
     parameter("basepath", type=str, required=True),
     parameter("display_url", type=str, required=False),
     parameter("description", type=str, required=False),
-    parameter("throttle_connections", type=int, required=False)
+    parameter("throttle_connections", type=int, required=False),
+
+    parameter("group", type=str, required=False, default="Default", validator=validators.server_group)
 )
 def api_resource_add_post(server_name, server_address, server_id, resource_port, resource_protocol, auth_user,
                           auth_pass, auth_type, user_agent, recursive_sizes, basepath, display_url, description,
-                          throttle_connections):
+                          throttle_connections, group):
     """
     Adds a local or remote file resource
     :param server_name: Server name
@@ -48,6 +53,7 @@ def api_resource_add_post(server_name, server_address, server_id, resource_port,
     :param auth_type: resource type authentication
     :param user_agent: The string to identify ourselves with against the service
     :param throttle_connections: Wait X millisecond(s) between each request/connection
+    :param group: The resourcegroup name - defaults to 'Default' if left empty
     :return: resource
     """
     resource = ResourceController.add_resource(server_name=server_name,
@@ -63,9 +69,9 @@ def api_resource_add_post(server_name, server_address, server_id, resource_port,
                                                basepath=basepath,
                                                display_url=display_url,
                                                description=description,
-                                               throttle_connections=throttle_connections)
+                                               throttle_connections=throttle_connections,
+                                               group=group)
     return "resource added with id: %d" % resource.id
-
 
 @app.route("/api/v2/resource/get", methods=["GET"])
 @endpoint.api(
@@ -138,7 +144,6 @@ def api_resource_get(by_owner, limit, offset, search):
         "totalRecordCount": len(records)
     }
 
-
 @app.route("/api/v2/resource/remove", methods=["POST"])
 @endpoint.api(
     parameter("resource_id", type=int, required=True)
@@ -175,3 +180,49 @@ def api_admin_server_test_reachability(server_address, basepath,
     result = TestReachability.test(server_address, resource_port, resource_protocol,
                                    basepath, auth_user, auth_pass, auth_type)
     return result
+
+@app.route("/api/v2/resourcegroup/assign_amqp")
+@admin_required
+@endpoint.api(
+    parameter("resourcegroup_id", type=int, required=True),
+    parameter("amqp_id", type=int, required=True)
+)
+def api_admin_resourcegroup_assign_amqp(resourcegroup_id, amqp_id):
+    ResourceController.assign_amqp(resourcegroup_id, amqp_id)
+    return True
+
+
+@app.route("/api/v2/resourcegroup/get")
+@admin_required
+@endpoint.api(
+    parameter("limit", type=int, default=10),
+    parameter("offset", type=int, default=0),
+    parameter("search", type=str, required=False, default=None)
+)
+def api_resourcegroup_get(limit, offset, search):
+    """
+    Get resources.
+    :param by_owner: Filter on resources by owner id
+    :param limit:
+    :param offset:
+    :param search: hmmz
+    :return:
+    """
+    args = {
+        "limit": limit,
+        "offset": offset
+    }
+
+    records = ResourceGroupController.get(limit=limit, offset=offset, search=search)
+
+    # bleh
+    args.pop('limit')
+    args.pop('offset')
+
+    records_total = db.session.query(func.count(ResourceGroup.id)).scalar()
+
+    return {
+        "records": records,
+        "queryRecordCount": records_total,
+        "totalRecordCount": len(records)
+    }

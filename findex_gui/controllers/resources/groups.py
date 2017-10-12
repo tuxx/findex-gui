@@ -7,6 +7,27 @@ from findex_gui.controllers.user.roles import role_req
 
 class ResourceGroupController:
     @staticmethod
+    @role_req("USER_REGISTERED", "RESOURCE_CREATE")
+    def remove(uid: int):
+        if not isinstance(uid, int):
+            raise Exception("uid should be int")
+        try:
+            q = db.session.query(ResourceGroup)
+            result = q.filter(ResourceGroup.id == uid).first()
+            if not result:
+                return True
+            elif result.name == "Default":
+                raise Exception("cant remove the default group")
+            result.remove()
+            db.session.commit()
+            db.session.flush()
+            return True
+        except:
+            db.session.rollback()
+            raise
+
+    @staticmethod
+    @role_req("USER_REGISTERED", "RESOURCE_VIEW")
     def get(uid: int = None, name: str = None, limit: int = None,
             offset: int = None, search: str = None):
         """

@@ -10,7 +10,7 @@ class FormServerAddOptions(Form):
     recursive_sizes = BooleanField("Recursive directory sizes", default=True)
     throttle_connections = IntegerField("Throttle connections (seconds)", default=-1)
     user_agent = StringField("User Agent", default=user_agent)
-
+    auth_type = SelectField("Group", [DataRequired()], choices=[])
 
 class FormServerAddAuthentication(Form):
     auth_user = StringField("Username")

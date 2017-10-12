@@ -182,8 +182,10 @@ class ResourceGroup(BASE, Extended):
     resources = relationship("Resource", back_populates="group")
     nmap_rules = relationship("NmapRule", back_populates="group")
 
-    mq_id = Column(Integer, ForeignKey("mq.id"), nullable=False)
+    mq_id = Column(Integer, ForeignKey("mq.id"), nullable=True)
     mq = relationship("Mq", back_populates="groups")
+
+    ix_name = Index("ix_resourcegroup_name", name)
 
     def __init__(self, name, description, removable=True):
         self.name = self.make_valid_groupname(name)

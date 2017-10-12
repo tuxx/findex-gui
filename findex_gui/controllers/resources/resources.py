@@ -2,7 +2,7 @@ from sqlalchemy_zdb import ZdbQuery
 
 from findex_gui.web import db, locales, auth
 from findex_gui.bin.config import config
-from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server
+from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server, Mq
 from findex_gui.controllers.user.roles import role_req
 from findex_gui.controllers.user.user import UserController
 from findex_common.exceptions import DatabaseException, FindexException
@@ -89,7 +89,7 @@ class ResourceController:
     def add_resource(resource_port, resource_protocol, server_name=None, server_address=None, server_id=None,
                      description="", display_url="/", basepath="/", recursive_sizes=True,
                      auth_user=None, auth_pass=None, auth_type=None, user_agent=static_variables.user_agent,
-                     throttle_connections=-1, current_user=None):
+                     throttle_connections=-1, current_user=None, group="Default"):
         """
         Adds a local or remote file resource
         :param server_name: Server name
@@ -168,7 +168,7 @@ class ResourceController:
         db.session.add(resource)
         db.session.commit()
 
-        resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == "Default").first()
+        resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == group).first()
         db.session.commit()
         db.session.flush()
 
@@ -288,4 +288,3 @@ class ResourceController:
             query = query.filter(ResourceGroup.name == name)
 
         return query.first()
-

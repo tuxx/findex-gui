@@ -28,7 +28,7 @@ def parse_bool(value):
 
 
 class Dictionary(dict):
-    """Cuckoo custom dict."""
+    """Findex custom dict."""
 
     def __getattr__(self, key):
         return self.get(key, None)
@@ -283,7 +283,7 @@ class Config(object):
         """
         env = {}
         for key, value in os.environ.items():
-            if key.startswith("CUCKOO_"):
+            if key.startswith("FINDEX_"):
                 env[key] = value
 
         env["FINDEX_CWD"] = cwd()
@@ -361,7 +361,7 @@ class Config(object):
                         log.error(
                             "Type of config parameter %s:%s:%s not found! "
                             "This may indicate that you've incorrectly filled "
-                            "out the Cuckoo configuration, please double "
+                            "out the findex configuration, please double "
                             "check it.", file_name, section, name
                         )
                     value = raw_value
@@ -455,7 +455,7 @@ def config(s, cfg=None, strict=False, raw=False, loose=False, check=False):
     if strict and required and section not in config.sections:
         raise ConfigError(
             "Configuration value %s not present! This may indicate that "
-            "you've incorrectly filled out the Cuckoo configuration, "
+            "you've incorrectly filled out the Findex configuration, "
             "please double check it." % s
         )
 
@@ -463,7 +463,7 @@ def config(s, cfg=None, strict=False, raw=False, loose=False, check=False):
     if strict and required and key not in section:
         raise ConfigError(
             "Configuration value %s not present! This may indicate that "
-            "you've incorrectly filled out the Cuckoo configuration, "
+            "you've incorrectly filled out the Findex configuration, "
             "please double check it." % s
         )
 

@@ -250,9 +250,9 @@ curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-A
                 });
             });
 
-            FindexGui.api("/resourcegroup/get", "GET").then(function (result) {
+            FindexGui.api("/resourcegroup/get?limit=1000", "GET").then(function (result) {
                 if(!result.hasOwnProperty("data") || !result.data.hasOwnProperty("records")) throw "bad data";
-                let sel = $("form#options select#auth_type");
+                let sel = $("form#options select#group");
                 result.data.records.forEach(function(obj, i){
                     sel.append($('<option>', {
                         value: obj.id,

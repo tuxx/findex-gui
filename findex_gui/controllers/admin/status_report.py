@@ -2,6 +2,7 @@ import os
 import sys
 from collections import OrderedDict
 
+import dsnparse
 from sqlalchemy.sql import text
 
 from findex_gui.web import db, app
@@ -39,14 +40,6 @@ class AdminStatusReport:
             ("size on disk", AdminStatusReport.database_get_size()),
         ])
 
-        # _amqp = AdminStatusReport.amqp_get_credentials()
-        # data["rabbitmq"] = OrderedDict([
-        #     ("username", _amqp["username"]),
-        #     ("host", _amqp["host"]),
-        #     ("vhost", _amqp["vhost"]),
-        #     ("queue_name", _amqp["queue_name"])
-        # ])
-
         freezed_date, freezed_packages = get_pip_freeze()
         freezed_title = "Python Packages (`pip freeze` @ %s)" % freezed_date.strftime("%Y-%m-%d %H:%M")
         data[freezed_title] = OrderedDict(
@@ -79,14 +72,14 @@ class AdminStatusReport:
 
     @staticmethod
     def database_get_size():
-        db_dsn = config("findex:database:connection")
-        db_info = db.parse_connection_string(db_dsn)
+        dsn = dsnparse.parse(config("findex:database:connection"))
+        db_name = dsn.paths[0]
         sql = """
         SELECT
             pg_size_pretty(pg_database_size(pg_database.datname)) AS size
         FROM pg_database WHERE datname=:db_name;
         """
-        res = AdminStatusReport.raw_query(sql, {"db_name": db_info["name"]})
+        res = AdminStatusReport.raw_query(sql, {"db_name": db_name})
         if res.cls != "ok":
             return res
 

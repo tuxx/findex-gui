@@ -20,7 +20,7 @@ class ResourceGroupController:
             if not mq:
                 raise Exception("could not assign amqp name \'%s\' to new "
                                 "resource group because it does not exist")
-            group.mq = mq
+            group.mq = mq[0]
         db.session.add(group)
         db.session.commit()
         db.session.flush()

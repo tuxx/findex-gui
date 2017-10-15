@@ -154,6 +154,20 @@
                     }
                 });
             });
+
+            FindexGui.api("/resourcegroup/get?limit=1000", "GET").then(function (result) {
+                if(!result.hasOwnProperty("data") || !result.data.hasOwnProperty("records")) throw "bad data";
+                let sel = $("form#nmap_add select#group");
+                result.data.records.forEach(function(obj, i){
+                    sel.append($('<option>', {
+                        value: obj.id,
+                        text : obj.name
+                    }));
+                });
+            }).fail(function (result) {
+                console.log(result);
+                msg_add_err("Unreachable");
+            });
         });
     </script>
 {% endblock %}

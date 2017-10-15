@@ -167,7 +167,7 @@ r = requests.post('http://localhost:9200/api/v2/mq/add',
                 });
             });
 
-            FindexGui.api("/admin/mq/get", "GET").then(function (result) {
+            FindexGui.api("/admin/mq/get?limit=100", "GET").then(function (result) {
                 if(!result.hasOwnProperty("data") || !result.data.hasOwnProperty("records")) throw "bad data";
                 let sel = $("form#add select#amqp");
                 result.data.records.forEach(function(obj, i){

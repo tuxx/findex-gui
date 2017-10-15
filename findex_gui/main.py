@@ -194,10 +194,6 @@ def view_config(ctx):
     print("debug: %s" % str(config("findex:findex:debug")))
     print("async: %s" % config("findex:findex:async"))
     print("database: %s" % config("findex:database:connection"))
-    print("rabbitmq_username: %s" % config("findex:rabbitmq:username"))
-    print("rabbitmq_host: %s" % config("findex:rabbitmq:host"))
-    print("rabbitmq_vhost: %s" % config("findex:rabbitmq:virtual_host"))
-    print("rabbitmq_queue_name: %s" % config("findex:rabbitmq:queue_name"))
 
 
 @main.command(context_settings=dict(
@@ -252,13 +248,7 @@ def generate_crawl_config(ctx):
         db_name=db_name,
         db_user=db_user,
         db_pass=db_pass,
-        db_max_bulk_inserts=1000,
-        amqp_username=config("findex:rabbitmq:username"),
-        amqp_password=config("findex:rabbitmq:password"),
-        amqp_host=config("findex:rabbitmq:host"),
-        amqp_vhost=config("findex:rabbitmq:virtual_host"),
-        amqp_queue_name=config("findex:rabbitmq:queue_name"),
-        amqp_queue_size=config("findex:rabbitmq:queue_size"),
+        db_max_bulk_inserts=1000
     )
 
     print("Save the following as `settings.py`")

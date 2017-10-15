@@ -246,14 +246,6 @@ class Config(object):
                 "enabled": Boolean(True),
                 "host": String("http://localhost:9200/")
             },
-            "rabbitmq": {
-                "host": String(""),
-                "username": String("changeme"),
-                "password": String("changeme"),
-                "virtual_host": String(""),
-                "queue_name": String(""),
-                "queue_size": Int(20)
-            },
             "users": {
                 "default_root_password": String("changeme"),
                 "default_anon_password": String("changeme")
@@ -571,13 +563,7 @@ def generate_crawl_config(bot_name: str,
                           db_name: str,
                           db_user: str,
                           db_pass: str,
-                          db_max_bulk_inserts: int,
-                          amqp_username: str,
-                          amqp_password: str,
-                          amqp_host: str,
-                          amqp_vhost: str,
-                          amqp_queue_name: str,
-                          amqp_queue_size: str):
+                          db_max_bulk_inserts: int):
     from jinja2 import Environment
     from findex_gui.bin.misc import cwd
     f = open(cwd("conf/crawl.conf"), "r")

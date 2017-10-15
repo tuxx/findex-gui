@@ -108,7 +108,9 @@ do_setup(
         "python-magic",
         "requests[security]",
         "markupsafe",
-        "sqlalchemy-json"
+        "sqlalchemy-json",
+        "pika",
+        "dsnparse==0.1.10"
     ],
     setup_requires=[
         "pytest-runner",

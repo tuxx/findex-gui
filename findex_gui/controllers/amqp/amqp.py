@@ -1,6 +1,7 @@
 import json
 import string
 import random
+from typing import List
 
 import pika
 from pika import credentials
@@ -9,7 +10,7 @@ from findex_common.static_variables import FileProtocols
 from findex_gui.web import db
 from findex_gui.bin.utils import log_msg
 from findex_gui.controllers.user.roles import role_req
-from findex_gui.orm.models import Mq
+from findex_gui.orm.models import Mq, Resource, NmapRule
 
 
 class MqConnectionController(object):
@@ -30,6 +31,9 @@ class MqConnectionController(object):
         pass
 
     def is_connected(self):
+        pass
+
+    def send(self, blob: dict):
         pass
 
     @staticmethod
@@ -66,38 +70,72 @@ class AmqpConnectionController(MqConnectionController):
     def is_connected(self):
         return not self.connection.is_closed
 
-    def send_tasks(self, resources):
+    def send_scans(self, scans: List[NmapRule]):
         """
-        converts resource objects to crawl requests and
-        inserts into the message queue
-        :param resources: a list of resource SQLa objects
+        Sends nmap tasks to available crawlers
+        :param scans: nmap rules
+        :return:
+        """
+        tasks = []
+        for scan in scans:
+            task = {
+                "type": "nmap",
+                "task": {
+                    "rule": scan.rule,
+                    "group": scan.group.name
+                }
+            }
+            tasks.append(task)
+
+    def send_resources(self, resources: List[Resource]):
+        """
+        Sends resource crawl tasks to available crawlers
+        :param resources: resources
         :return:
         """
         tasks = []
         for resource in resources:
             task = {
-                "address": resource.server.address,
-                "method": FileProtocols().name_by_id(resource.protocol),
-                "basepath": resource.basepath,
-                "resource_id": resource.id,
-                "options": {
-                    "user-agent": resource.meta.web_user_agent,
-                    "recursive_foldersizes": True,
-                    "port": resource.port,
-                    "auth_user": resource.meta.auth_user,
-                    "auth_pass": resource.meta.auth_pass
+                "type": "crawl",
+                "task": {
+                    "address": resource.server.address,
+                    "method": FileProtocols().name_by_id(resource.protocol),
+                    "basepath": resource.basepath,
+                    "resource_id": resource.id,
+                    "options": {
+                        "user-agent": resource.meta.web_user_agent,
+                        "recursive_foldersizes": True,
+                        "port": resource.port,
+                        "auth_user": resource.meta.auth_user,
+                        "auth_pass": resource.meta.auth_pass
+                    }
                 }
             }
             tasks.append(task)
 
         for task in tasks:
-            self.channel.basic_publish(exchange="",
-                                       routing_key=self.queue_name,
-                                       body=json.dumps(task),
-                                       properties=pika.BasicProperties(delivery_mode=2))
-        log_msg("Sent %s tasks to queue %s" % (str(len(tasks)), self.queue_name),
-                author="AmqpConnectionController")
+            self.send(task)
+
+        log_msg("Sent %s tasks to queue %s" % (str(len(tasks)), self.queue_name), author="AmqpConnectionController")
         self.connection.close()
+
+    def send(self, blob: dict):
+        try:
+            dumps = json.dumps(blob)
+            result = self.channel.basic_publish(
+                exchange="",
+                routing_key=self.queue_name,
+                body=dumps,
+                properties=pika.BasicProperties(delivery_mode=2))
+            if not result:
+                raise Exception(result)
+
+            # debug log here
+            return result
+        except ValueError:
+            return
+        except Exception as ex:
+            return
 
 
 class MqController:

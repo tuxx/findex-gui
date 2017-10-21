@@ -13,6 +13,10 @@ from findex_common.nmap import NmapScan
 
 class Worker:
     @staticmethod
+    def _spawn_crawler(tasks_resources, tasks_nmap, queue_size=2):
+        pass
+
+    @staticmethod
     def loop():
         tasks = Worker.collect_tasks()
 
@@ -29,78 +33,80 @@ class Worker:
             console_log("done sending")
         logging.info("looped")
 
-    @staticmethod
-    def nmap_to_resource(nmap_task):
-        if not nmap_task:
-            raise Exception("no nmap tasks")
-
-        nmap = Nmap()
-        nmap_task.status = 1
-        db.session.commit()
-        db.session.flush()
-
-        now = datetime.now()
-        scan_results = nmap.scan(nmap_task.rule)
-        scan_time = (datetime.now() - now).total_seconds()
-
-        output = []
-        for scan_result in scan_results:
-            resource = None
-            try:
-                resource = ResourceController.get_resources(address=scan_result["host"],
-                                                            port=scan_result["port"])
-            except:
-                pass
-
-            if not resource:
-                if scan_result["service"] not in FileProtocols().get_names():
-                    log_msg("Discovered service \"%s://%s:%d\" not regonized - should be any of: (%s)" % (
-                        scan_result["service"],
-                        scan_result["host"],
-                        scan_result["port"],
-                        ", ".join(FileProtocols().get_names())), level=1, author="taskloop")
-                    continue
-                else:
-                    name = "%s_%s" % (nmap_task.name, random.randrange(10 ** 8))
-                    try:
-                        ResourceController.add_resource(
-                            server_address=scan_result["host"],
-                            resource_port=scan_result["port"],
-                            resource_protocol=FileProtocols().id_by_name(scan_result["service"]),
-                            server_name=name,
-                            description="Discovered via nmap",
-                            display_url="/",
-                            recursive_sizes=True,
-                            throttle_connections=-1,
-                            current_user=0
-                        )
-                    except Exception as ex:
-                        log_msg("Could not auto-add resource (%s:%d) with name \"%s\": %s" % (
-                            name, scan_result["host"], scan_result["port"], str(ex)
-                        ), level=2, author="taskloop")
-                        continue
-
-                    log_msg("Discovered service \"%s://%s:%d\" - auto-adding as \"%s\"" % (
-                        scan_result["service"],
-                        scan_result["host"],
-                        scan_result["port"],
-                        name), author="taskloop")
-            output.append(scan_result)
-
-        nmap_task.status = 0
-        nmap_task.date_scanned = datetime.now()
-        nmap_task.output["data"] = {
-            "output": output,
-            "time": scan_time
-        }
-        db.session.commit()
-        db.session.flush()
+    # @staticmethod
+    # def nmap_to_resource(nmap_task):
+    #     if not nmap_task:
+    #         raise Exception("no nmap tasks")
+    #
+    #     nmap = Nmap()
+    #     nmap_task.status = 1
+    #     db.session.commit()
+    #     db.session.flush()
+    #
+    #     now = datetime.now()
+    #     scan_results = nmap.scan(nmap_task.rule)
+    #     scan_time = (datetime.now() - now).total_seconds()
+    #
+    #     output = []
+    #     for scan_result in scan_results:
+    #         resource = None
+    #         try:
+    #             resource = ResourceController.get_resources(address=scan_result["host"],
+    #                                                         port=scan_result["port"])
+    #         except:
+    #             pass
+    #
+    #         if not resource:
+    #             if scan_result["service"] not in FileProtocols().get_names():
+    #                 log_msg("Discovered service \"%s://%s:%d\" not regonized - should be any of: (%s)" % (
+    #                     scan_result["service"],
+    #                     scan_result["host"],
+    #                     scan_result["port"],
+    #                     ", ".join(FileProtocols().get_names())), level=1, author="taskloop")
+    #                 continue
+    #             else:
+    #                 name = "%s_%s" % (nmap_task.name, random.randrange(10 ** 8))
+    #                 try:
+    #                     ResourceController.add_resource(
+    #                         server_address=scan_result["host"],
+    #                         resource_port=scan_result["port"],
+    #                         resource_protocol=FileProtocols().id_by_name(scan_result["service"]),
+    #                         server_name=name,
+    #                         description="Discovered via nmap",
+    #                         display_url="/",
+    #                         recursive_sizes=True,
+    #                         throttle_connections=-1,
+    #                         current_user=0
+    #                     )
+    #                 except Exception as ex:
+    #                     log_msg("Could not auto-add resource (%s:%d) with name \"%s\": %s" % (
+    #                         name, scan_result["host"], scan_result["port"], str(ex)
+    #                     ), level=2, author="taskloop")
+    #                     continue
+    #
+    #                 log_msg("Discovered service \"%s://%s:%d\" - auto-adding as \"%s\"" % (
+    #                     scan_result["service"],
+    #                     scan_result["host"],
+    #                     scan_result["port"],
+    #                     name), author="taskloop")
+    #         output.append(scan_result)
+    #
+    #     nmap_task.status = 0
+    #     nmap_task.date_scanned = datetime.now()
+    #     nmap_task.output["data"] = {
+    #         "output": output,
+    #         "time": scan_time
+    #     }
+    #     db.session.commit()
+    #     db.session.flush()
 
     @staticmethod
     def collect_tasks(check_resources: bool = True, check_nmap: bool = True):
-        tasks = []
+        tasks = {
+            "nmap": [],
+            "resources": []
+        }
         if check_nmap:
-            nmap_rules = []
             for nmap_rule in db.session.query(NmapRule).all():
                 def _skipping(_rule):
                     log_msg("skipping nmap rule \'%s\': %s" % (_rule.name, _rule.rule), level=1)
@@ -121,10 +127,7 @@ class Worker:
 
                 log_msg("adding nmap rule for scanning \'%s\': %s" % (
                     nmap_rule.name, nmap_rule.rule), author="taskloop")
-                nmap_rules.append(nmap_rule)
-
-            for nmap_rule in nmap_rules:
-                Worker.nmap_to_resource(nmap_rule)
+                tasks["nmap"].append(nmap_rule)
 
         if check_resources:
             for group in db.session.query(ResourceGroup).all():
@@ -141,7 +144,7 @@ class Worker:
                     if resource.meta.status != 0:
                         continue
 
-                    tasks.append(resource)
+                    tasks["resources"].append(resource)
                     log_msg("adding resource \'%s://%s\' (id: %d) for scanning" % (
                         resource.protocol_human, resource.resource_id, resource.id), author="taskloop")
         return tasks

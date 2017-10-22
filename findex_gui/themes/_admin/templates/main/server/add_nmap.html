@@ -160,7 +160,7 @@
                 let sel = $("form#nmap_add select#group");
                 result.data.records.forEach(function(obj, i){
                     sel.append($('<option>', {
-                        value: obj.id,
+                        value: obj.name,
                         text : obj.name
                     }));
                 });

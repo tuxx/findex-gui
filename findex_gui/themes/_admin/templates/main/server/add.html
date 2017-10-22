@@ -255,11 +255,10 @@ curl 'http://localhost:9200/api/v2/resource/add' --user root:changeme -H 'User-A
                 let sel = $("form#options select#group");
                 result.data.records.forEach(function(obj, i){
                     sel.append($('<option>', {
-                        value: obj.id,
+                        value: obj.name,
                         text : obj.name
                     }));
                 });
-
             }).fail(function (result) {
                 console.log(result);
                 msg_add_err("Unreachable");

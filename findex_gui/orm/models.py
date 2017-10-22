@@ -140,7 +140,7 @@ class ResourceMeta(BASE, Extended):
     auth_pass = Column(String(), nullable=True, info={"exclude_json": True})
     auth_type = Column(String(), nullable=True)
 
-    web_user_agent = Column(String(), nullable=True)
+    user_agent = Column(String(), nullable=True)
 
     relay_user_agent = Column(String(), nullable=True)
     relay_proxy = Column(String(), nullable=True)
@@ -152,6 +152,7 @@ class ResourceMeta(BASE, Extended):
 
     banner = Column(String(), nullable=True)
     response_time = Column(Integer(), nullable=True)
+    depth = Column(Integer(), nullable=True)  # nested directories - specifies crawl depth
     uid = Column(String(), nullable=True)
 
     def set_auth(self, username, password, auth_type):
@@ -569,7 +570,7 @@ class Logging(BASE, Extended):
     id = Column(Integer(), primary_key=True)
     message = Column(String(), nullable=False)
     data = Column(MutableJson(), nullable=True)
-    author = Column(String(), nullable=False)
+    author = Column(String(), nullable=True)
     date_added = Column(DateTime, nullable=False, default=datetime.utcnow)
     log_level = Column(Integer(), nullable=False, default=0)  # 1: warning 2: error
 

@@ -65,7 +65,7 @@ class ResourceGroupController:
             return [q.filter(ResourceGroup.id == uid).first()]
 
         if isinstance(name, str) and name:
-            q = q.filter(ResourceGroup.name == name).first()
+            return q.filter(ResourceGroup.name == name).first()
 
         if isinstance(search, str) and search:
             q = q.filter(ResourceGroup.name.ilike("%" + escape_like(search) + "%"))

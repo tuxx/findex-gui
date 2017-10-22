@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime, date
 
 from flask import url_for as _url_for
@@ -127,10 +128,30 @@ def get_pip_freeze():
     return app.config["PIP_FREEZE"]
 
 
-def log_msg(msg: str, author, level: int = 1):
-    from findex_gui.orm.models import Logging
+def log_msg(msg: str, level: int = 1):
+    """
+    Logs a message
+    :param msg: msg
+    :param author: author
+    :param level: 0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR
+    :return:
+    """
     from findex_gui.web import db
-    print("[%s] %s" % (["INFO", "WARNING", "ERROR"][level], msg))
+    from findex_gui.orm.models import Logging
+    from findex_gui.bin.config import config
+    if config("findex:findex:debug") and level == 0:
+        return
+
+    print("[%s] %s" % (["DEBUG", "INFO", "WARNING", "ERROR"][level], msg))
+
+    try:
+        prev_frame = sys._getframe(1).f_code
+        fn = prev_frame.co_filename
+        fu = prev_frame.co_name
+        author = "%s:%s" % (fn, fu)
+    except:
+        author = None
+
     log = Logging()
     log.author = author
     log.message = msg

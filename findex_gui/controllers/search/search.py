@@ -100,7 +100,9 @@ class SearchController:
         filecategories = FileCategories()
 
         cat_ids = []
-        for cat in kwargs["file_categories"]:
+        cats = kwargs.get("file_categories", [])
+        cats = [] if cats is None else cats
+        for cat in cats:
             cat_id = filecategories.id_by_name(cat)
 
             if cat_id is None:
@@ -108,7 +110,7 @@ class SearchController:
 
             cat_ids.append(FileCategories().id_by_name(cat))
 
-        if cat_ids and not "file_categories" in ignore_filters:
+        if cat_ids and "file_categories" not in ignore_filters:
             q = q.filter(Files.file_format.in_(cat_ids))
 
         if not kwargs["file_categories"]:

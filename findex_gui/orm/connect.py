@@ -23,7 +23,7 @@ class Database(object):
         self.pool = pool.QueuePool(creator=self._getconn,
                                    max_overflow=1,
                                    pool_size=300,
-                                   echo=config("findex:findex:debug"))
+                                   echo=False)  # config("findex:findex:debug")
 
     def connect(self, echo=None):
         if echo is None:

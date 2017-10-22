@@ -18,6 +18,11 @@ from findex_common.logo import logo
 from findex_common.colors import yellow, red, green
 from findex_common.exceptions import ConfigError, FindexException
 
+python_env = {
+    "project_root": "/".join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]),
+    "interpreter": sys.executable,
+}
+
 log = logging.getLogger("findex")
 
 
@@ -219,7 +224,6 @@ def view_stats(ctx):
 @main.command()
 @click.pass_context
 def scheduler(ctx):
-    print(red("Yet to be implemented"))
     findex_init(logging.DEBUG, ctx)
     from findex_gui.controllers.tasks.loop import worker
     # worker()

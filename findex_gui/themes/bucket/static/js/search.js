@@ -26,11 +26,6 @@ class bucket_search extends Search {
             throw "bleh";
         }
 
-        if(!data.status){
-            bucket_search.error(data.data);
-            throw "bleh";
-        }
-
         data = data.data;
 
         if(!this._loading){

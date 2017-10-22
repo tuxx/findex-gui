@@ -91,14 +91,6 @@
                                     <table class="table table-striped">
                                         <tbody>
                                             <tr>
-                                                <td>Direct Link</td>
-                                                <td>
-                                                    <a href="{{ f.path_direct }}">
-                                                        <button type="button" class="btn btn-success btn-sm">Download</button>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            <tr>
                                                 <td>Modified</td>
                                                 <td>{{ f.file_modified_human }}</td>
                                             </tr>
@@ -131,6 +123,24 @@
                             {% endfor %}
                         </div>
                         {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 no-padding">
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <a href="{{ url_for("browse_home") + "/" + resource.resource_id + f.file_path }}" class="btn btn-secondary">
+                                <i class="fa fa-arrow-left"></i>
+                                Back to file explorer
+                            </a>
+                        </div>
+                        <div class="pull-right">
+                            <a href="{{ f.path_direct }}" class="btn btn-secondary">
+                                <i class="fa fa-arrow-down"></i>
+                                Download
+                            </a>
+                        </div>
+                        <br><br>
                     </div>
                 </div>
 

@@ -483,8 +483,8 @@ class Files(BASE, Extended):
     @property
     def file_name_human(self):
         return "%s%s%s" % (self.file_name,
-                           "." if not self.file_isdir else "",
-                           self.file_ext)
+                           "." if not self.file_isdir and self.file_ext is not None else "",
+                           self.file_ext if self.file_ext is not None else "")
 
     @property
     def file_modified_human(self):

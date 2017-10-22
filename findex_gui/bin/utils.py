@@ -139,7 +139,7 @@ def log_msg(msg: str, level: int = 1):
     from findex_gui.web import db
     from findex_gui.orm.models import Logging
     from findex_gui.bin.config import config
-    if config("findex:findex:debug") and level == 0:
+    if not config("findex:findex:debug") and level == 0:
         return
 
     print("[%s] %s" % (["DEBUG", "INFO", "WARNING", "ERROR"][level], msg))

@@ -28,7 +28,7 @@ class Database(object):
 
     def connect(self, echo=None):
         if echo is None:
-            echo = config("findex:findex:debug")
+            echo = False  # config("findex:findex:debug")
 
         self.engine = create_engine("postgresql+psycopg2://",
                                     pool=self.pool,

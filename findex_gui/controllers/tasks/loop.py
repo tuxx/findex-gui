@@ -12,6 +12,7 @@ from findex_common.nmap import NmapScan
 
 from findex_gui.web import db
 from findex_gui.main import python_env
+from findex_gui.bin.config import config
 from findex_gui.bin.utils import log_msg
 from findex_gui.orm.models import NmapRule, ResourceGroup, Resource, ResourceMeta
 from findex_gui.controllers.amqp.amqp import AmqpConnectionController
@@ -146,14 +147,6 @@ class Worker:
         f.write(crawl_messages)
         f.close()
 
-        # set env variables
-        shell_env = os.environ.copy()  # should include the current python virtualenv
-        shell_env["FINDEX_CRAWL_MODE"] = "DIRECT"
-        shell_env["FINDEX_CRAWL_FILE"] = crawl_file
-        shell_env["FINDEX_CRAWL_FILE_CLEANUP"] = ":-D"
-        shell_env["FINDEX_CRAWL_QUEUE_SIZE"] = str(queue_size)
-
-        from findex_gui.bin.config import config
         dsn = dsnparse.parse(config("findex:database:connection"))
 
         dsn_blob = {
@@ -164,27 +157,31 @@ class Worker:
             "db": dsn.paths[0]
         }
 
+        # set env variables
+        shell_env = os.environ.copy()  # should include the current python virtualenv
+        shell_env["FINDEX_CRAWL_MODE"] = "DIRECT"
+        shell_env["FINDEX_CRAWL_FILE"] = crawl_file
+        shell_env["FINDEX_CRAWL_FILE_CLEANUP"] = ":-D"
+        shell_env["FINDEX_CRAWL_LOG_VERBOSITY"] = "20"
+        shell_env["FINDEX_CRAWL_QUEUE_SIZE"] = str(queue_size)
+
         for k, v in dsn_blob.items():
-            shell_env["FINDEX_CRAWL_DB_%s" % k.upper()] = v
+            shell_env["FINDEX_CRAWL_DB_%s" % k.upper()] = str(v)
+
+        for k, v in shell_env.items():
+            if k.startswith("FINDEX_CRAWL"):
+                print("export %s=\"%s\"" % (k, str(v)))
 
         # should not block
         command = ["/bin/bash", "-c",
-                   "%s/twistd -ony rpc.py" % os.path.dirname(python_env["interpreter"])]
+                   "%s/twistd -ony rpc.py &" % os.path.dirname(python_env["interpreter"])]
 
-        p = subprocess.Popen(command,
-                             cwd="%s/findex-crawl/" % python_env["project_root"],
-                             env=shell_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             universal_newlines=True)
+        print("spawning shell")
 
-        z = ""
-        while True:
-            out = p.stdout.read(10000)
-            x = p.stderr.read(10000)
-            if out == '' and p.poll() is None:
-                break
-            if out != '':
-                z += out
-        v = ""
+        subprocess.Popen(command, cwd="%s/findex-crawl/" % python_env["project_root"],
+                         env=shell_env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         universal_newlines=True, preexec_fn=os.setpgrp)
+
 
 worker = Worker()
 worker.loop()

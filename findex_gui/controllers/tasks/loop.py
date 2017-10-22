@@ -5,15 +5,17 @@ import logging
 import tempfile
 from datetime import datetime
 
+import dsnparse
+from findex_common.static_variables import FileProtocols
+from findex_common.crawl.crawl import CrawlController
+from findex_common.nmap import NmapScan
+
 from findex_gui.web import db
 from findex_gui.main import python_env
 from findex_gui.bin.utils import log_msg
 from findex_gui.orm.models import NmapRule, ResourceGroup, Resource, ResourceMeta
 from findex_gui.controllers.amqp.amqp import AmqpConnectionController
 from findex_gui.controllers.resources.resources import ResourceController
-from findex_common.static_variables import FileProtocols
-from findex_common.crawl.crawl import CrawlController
-from findex_common.nmap import NmapScan
 
 
 class Worker:
@@ -144,12 +146,26 @@ class Worker:
         f.write(crawl_messages)
         f.close()
 
-        # spawn stand-alone crawler
+        # set env variables
         shell_env = os.environ.copy()  # should include the current python virtualenv
         shell_env["FINDEX_CRAWL_MODE"] = "DIRECT"
         shell_env["FINDEX_CRAWL_FILE"] = crawl_file
         shell_env["FINDEX_CRAWL_FILE_CLEANUP"] = ":-D"
         shell_env["FINDEX_CRAWL_QUEUE_SIZE"] = str(queue_size)
+
+        from findex_gui.bin.config import config
+        dsn = dsnparse.parse(config("findex:database:connection"))
+
+        dsn_blob = {
+            "user": dsn.username,
+            "pass": dsn.password,
+            "host": dsn.host,
+            "port": 5432 if not isinstance(dsn.port, int) else dsn.port,
+            "db": dsn.paths[0]
+        }
+
+        for k, v in dsn_blob.items():
+            shell_env["FINDEX_CRAWL_DB_%s" % k.upper()] = v
 
         # should not block
         command = ["/bin/bash", "-c",

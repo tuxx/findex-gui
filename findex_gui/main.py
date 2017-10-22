@@ -10,13 +10,14 @@ import platform
 import sys
 import traceback
 
+from findex_common.logo import logo
+from findex_common.colors import yellow, red, green
+from findex_common.exceptions import ConfigError, FindexException
+
 import findex_gui
 from findex_gui.bin.misc import cwd, version, getuser, decide_cwd, migrate_cwd
 from findex_gui.bin.startup import check_configs, check_version
 from findex_gui.bin.config import Config, config
-from findex_common.logo import logo
-from findex_common.colors import yellow, red, green
-from findex_common.exceptions import ConfigError, FindexException
 
 python_env = {
     "project_root": "/".join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]),

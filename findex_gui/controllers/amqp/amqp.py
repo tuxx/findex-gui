@@ -116,7 +116,7 @@ class AmqpConnectionController(MqConnectionController):
         for task in tasks:
             self.send(task)
 
-        log_msg("Sent %s tasks to queue %s" % (str(len(tasks)), self.queue_name), author="AmqpConnectionController")
+        log_msg("Sent %s tasks to queue %s" % (str(len(tasks)), self.queue_name))
         self.connection.close()
 
     def send(self, blob: dict):

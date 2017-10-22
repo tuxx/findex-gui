@@ -19,6 +19,7 @@ class Database(object):
         """Connects to the Postgres database."""
         self.engine = None
         self.session = None
+        self.dsn = config("findex:database:connection")
 
         self.pool = pool.QueuePool(creator=self._getconn,
                                    max_overflow=1,
@@ -191,10 +192,9 @@ class Database(object):
     def _getconn(self):
         # random.shuffle(self.hosts)
         # for host in self.hosts:
-        dsn = config("findex:database:connection")
-        logging.info("connecting to: %s" % dsn)
+        logging.info("connecting to: %s" % self.dsn)
         try:
-            return psycopg2.connect(dsn, connect_timeout=3)
+            return psycopg2.connect(self.dsn, connect_timeout=3)
         except psycopg2.OperationalError as e:
-            print('Failed to connect to %s: %s' % (dsn, e))
+            print('Failed to connect to %s: %s' % (self.dsn, e))
             raise psycopg2.OperationalError("Ran out of database servers - exiting")

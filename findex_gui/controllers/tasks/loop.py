@@ -23,7 +23,7 @@ class Worker:
     @staticmethod
     def loop():
         tasks = Worker.collect_tasks()
-        local_resources = []
+        scheduled_resources = []
 
         for task in tasks:
             if task.group.mq:
@@ -52,14 +52,16 @@ class Worker:
                     db.session.commit()
                     db.session.flush()
 
-                    nmap.nmap_to_resource(task, scan_results)
+                    added_resources = nmap.nmap_to_resource(task, scan_results)
+                    for added_resource in added_resources:
+                        scheduled_resources.append(added_resource)
                 elif isinstance(task, Resource):
-                    local_resources.append(task)
+                    scheduled_resources.append(task)
 
-        if local_resources:
-            Worker._spawn_crawler(local_resources)
+        if scheduled_resources:
+            Worker._spawn_crawler(scheduled_resources)
 
-        logging.info("looped")
+        log_msg("Scheduler loop finished", level=1)
 
     @staticmethod
     def collect_tasks(check_resources: bool = True, check_nmap: bool = True):
@@ -70,9 +72,9 @@ class Worker:
                 log_msg("skipping nmap rule \'%s\': %s" % (_task.name,
                                                            _task.rule), level=level)
             elif isinstance(_task, Resource):
-                log_msg("skipping resource \'%s\', protocol: %s" % (_task.server.name,
-                                                                    _task.protocol_human), level=level)
-
+                log_msg("skipping resource id: %d - \'%s\' [%s]" % (_task.id,
+                                                                    _task.resource_id,
+                                                                    _task.protocol_human.upper()), level=level)
         if check_nmap:
             for nmap_rule in db.session.query(NmapRule).filter(NmapRule.status == 0).all():
                 if isinstance(nmap_rule.crawl_interval, int) and isinstance(nmap_rule.date_scanned, datetime):
@@ -97,14 +99,16 @@ class Worker:
                 crawl_interval = group.crawl_interval
 
                 for resource in group.resources:
-                    # # check last crawl time
-                    # last = resource.date_crawl_end
-                    # if isinstance(last, datetime):
-                    #     if (datetime.now() - last).total_seconds() <= crawl_interval:
-                    #         continue
-                    #
-                    # if resource.meta.status != 0:
-                    #     continue
+                    # check last crawl time
+                    last = resource.date_crawl_end
+                    if isinstance(last, datetime):
+                        if (datetime.now() - last).total_seconds() <= crawl_interval:
+                            _skipping(resource, level=0)
+                            continue
+
+                    if resource.meta.status != 0:
+                        _skipping(resource, level=0)
+                        continue
 
                     tasks.append(resource)
                     resource.meta.status = 4  # task scheduled
@@ -123,7 +127,13 @@ class Worker:
         :param queue_size:
         :return:
         """
-        log_msg("Spawning local crawler for %d tasks" % len(tasks))
+        path_twistd = "%s/twistd" % os.path.dirname(python_env["interpreter"])
+        path_fincrawl = "%s/findex-crawl/" % python_env["project_root"]
+
+        if not os.path.isfile(path_twistd):
+            raise Exception("")
+
+        log_msg("Spawning local crawler in DIRECT mode for %d tasks" % len(tasks))
 
         # construct tasks json file
         blobs = []
@@ -172,13 +182,13 @@ class Worker:
             if k.startswith("FINDEX_CRAWL"):
                 print("export %s=\"%s\"" % (k, str(v)))
 
-        # should not block
+        # non-blocking Popen
+        # for some reason `/bin/bash -c` is needed, else it cant find the relative `rpc.py`, even tough `cwd=` is set
         command = ["/bin/bash", "-c",
                    "%s/twistd -ony rpc.py &" % os.path.dirname(python_env["interpreter"])]
 
-        print("spawning shell")
-
-        subprocess.Popen(command, cwd="%s/findex-crawl/" % python_env["project_root"],
+        print("spawning shell: %s" % " ".join(command))
+        subprocess.Popen(command, cwd=path_fincrawl,
                          env=shell_env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                          universal_newlines=True, preexec_fn=os.setpgrp)
 

@@ -48,7 +48,7 @@ The current Vagrant/ansible configuration spawns 3 machines:
 192.168.1.12 - Elasticsearch
 ```
 
-To get up and running:
+To get up and running, make sure you have the correct versions installed:
 
 ```sh
 $ ansible --version
@@ -57,15 +57,32 @@ ansible 2.3.2.0
 $ vagrant -v
 Vagrant 2.0.0
 
-$ vagrant up postgres
-$ vagrant up elasticsearch
-$ vagrant up gui
+$ virtualbox -h
+Oracle VM VirtualBox Manager 5.1.3
+```
 
-# start findex-gui
+Bring up the machines
+
+```sh
+$ vagrant up postgres_dev
+$ vagrant up elasticsearch_dev
+$ vagrant up gui_dev
+```
+
+Provision (if necessary, should happen automatically)
+```
+$ vagrant provision postgres_dev
+$ vagrant provision elasticsearch_dev
+$ vagrant provision gui_dev
+```
+
+Starting the web interface
+
+```
 $ vagrant ssh gui
 $ sudo su
 $ su findex
-$ cd findex-gui
+$ cd ~/findex-gui
 $ source venv/bin/activate
 $ findex web --host 192.168.1.10 --port 3030
 ```

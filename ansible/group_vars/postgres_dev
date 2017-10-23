@@ -1,0 +1,5 @@
+findex:
+  postgres:
+    host: "192.168.1.11"
+    shared_buffers: "512MB"
+    pg_hba_whitelist: "host findex findex 192.168.1.0/24 md5"

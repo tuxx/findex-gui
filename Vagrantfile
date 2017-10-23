@@ -6,7 +6,7 @@ Vagrant.configure(2) do |config|
     config.vm.box = "debian/stretch64"
     config.vm.synced_folder ".", "/vagrant", disabled: true
 
-    config.vm.define :gui do |gui_config|
+    config.vm.define :gui_dev do |gui_config|
         gui_config.vm.host_name = "gui"
         gui_config.vm.network "private_network", ip:"192.168.1.10"
         gui_config.vm.provider :virtualbox do |vb|
@@ -19,10 +19,11 @@ Vagrant.configure(2) do |config|
         gui_config.vm.provision "ansible" do |ansible|
             ansible.verbose = "v"
             ansible.playbook = "ansible/gui.yml"
+            ansible.inventory_path = "ansible/development.inventory"
         end
     end
 
-    config.vm.define :postgres do |postgres_config|
+    config.vm.define :postgres_dev do |postgres_config|
         postgres_config.vm.host_name = "postgres.findex"
         postgres_config.vm.network "private_network", ip:"192.168.1.11"
         postgres_config.vm.provider :virtualbox do |vb|
@@ -35,10 +36,11 @@ Vagrant.configure(2) do |config|
         postgres_config.vm.provision "ansible" do |ansible|
             ansible.verbose = "v"
             ansible.playbook = "ansible/postgres.yml"
+            ansible.inventory_path = "ansible/development.inventory"
         end
     end
 
-    config.vm.define :elasticsearch do |elasticsearch_config|
+    config.vm.define :elasticsearch_dev do |elasticsearch_config|
         elasticsearch_config.vm.host_name = "elasticsearch.findex"
         elasticsearch_config.vm.network "private_network", ip:"192.168.1.12"
         elasticsearch_config.vm.provider :virtualbox do |vb|
@@ -51,6 +53,7 @@ Vagrant.configure(2) do |config|
         elasticsearch_config.vm.provision "ansible" do |ansible|
             ansible.verbose = "v"
             ansible.playbook = "ansible/elasticsearch.yml"
+            ansible.inventory_path = "ansible/development.inventory"
         end
     end
 end

@@ -19,3 +19,8 @@
 .skin-black-light .sidebar-menu > li > a, .skin-black-light .sidebar-menu > li.active > a {
     background-color: white;
 }
+
+.skin-black-light .sidebar-menu > li:hover > a, .skin-black-light .sidebar-menu > li.active > a {
+    color: #000000;
+    background: white;
+}

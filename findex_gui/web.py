@@ -73,6 +73,7 @@ def create_app():
     from findex_gui.controllers.admin import routes
     from findex_gui.controllers.admin.amqp import routes
     from findex_gui.controllers.admin.server import routes
+    from findex_gui.controllers.admin.status import routes
     app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('news_home'), code=302))
 
     from findex_gui.controllers.search import api
@@ -85,5 +86,6 @@ def create_app():
     from findex_gui.controllers.admin import api
     from findex_gui.controllers.nmap import api
     from findex_gui.controllers.amqp import api
+    from findex_gui.controllers.admin.status import api
 
     return app

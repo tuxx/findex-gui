@@ -1,3 +1,5 @@
+<!-- @TODO: url_for -->
+
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
@@ -14,6 +16,22 @@
                     <li><a href="/admin"><i class="fa fa-circle-o"></i> Home</a></li>
                     <li><a href="/admin/appearance"><i class="fa fa-circle-o"></i> Appearance</a></li>
                     <li><a href="/admin/news/overview"><i class="fa fa-circle-o"></i> News</a></li>
+                    <li class="treeview menu-open">
+                        <a href="#"><i class="fa fa-circle-o"></i> Status
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu" style="display: block;">
+                            <li><a id="menu_status_overview" href="/admin/status/overview"><i class="fa fa-circle-o"></i> Overview
+
+                            </a></li>
+                            <li><a href="/admin/status/findex"><i class="fa fa-circle-o"></i> Findex</a></li>
+                            <li><a href="/admin/status/system"><i class="fa fa-circle-o"></i> System</a></li>
+                            <li><a href="/admin/status/database"><i class="fa fa-circle-o"></i> Database</a></li>
+                            <li><a href="/admin/status/python"><i class="fa fa-circle-o"></i> Python</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
             <li class="treeview menu-open">

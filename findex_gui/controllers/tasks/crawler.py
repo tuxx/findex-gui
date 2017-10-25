@@ -12,20 +12,6 @@ from findex_gui.bin.utils import log_msg
 
 class Crawler:
     @staticmethod
-    def can_crawl():
-        path_twistd = "%s/twistd" % os.path.dirname(python_env["interpreter"])
-        path_fincrawl = "%s/findex-crawl/" % python_env["project_root"]
-        path_fincrawl_rpc = "%srpc.py" % path_fincrawl
-
-        if not os.path.isfile(path_twistd):
-            raise Exception("twistd not found (%s)" % path_twistd)
-
-        if not os.path.isfile(path_fincrawl_rpc):
-            raise Exception("findex-crawl directory not found (%s)" % path_fincrawl_rpc)
-
-        return True
-
-    @staticmethod
     def spawn(tasks, queue_size=5):
         """
         Spawns the crawler in 'DIRECT' mode. The suggested way
@@ -93,3 +79,77 @@ class Crawler:
         subprocess.Popen(command, cwd=path_fincrawl,
                          env=shell_env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                          universal_newlines=True, preexec_fn=os.setpgrp)
+
+    @staticmethod
+    def can_crawl():
+        path_twistd = "%s/twistd" % os.path.dirname(python_env["interpreter"])
+        path_fincrawl = "%s/findex-crawl/" % python_env["project_root"]
+        path_fincrawl_rpc = "%srpc.py" % path_fincrawl
+
+        if not os.path.isfile(path_twistd):
+            raise Exception("twistd not found (%s)" % path_twistd)
+
+        if not os.path.isfile(path_fincrawl_rpc):
+            raise Exception("findex-crawl directory not found (%s)" % path_fincrawl_rpc)
+
+        return True
+
+    @staticmethod
+    def has_cronjob():
+        crontab = os.popen("crontab -l").read()
+        cronjob = Crawler.generate_cronjob()
+        if cronjob in crontab:
+            return True
+        Crawler.insert_cronjob(cronjob)
+        return
+
+    @staticmethod
+    def insert_cronjob(job, default_time="*/1 * * * *"):
+        """
+        Insert a command into cronjobs
+        :param job: the command
+        :param default_time: every 1 min is default
+        :return:
+        """
+        tmp_file = tempfile.mkstemp("_fincron")[1]
+        crontab = os.popen("crontab -l").read()
+        crontab += "\n%s %s\n" % (default_time, job)
+
+        f = open(tmp_file, "w")
+        f.write(crontab)
+        f.close()
+
+        os.popen("crontab %s" % tmp_file)
+        os.remove(tmp_file)
+
+    @staticmethod
+    def remove_cronjob():
+        crontab = os.popen("crontab -l").read()
+        cronjob = Crawler.generate_cronjob()
+
+        new_lines = []
+        for line in crontab.split("\n"):
+            if cronjob not in line and line != cronjob:
+                new_lines.append(line)
+        new_crontab = "\n".join(new_lines)
+
+        if not new_crontab.endswith("\n"):
+            new_crontab += "\n"
+
+        tmp_file = tempfile.mkstemp("_fincron")[1]
+
+        f = open(tmp_file, "w")
+        f.write(new_crontab)
+        f.close()
+
+        os.popen("crontab %s" % tmp_file)
+        os.remove(tmp_file)
+
+    @staticmethod
+    def generate_cronjob():
+        return " ".join([
+            "cd %s &&" % python_env["project_root"],
+            python_env["interpreter"],
+            "%s/findex" % os.path.dirname(python_env["interpreter"]),
+            "scheduler"
+        ])

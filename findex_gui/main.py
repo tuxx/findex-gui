@@ -68,11 +68,12 @@ def findex_create(username=None, cfg=None, quiet=False):
         ).render())
 
 
-def findex_init(level, ctx, cfg=None):
+def findex_init(level, ctx, cfg=None, nologo=False):
     """Initialize Findex configuration.
     @param quiet: enable quiet mode.
     """
-    logo(version)
+    if not nologo:
+        logo(version)
 
     # It would appear this is the first time Findex is being run (on this
     # Findex Working Directory anyway).
@@ -225,9 +226,11 @@ def view_stats(ctx):
 @main.command()
 @click.pass_context
 def scheduler(ctx):
-    findex_init(logging.DEBUG, ctx)
-    from findex_gui.controllers.tasks.loop import worker
-    # worker()
+    findex_init(logging.DEBUG, ctx, nologo=True)
+    from findex_gui.controllers.tasks.loop import Worker
+    worker = Worker()
+    worker.loop()
+
 
 @main.command()
 @click.pass_context

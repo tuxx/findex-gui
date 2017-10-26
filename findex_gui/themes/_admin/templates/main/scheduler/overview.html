@@ -1,0 +1,129 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Scheduler Overview
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Description</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <p>
+                                The scheduler ensures that servers get indexed, either
+                                by spawning a <code>findex-crawl</code> instance, or sending a crawl task via
+                                the message queue (RabbitMQ).
+                            </p>
+
+                            <p>
+                                An entry in the cron is required to activate scheduler.
+                                By default, the cron is set to a 1 minute interval.
+                            </p>
+
+                            <p>
+                                If you're wondering what the exact command should be to run the scheduler:
+                            </p>
+                            <p>
+                                <code>{{ generated_cron }}</code>
+                            </p>
+                            <p>
+                                Use the form below to automatically add to cron if it's not activated yet.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Cronjob</h3>
+                        </div>
+                        <div class="box-body">
+                            <span style="display:block;margin-top:6px;float:left;">
+                            Status:
+                            {% if has_cron %}
+                                <span style="color:green;">Active</span>
+                            {% else %}
+                                <span style="color:red;">Inactive</span>
+                            {% endif %}
+                            </span>
+
+                            <div class="btn-group pull-right" role="group" aria-label="submit">
+                            {% if has_cron %}
+                                <button type="button" id="submit" class="btn btn-warning">Remove from cron</button>
+                            {% else %}
+                                <button type="button" id="submit" class="btn btn-primary">Add to cron</button>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Scheduled servers</h3>
+                        </div>
+                        <div class="box-body">
+                            <table id="resources" class="display table table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Scheduled</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // selectors
+            let table_server_overview = $("table#resources");
+
+            function row_writer(column_name, row_data){
+                if(column_name === "name") return row_data.name;
+                else if(column_name === "address") return `<code>${row_data["name human"]}</code>`;
+                else if(column_name === "scheduled") {
+                    let value = row_data["scheduled crawl_in_human"];
+                    if(value === "scheduled"){
+                        return `<span style="color:green">scheduled</span>`
+                    }
+                    return value;
+                }
+            }
+
+            table_server_overview.fintable({
+                endpoint: "/resource/get",
+                row_writer: row_writer
+            });
+        });
+    </script>
+
+{% endblock %}

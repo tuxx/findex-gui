@@ -118,16 +118,24 @@ class FinTable {
     draw_row(row_data){
         let td = [];
         let column_writer = null;
+        let row_writer = null;
         if(this.settings.column_writer) column_writer = this.settings.column_writer;
+        if(this.settings.row_writer) row_writer = this.settings.row_writer;
         else column_writer = FinTable.draw_column;
 
         for(let i = 0; i !== this.columns.length; i++){
-            let value = "";
             let column_name = this.columns[i];
-            if(row_data.hasOwnProperty(column_name)){
-                value = column_writer(column_name, row_data[column_name]);
+
+            if(row_writer !== null){
+                let value = row_writer(column_name, row_data);
+                td.push(value);
+            } else {
+                let value = "";
+                if(row_data.hasOwnProperty(column_name)){
+                    value = column_writer(column_name, row_data[column_name]);
+                }
+                td.push(value);
             }
-            td.push(value);
         }
 
         let tds = td.map(function(obj){return `<td>${obj}</td>`});

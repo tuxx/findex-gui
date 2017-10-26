@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import request
 import humanfriendly
@@ -124,9 +124,35 @@ class Resource(BASE, Extended):
     def resource_id(self):
         return "%s:%d" % (self.server.address, self.port)
 
+    @property
+    def name_human(self):
+        return "%s://%s:%d%s" % (self.protocol_human, self.server.address, self.port, self.basepath)
+
     @staticmethod
     def make_valid_resourcename(resourcename):
         return re.sub("[^a-zA-Z0-9_\.]", "", resourcename)
+
+    @property
+    def scheduled_crawl_in_human(self):
+        """Returns the time when this task will be scheduled"""
+        # @TODO: it's better to let the crawler set the next date, so we can ORDER BY on it
+        # (we'll need to change this date when group.crawl_interval gets changed)
+        if not self.date_crawl_end:
+            return "scheduled"
+
+        _tmp = self.date_crawl_end + timedelta(seconds=self.group.crawl_interval)
+        seconds_till_scheduling = int((datetime.now() - _tmp).total_seconds() * -1)
+
+        if seconds_till_scheduling >= 0:
+            if seconds_till_scheduling <= 60:
+                rtn = "%d seconds" % seconds_till_scheduling
+            elif seconds_till_scheduling <= 3600:
+                rtn = "%d minute(s)" % int(seconds_till_scheduling / 60)
+            else:
+                rtn = "%.1f hour(s)" % float(seconds_till_scheduling / 3600)
+        else:
+            rtn = "scheduled"
+        return rtn
 
 
 class ResourceMeta(BASE, Extended):

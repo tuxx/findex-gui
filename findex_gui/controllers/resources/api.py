@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+
 from flask_yoloapi import endpoint, parameter
 from sqlalchemy import func
 
@@ -129,13 +131,20 @@ def api_resource_get(by_owner, limit, offset, search):
     for resource in resources:
         item = {
             "name": resource.server.name,
+            "name_human": resource.name_human,
             "location": resource.resource_id,
             "protocol": resource.protocol_human,
             "files": resource.meta.file_count,
             "added": resource.date_added_ago,
             "updated": resource.date_crawl_end_ago,
+            "scheduled_crawl_in_human": resource.scheduled_crawl_in_human,
             "options": None,
-            "group": "Default"
+            "group": {
+                "name": resource.group.name,
+                "added": resource.group.added,
+                "description": resource.group.description,
+                "crawl_interval": resource.group.crawl_interval
+            }
         }
         records.append(item)
 

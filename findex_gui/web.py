@@ -74,6 +74,7 @@ def create_app():
     from findex_gui.controllers.admin.amqp import routes
     from findex_gui.controllers.admin.server import routes
     from findex_gui.controllers.admin.status import routes
+    from findex_gui.controllers.admin.scheduler import routes
     app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('news_home'), code=302))
 
     from findex_gui.controllers.search import api

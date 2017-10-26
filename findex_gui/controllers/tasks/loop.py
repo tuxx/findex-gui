@@ -108,6 +108,3 @@ class Worker:
                 db.session.flush()
         return tasks
 
-
-worker = Worker()
-worker.loop()

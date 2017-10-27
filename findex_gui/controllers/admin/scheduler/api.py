@@ -16,3 +16,13 @@ def api_admin_scheduler_cron_add():
     cron = CronController.generate_cronjob()
     CronController.insert_cronjob(cron)
     return "added"
+
+@app.route("/api/v2/admin/scheduler/cron_remove")
+@admin_required
+@endpoint.api()
+def api_admin_scheduler_cron_remove():
+    if not CronController.has_cronjob():
+        return "cron previously removed"
+
+    CronController.remove_cronjob()
+    return "removed"

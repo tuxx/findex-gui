@@ -70,9 +70,9 @@
 
                             <div class="btn-group pull-right" role="group" aria-label="submit">
                             {% if has_cron %}
-                                <button type="button" id="submit" class="btn btn-warning">Remove from cron</button>
+                                <button type="button" id="rm_cron" class="btn btn-warning">Remove from cron</button>
                             {% else %}
-                                <button type="button" id="submit" class="btn btn-primary">Add to cron</button>
+                                <button type="button" id="add_cron" class="btn btn-primary">Add to cron</button>
                             {% endif %}
                             </div>
                         </div>
@@ -122,6 +122,18 @@
             table_server_overview.fintable({
                 endpoint: "/resource/get",
                 row_writer: row_writer
+            });
+
+            $("#rm_cron").click(function(){
+                FindexGui.api("/admin/scheduler/cron_remove", "GET").then(function(){
+                    location.reload();
+                });
+            });
+
+            $("#add_cron").click(function(){
+                FindexGui.api("/admin/scheduler/cron_add", "GET").then(function(){
+                    location.reload();
+                });
             });
         });
     </script>

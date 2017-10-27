@@ -31,6 +31,7 @@
                                         <table id="resources" class="display table table-bordered" cellspacing="0" width="100%">
                                             <thead>
                                             <tr>
+                                                <th style="width: 30px;"></th>
                                                 <th style="width: 150px;">Name</th>
                                                 <th style="width: 30px;">Location</th>
                                                 <th style="width: 80px;">Protocol</th>
@@ -39,7 +40,6 @@
                                                 <th>Updated</th>
                                                 <th>Options</th>
                                                 <th>Group</th>
-                                                <th style="width: 30px;"></th>
                                             </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -111,8 +111,17 @@
             let table_server_nmap = $("table#nmap");
             let table_servergroups = $("table#server_groups");
 
+            function server_column_writer(column_name, value){
+                if(column_name === ""){
+                    return `<label><input type="checkbox" value=""></label>`;
+                }
+                if(column_name === "group") return value.name;
+                return value;
+            }
+
             table_server_overview.fintable({
-                endpoint: "/resource/get"
+                endpoint: "/resource/get",
+                column_writer: server_column_writer
             });
 
             function groups_column_writer(column_name, value){
@@ -126,7 +135,7 @@
 
             function nmap_column_writer(column_name, value){
                 if(!value) return "";
-                if(column_name == "output") {
+                if(column_name === "output") {
                     let output = "No data";
                     if(!value.data.hasOwnProperty("output")) return output;
                     if(!value.data.output) return output;
@@ -136,7 +145,7 @@
                     });
                     return output;
                 }
-                else if(column_name == "rule"){
+                else if(column_name === "rule"){
                     return `<code>${value}</code>`;
                 } else {
                     return value;

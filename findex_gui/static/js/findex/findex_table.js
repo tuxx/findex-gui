@@ -120,18 +120,18 @@ class FinTable {
         let column_writer = null;
         let row_writer = null;
         if(this.settings.column_writer) column_writer = this.settings.column_writer;
-        if(this.settings.row_writer) row_writer = this.settings.row_writer;
         else column_writer = FinTable.draw_column;
+
+        if(this.settings.row_writer) row_writer = this.settings.row_writer;
 
         for(let i = 0; i !== this.columns.length; i++){
             let column_name = this.columns[i];
-
             if(row_writer !== null){
                 let value = row_writer(column_name, row_data);
                 td.push(value);
             } else {
                 let value = "";
-                if(row_data.hasOwnProperty(column_name)){
+                if(row_data.hasOwnProperty(column_name) || FinTable.draw_column !== this.settings.column_writer){
                     value = column_writer(column_name, row_data[column_name]);
                 }
                 td.push(value);

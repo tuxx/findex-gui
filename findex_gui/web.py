@@ -88,5 +88,6 @@ def create_app():
     from findex_gui.controllers.nmap import api
     from findex_gui.controllers.amqp import api
     from findex_gui.controllers.admin.status import api
+    from findex_gui.controllers.admin.scheduler import api
 
     return app

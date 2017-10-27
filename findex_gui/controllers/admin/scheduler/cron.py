@@ -29,7 +29,7 @@ class CronController:
         f.write(crontab)
         f.close()
 
-        os.popen("crontab %s" % tmp_file)
+        os.popen("crontab %s" % tmp_file).read()
         os.remove(tmp_file)
 
     @staticmethod
@@ -52,7 +52,7 @@ class CronController:
         f.write(new_crontab)
         f.close()
 
-        os.popen("crontab %s" % tmp_file)
+        os.popen("crontab %s" % tmp_file).read()
         os.remove(tmp_file)
 
     @staticmethod

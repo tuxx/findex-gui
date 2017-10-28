@@ -10,7 +10,7 @@ class FormMqAdd(Form):
     broker = SelectField("Broker", choices=[
         ("rabbitmq", "RabittMQ"),
     ])
-    vhost = StringField("Vhost", [DataRequired()])
+    vhost = StringField("Vhost", [DataRequired()], default="/")
     queue = StringField("Queue Name", [DataRequired()])
     ssl = BooleanField("SSL", default=False)
     auth_user = StringField("Username", [DataRequired()])

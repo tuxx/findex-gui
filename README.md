@@ -34,19 +34,7 @@ Installation
 
 **warning: findex is still in development and not in alpha mode.**
 
-[manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) (not recommended).
-
-### Vagrant
-
-The easiest way to get findex up and running is via vagrant.
-
-The current Vagrant/ansible configuration spawns 3 machines:
-
-```
-192.168.1.10 - findex-gui
-192.168.1.11 - Postgres
-192.168.1.12 - Elasticsearch
-```
+The easiest way to get findex up and running is via Vagrant. This will create a single virtual machine running Findex.
 
 To get up and running, make sure you have the correct versions installed:
 
@@ -59,34 +47,24 @@ Vagrant 2.0.0
 
 $ virtualbox -h
 Oracle VM VirtualBox Manager 5.1.3
+(however, can be a lower version)
 ```
 
-Bring up the machines
+Bring the machine up.
 
 ```sh
-$ vagrant up postgres_dev
-$ vagrant up elasticsearch_dev
-$ vagrant up gui_dev
+$ vagrant up findex
 ```
 
-Provision (if necessary, should happen automatically)
-```
-$ vagrant provision postgres_dev
-$ vagrant provision elasticsearch_dev
-$ vagrant provision gui_dev
-```
+The web interface can now be reached: `http://192.168.1.13`
 
-Starting the web interface
+Login to the admin interface:
 
-```
-$ vagrant ssh gui
-$ sudo su
-$ su findex
-$ cd ~/findex-gui
-$ source venv/bin/activate
-$ findex web --host 192.168.1.10 --port 3030
-```
+1. Go to `/login`
+2. username: `root` pass: `changeme`
+3. Go to `/admin`
 
-The web interface can now be reached: `http://192.168.1.10:3030`
+As previously mentioned, findex is still in development.
 
-In the future, more versatile deployment options will be provided.
+### Manual install
+[manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) (not recommended).

@@ -28,7 +28,7 @@ def parse_bool(value):
 
 
 class Dictionary(dict):
-    """Cuckoo custom dict."""
+    """Findex custom dict."""
 
     def __getattr__(self, key):
         return self.get(key, None)
@@ -246,14 +246,6 @@ class Config(object):
                 "enabled": Boolean(True),
                 "host": String("http://localhost:9200/")
             },
-            "rabbitmq": {
-                "host": String(""),
-                "username": String("changeme"),
-                "password": String("changeme"),
-                "virtual_host": String(""),
-                "queue_name": String(""),
-                "queue_size": Int(20)
-            },
             "users": {
                 "default_root_password": String("changeme"),
                 "default_anon_password": String("changeme")
@@ -283,7 +275,7 @@ class Config(object):
         """
         env = {}
         for key, value in os.environ.items():
-            if key.startswith("CUCKOO_"):
+            if key.startswith("FINDEX_"):
                 env[key] = value
 
         env["FINDEX_CWD"] = cwd()
@@ -361,7 +353,7 @@ class Config(object):
                         log.error(
                             "Type of config parameter %s:%s:%s not found! "
                             "This may indicate that you've incorrectly filled "
-                            "out the Cuckoo configuration, please double "
+                            "out the findex configuration, please double "
                             "check it.", file_name, section, name
                         )
                     value = raw_value
@@ -455,7 +447,7 @@ def config(s, cfg=None, strict=False, raw=False, loose=False, check=False):
     if strict and required and section not in config.sections:
         raise ConfigError(
             "Configuration value %s not present! This may indicate that "
-            "you've incorrectly filled out the Cuckoo configuration, "
+            "you've incorrectly filled out the Findex configuration, "
             "please double check it." % s
         )
 
@@ -463,7 +455,7 @@ def config(s, cfg=None, strict=False, raw=False, loose=False, check=False):
     if strict and required and key not in section:
         raise ConfigError(
             "Configuration value %s not present! This may indicate that "
-            "you've incorrectly filled out the Cuckoo configuration, "
+            "you've incorrectly filled out the Findex configuration, "
             "please double check it." % s
         )
 
@@ -571,13 +563,7 @@ def generate_crawl_config(bot_name: str,
                           db_name: str,
                           db_user: str,
                           db_pass: str,
-                          db_max_bulk_inserts: int,
-                          amqp_username: str,
-                          amqp_password: str,
-                          amqp_host: str,
-                          amqp_vhost: str,
-                          amqp_queue_name: str,
-                          amqp_queue_size: str):
+                          db_max_bulk_inserts: int):
     from jinja2 import Environment
     from findex_gui.bin.misc import cwd
     f = open(cwd("conf/crawl.conf"), "r")

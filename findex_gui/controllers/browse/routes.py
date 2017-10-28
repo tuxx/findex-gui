@@ -32,12 +32,12 @@ def browse_home():
 def browse(args):
     resource, f, path, filename = args
 
-    browse = Browse()
+    _browse = Browse()
     if not filename:
-        browser = browse.browse(resource, path, filename)
+        browser = _browse.browse(resource, path, filename)
         return themes.render("main/browse_dir", browser=browser)
 
-    browser = browse.browse(resource, path, "")
+    browser = _browse.browse(resource, path, "")
 
     imdb = None
     if f.meta_imdb:

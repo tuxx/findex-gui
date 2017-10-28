@@ -1,18 +1,19 @@
+import sys
 from datetime import datetime, date
-
-import flask
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from sqlalchemy_zdb import ZdbColumn
-from sqlalchemy_json import MutableJson
 
 from flask import url_for as _url_for
 from flask import redirect as _redirect
 from flask.json import JSONEncoder
+import flask
 
-from findex_gui.web import app
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy_zdb import ZdbColumn
+from sqlalchemy_json import MutableJson
 
-# dirty flask.url_for() monkey patch.
-flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1], _url_for(*args, **kwargs))
+def dirty_url_for():
+    """dirty flask.url_for() monkey patch."""
+    from findex_gui.web import app
+    flask.url_for = lambda *args, **kwargs: "%s%s" % (app.config["APPLICATION_ROOT"][:-1], _url_for(*args, **kwargs))
 
 def redirect(*args, **kwargs):
     __redirect = _redirect(*args, **kwargs)
@@ -110,13 +111,14 @@ def pip_freeze():
         if not _package:
             continue
         if _package.startswith("-e"):
-            packages.append(["-e", _package[3:]])
+            packages.append(["-e (#%d)" % len(packages), _package[3:]])
         else:
             _pack, _ver = _package.split("==", 1)
             packages.append([_pack, _ver])
     return packages
 
 def get_pip_freeze():
+    from findex_gui.web import app
     if not app.config['PIP_FREEZE']:
         app.config['PIP_FREEZE'] = (datetime.now(), pip_freeze())
 
@@ -124,3 +126,45 @@ def get_pip_freeze():
         # refresh the pip freeze output every 2 days
         app.config['PIP_FREEZE'] = (datetime.now(), pip_freeze())
     return app.config["PIP_FREEZE"]
+
+
+def log_msg(msg: str, category: str, level: int = 1):
+    """
+    Logs a message
+    :param msg: msg
+    :param author: author
+    :param level: 0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR
+    :return:
+    """
+    from findex_gui.web import db
+    from findex_gui.orm.models import Logging
+    from findex_gui.bin.config import config
+    if not config("findex:findex:debug") and level == 0:
+        return
+    categories = [
+        "scheduler"
+    ]
+
+    if category not in categories:
+        sys.stderr.write("cant log category %s - not in categories\n" % category)
+        return
+
+    print("[%s] %s" % (["DEBUG", "INFO", "WARNING", "ERROR"][level], msg))
+
+    try:
+        prev_frame = sys._getframe(1).f_code
+        fn = prev_frame.co_filename
+        fu = prev_frame.co_name
+        fn = "/".join(fn.split("/")[-3:])
+        file = "%s:%s" % (fn, fu)
+    except:
+        file = None
+
+    log = Logging()
+    log.file = file
+    log.message = msg
+    log.log_level = level
+    log.category = category
+    db.session.add(log)
+    db.session.commit()
+    db.session.flush()

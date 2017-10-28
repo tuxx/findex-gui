@@ -5,6 +5,7 @@ from findex_gui.controllers.resources.resources import ResourceController
 from findex_gui.controllers.user.decorators import admin_required
 from findex_gui.controllers.admin.server.forms import FormServerAdd, FormServerAddOptions, FormServerAddAuthentication
 from findex_gui.controllers.nmap.forms import NmapRuleAdd
+from findex_gui.controllers.admin.server.forms import FormServerGroupAdd
 
 @app.route("/admin/server/overview")
 @admin_required
@@ -45,4 +46,16 @@ def admin_server_remove(args):
 @admin_required
 def admin_server_add_nmap():
     nmap_rule_add = NmapRuleAdd(request.form)
-    return themes.render("main/server/add_nmap", theme="_admin", form_nmap_rule_add=nmap_rule_add)
+    return themes.render("main/server/add_nmap", theme="_admin",
+                         form_nmap_rule_add=nmap_rule_add)
+
+#
+# groups
+#
+
+@app.route("/admin/server/group/add")
+@admin_required
+def admin_group_add():
+    group_add = FormServerGroupAdd(request.form)
+    return themes.render("main/server/add_group", theme="_admin",
+                         form_add=group_add)

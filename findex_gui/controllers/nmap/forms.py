@@ -6,4 +6,5 @@ class NmapRuleAdd(Form):
     name = StringField("Rule Name", [DataRequired], default="")
     hosts = StringField("IP Address/Range", [DataRequired()], default="127.0.0.1/32")
     ports = StringField("Ports", default="21")
-    timeout = IntegerField("Scan Timeout", default=-1)
+    interval = IntegerField("Scan Interval (seconds)", default="")
+    group = SelectField("Group", [DataRequired()], choices=[])

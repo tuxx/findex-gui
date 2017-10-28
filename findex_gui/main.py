@@ -10,13 +10,19 @@ import platform
 import sys
 import traceback
 
+from findex_common.logo import logo
+from findex_common.colors import yellow, red, green
+from findex_common.exceptions import ConfigError, FindexException
+
 import findex_gui
 from findex_gui.bin.misc import cwd, version, getuser, decide_cwd, migrate_cwd
 from findex_gui.bin.startup import check_configs, check_version
 from findex_gui.bin.config import Config, config
-from findex_common.logo import logo
-from findex_common.colors import yellow, red, green
-from findex_common.exceptions import ConfigError, FindexException
+
+python_env = {
+    "project_root": "/".join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1]),
+    "interpreter": sys.executable,
+}
 
 log = logging.getLogger("findex")
 
@@ -62,11 +68,12 @@ def findex_create(username=None, cfg=None, quiet=False):
         ).render())
 
 
-def findex_init(level, ctx, cfg=None):
+def findex_init(level, ctx, cfg=None, nologo=False):
     """Initialize Findex configuration.
     @param quiet: enable quiet mode.
     """
-    logo(version)
+    if not nologo:
+        logo(version)
 
     # It would appear this is the first time Findex is being run (on this
     # Findex Working Directory anyway).
@@ -102,7 +109,8 @@ def findex_main():
   view_config               view the configuration file(s)
   edit_config               edit configuration items
   view_stats                view some stats
-  generate_crawl_config     generate findex-crawl configuration
+  generate_crawl_config     generate findex-crawl configuration (output to stdout)
+  scheduler                 runs the scheduler for firing crawl/scan tasks
         """)
     except KeyboardInterrupt:
         print("w00t")
@@ -193,10 +201,6 @@ def view_config(ctx):
     print("debug: %s" % str(config("findex:findex:debug")))
     print("async: %s" % config("findex:findex:async"))
     print("database: %s" % config("findex:database:connection"))
-    print("rabbitmq_username: %s" % config("findex:rabbitmq:username"))
-    print("rabbitmq_host: %s" % config("findex:rabbitmq:host"))
-    print("rabbitmq_vhost: %s" % config("findex:rabbitmq:virtual_host"))
-    print("rabbitmq_queue_name: %s" % config("findex:rabbitmq:queue_name"))
 
 
 @main.command(context_settings=dict(
@@ -217,6 +221,15 @@ def edit_config(ctx):
 @click.pass_context
 def view_stats(ctx):
     print(red("Yet to be implemented"))
+
+
+@main.command()
+@click.pass_context
+def scheduler(ctx):
+    findex_init(logging.DEBUG, ctx, nologo=True)
+    from findex_gui.controllers.tasks.loop import Worker
+    worker = Worker()
+    worker.loop()
 
 
 @main.command()
@@ -243,13 +256,7 @@ def generate_crawl_config(ctx):
         db_name=db_name,
         db_user=db_user,
         db_pass=db_pass,
-        db_max_bulk_inserts=1000,
-        amqp_username=config("findex:rabbitmq:username"),
-        amqp_password=config("findex:rabbitmq:password"),
-        amqp_host=config("findex:rabbitmq:host"),
-        amqp_vhost=config("findex:rabbitmq:virtual_host"),
-        amqp_queue_name=config("findex:rabbitmq:queue_name"),
-        amqp_queue_size=config("findex:rabbitmq:queue_size"),
+        db_max_bulk_inserts=1000
     )
 
     print("Save the following as `settings.py`")
@@ -290,7 +297,8 @@ def web(ctx, args, host, port, uwsgi, nginx):
         bind_port = port
 
         def run_sync():
-            from findex_gui.web import app
+            from findex_gui.web import create_app
+            app = create_app()
             app.run(debug=app_debug, host=bind_host, port=bind_port, use_reloader=False)
 
         def run_async():
@@ -298,8 +306,9 @@ def web(ctx, args, host, port, uwsgi, nginx):
             monkey.patch_all()
 
             from gevent.pywsgi import WSGIServer
-            from findex_gui.web import app
+            from findex_gui.web import create_app
 
+            app = create_app()
             http_server = WSGIServer((bind_host, bind_port), app)
             print(green(" * Running on http://%s:%s/ (Press CTRL+C to quit)") % (bind_host, str(bind_port)))
             http_server.serve_forever()

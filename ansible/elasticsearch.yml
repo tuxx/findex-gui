@@ -1,6 +1,7 @@
 - name: deploy elasticsearch
   hosts:
     - elasticsearch
+    - elasticsearch_dev
   become: yes
   serial: 1
   any_errors_fatal: yes

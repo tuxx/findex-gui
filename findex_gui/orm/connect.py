@@ -19,16 +19,20 @@ class Database(object):
         """Connects to the Postgres database."""
         self.engine = None
         self.session = None
+        self.dsn = config("findex:database:connection")
 
         self.pool = pool.QueuePool(creator=self._getconn,
                                    max_overflow=1,
                                    pool_size=300,
-                                   echo=config("findex:findex:debug"))
+                                   echo=False)  # config("findex:findex:debug")
 
-    def connect(self):
+    def connect(self, echo=None):
+        if echo is None:
+            echo = False  # config("findex:findex:debug")
+
         self.engine = create_engine("postgresql+psycopg2://",
                                     pool=self.pool,
-                                    echo=config("findex:findex:debug"))
+                                    echo=echo)
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=True,
                                                    expire_on_commit=True,
@@ -82,7 +86,6 @@ class Database(object):
         from findex_gui.controllers.user.user import UserController
         from findex_gui.controllers.user.roles import default_anon_roles
         from findex_gui.controllers.resources.resources import ResourceController
-        from findex_gui.controllers.tasks.tasks import TaskController
 
         # add some default users, groups and tasks to the database
         if not UserController.user_view(username="root"):
@@ -106,23 +109,6 @@ class Database(object):
                 name="Default",
                 description="Default group",
                 removable=False,
-                skip_authorization=True,
-                log_error=False,
-                ignore_constraint_conflict=True)
-
-        def_task = TaskController.get_task(name="Default")
-        if not def_task:
-            def_task = TaskController.add_task(
-                name="Default",
-                owner_id=1,
-                skip_authorization=True,
-                log_error=False,
-                ignore_constraint_conflict=True)
-
-        if not def_task.groups:
-            TaskController.assign_resource_group(
-                task_id=1,
-                resourcegroup_id=1,
                 skip_authorization=True,
                 log_error=False,
                 ignore_constraint_conflict=True)
@@ -206,30 +192,9 @@ class Database(object):
     def _getconn(self):
         # random.shuffle(self.hosts)
         # for host in self.hosts:
-        dsn = config("findex:database:connection")
-        logging.info("connecting to: %s" % dsn)
+        logging.info("connecting to: %s" % self.dsn)
         try:
-            return psycopg2.connect(dsn, connect_timeout=3)
+            return psycopg2.connect(self.dsn, connect_timeout=3)
         except psycopg2.OperationalError as e:
-            print('Failed to connect to %s: %s' % (dsn, e))
+            print('Failed to connect to %s: %s' % (self.dsn, e))
             raise psycopg2.OperationalError("Ran out of database servers - exiting")
-
-    @staticmethod
-    def parse_connection_string(dsn):
-        db = dsn
-        spl = db[db.find("://") + 3:].split(":")
-        spl_ = spl[1].split("@")
-        spl__ = spl[2].split("/")
-
-        db_host = spl_[1]
-        db_user = spl[0]
-        db_pass = spl_[1]
-        db_port = int(spl__[0])
-        db_name = spl__[1]
-        return {
-            "host": db_host,
-            "user": db_user,
-            "pwd": db_pass,
-            "port": db_port,
-            "name": db_name
-        }

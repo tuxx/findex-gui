@@ -3,6 +3,7 @@
     repo=https://github.com/skftn/{{ git_repo }}.git
     dest=/home/findex/{{ git_repo }}/
     version={{ git_branch }}
+    force=yes
   become_user: findex
 
 - name: install additional system requirements for findex-gui
@@ -25,13 +26,23 @@
     executable: /bin/bash
   become_user: findex
 
-- name: Install python requirements
+- name: Install findex-gui python requirements
   shell:
     cmd: |
       source /home/findex/findex-gui/venv/bin/activate
       pip install -e .
   args:
     chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: Install findex-crawl python requirements
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      pip install -r requirements.txt
+  args:
+    chdir: /home/findex/findex-gui/findex-crawl
     executable: /bin/bash
   become_user: findex
 
@@ -49,7 +60,7 @@
   shell:
     cmd: |
       source /home/findex/findex-gui/venv/bin/activate
-      findex edit_config database.connection="postgresql://findex:oughtToChangeThis@192.168.1.11:5432/findex" elasticsearch.host="http://192.168.1.12:9200/"
+      findex edit_config database.connection="postgresql://{{ findex.postgres.user }}:{{ findex.postgres.passwd }}@{{ findex.postgres.host }}:{{ findex.postgres.port }}/findex" elasticsearch.host="http://{{ findex.es.host }}:9200/"
   args:
     chdir: /home/findex/findex-gui
     executable: /bin/bash

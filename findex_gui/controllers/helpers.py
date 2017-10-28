@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import request, url_for, jsonify
 
 from findex_gui.bin.config import config
-from findex_gui.web import app
+from findex_gui.web import app, db
 
 
 def redirect_url(default='index'):
@@ -30,3 +30,8 @@ def error(e):
 
     from findex_gui.web import themes
     return themes.render("main/error", msg=str(e))
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()

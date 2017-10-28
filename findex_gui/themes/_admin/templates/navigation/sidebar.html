@@ -1,3 +1,5 @@
+<!-- @TODO: url_for -->
+
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
@@ -12,32 +14,27 @@
                 </a>
                 <ul class="treeview-menu" style="display: block;">
                     <li><a href="/admin"><i class="fa fa-circle-o"></i> Home</a></li>
-                    <li><a href="/admin/appearance"><i class="fa fa-circle-o"></i> Appearance</a></li>
+{#                    <li><a href="/admin/appearance"><i class="fa fa-circle-o"></i> Appearance</a></li>#}
                     <li><a href="/admin/news/overview"><i class="fa fa-circle-o"></i> News</a></li>
-                </ul>
-            </li>
-            <li class="treeview menu-open">
-                <a href="#">
-                    <i class="fa fa-th"></i>
-                    <span>AMQP</span>
-                    <span class="label label-primary pull-right">1</span>
-                </a>
-                <ul class="treeview-menu" style="display: block;">
-                    <li><a href="/admin/amqp"><i class="fa fa-circle-o"></i> Overview</a></li>
-                </ul>
-            </li>
-            <li class="treeview menu-open">
-                <a href="#">
-                    <i class="fa fa-laptop"></i>
-                    <span>Crawls</span>
-                    <i class="fa fa-angle-left pull-right"></i>
-                </a>
-                <ul class="treeview-menu" style="display: block;">
-                    <li><a href="/admin/bot/list"><i class="fa fa-circle-o"></i> Bots</a></li>
-                    <li><a href="/admin/bot/list"><i class="fa fa-circle-o"></i> Tasks</a></li>
-                </ul>
-            </li>
+                    <li class="treeview menu-open">
+                        <a href="#"><i class="fa fa-circle-o"></i> Status
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu" style="display: block;">
+                            <li><a id="menu_status_overview" href="/admin/status/overview"><i class="fa fa-circle-o"></i> Overview
 
+                            </a></li>
+                            <li><a href="/admin/status/findex"><i class="fa fa-circle-o"></i> Findex</a></li>
+                            <li><a href="/admin/status/system"><i class="fa fa-circle-o"></i> System</a></li>
+                            <li><a href="/admin/status/database"><i class="fa fa-circle-o"></i> Database</a></li>
+                            <li><a href="/admin/status/python"><i class="fa fa-circle-o"></i> Python</a></li>
+                        </ul>
+                    </li>
+{#                    <li><a href="/admin/logs/overview"><i class="fa fa-circle-o"></i> Logs</a></li>#}
+                </ul>
+            </li>
             <li class="treeview menu-open">
                 <a href="#">
                     <i class="fa fa-laptop"></i> <span>Servers</span>
@@ -46,10 +43,31 @@
                 <ul class="treeview-menu" style="display: block;">
                     <li><a href="/admin/server/overview"><i class="fa fa-circle-o"></i>Overview</a></li>
                     <li><a href="/admin/server/add"><i class="fa fa-circle-o"></i>Add Server</a></li>
+                    <li><a href="/admin/server/group/add"><i class="fa fa-circle-o"></i>Add Group</a></li>
                     <li><a href="/admin/server/nmap/add"><i class="fa fa-circle-o"></i>Add Nmap Rule</a></li>
                 </ul>
             </li>
-
+            <li class="treeview menu-open">
+                <a href="#">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Scheduler</span>
+                    <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu" style="display: block;">
+                    <li><a href="/admin/scheduler/overview"><i class="fa fa-circle-o"></i> Overview</a></li>
+                </ul>
+            </li>
+            <li class="treeview menu-open">
+                <a href="#">
+                    <i class="fa fa-envelope-o"></i>
+                    <span>Message Queue</span>
+                    <i class="fa fa-angle-left pull-right"></i>
+                </a>
+                <ul class="treeview-menu" style="display: block;">
+                    <li><a href="/admin/mq/overview"><i class="fa fa-circle-o"></i> Overview</a></li>
+                    <li><a href="/admin/mq/add"><i class="fa fa-circle-o"></i> Add queue</a></li>
+                </ul>
+            </li>
             <li><a href="documentation/index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
         </ul>
     </section>

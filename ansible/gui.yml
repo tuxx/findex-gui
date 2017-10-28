@@ -1,6 +1,7 @@
 - name: deploy findex-gui
   hosts:
     - gui
+    - gui_dev
   serial: 1
   become: yes
   any_errors_fatal: yes

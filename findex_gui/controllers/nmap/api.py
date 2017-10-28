@@ -11,10 +11,17 @@ from findex_gui.controllers.nmap.nmap import NmapController
 @admin_required
 @endpoint.api(
     parameter("rule", type=str, required=True),
-    parameter("name", type=str, required=True)
+    parameter("name", type=str, required=True),
+    parameter("interval", type=str, required=False, default=None),
+    parameter("group", type=str, required=False, default="Default")
 )
-def api_admin_server_nmap_add(rule, name):
-    return NmapController.add(cmd=rule, name=name)
+def api_admin_server_nmap_add(rule, name, interval, group):
+    if isinstance(interval, str) and not interval.isdigit():
+        interval = None
+    else:
+        interval = int(interval)
+
+    return NmapController.add(cmd=rule, name=name, interval=interval, group=group)
 
 @app.route("/api/v2/admin/server/nmap/delete", methods=["POST"])
 @admin_required
@@ -27,30 +34,29 @@ def api_admin_server_nmap_remove(uid):
 @app.route("/api/v2/admin/server/nmap/get", methods=["GET"])
 @endpoint.api(
     parameter("uid", type=str, required=False),
-    parameter("perPage", type=int, required=False, default=None),
-    parameter("page", type=int, required=False, default=None)
+    parameter("limit", type=int, default=10),
+    parameter("offset", type=int, default=0)
 )
-def api_admin_server_nmap_get(uid, perPage, page):
+def api_admin_server_nmap_get(uid, limit, offset):
     """
-    Get resources.
+    Get nmap rules.
     :param uid: nmap uid
-    :param perPage:
-    :param page:
+    :param limit:
+    :param offset:
     :return: nmap_rule object
     """
-    args = {}
-    if perPage:
-        args["limit"] = perPage
-        if page:
-            args["offset"] = (page - 1) * perPage
+    args = {
+        "limit": limit,
+        "offset": offset
+    }
     if isinstance(uid, str) and uid:
         args["uid"] = uid
 
-    resources = NmapController.get(**args)
+    scan_results = NmapController.get(**args)
     record_count = db.session.query(func.count(NmapRule.id)).scalar()
 
-    return jsonify({
-        "records": resources,
+    return {
+        "records": scan_results,
         "queryRecordCount": record_count,
-        "totalRecordCount": len(resources)
-    })
+        "totalRecordCount": len(scan_results)
+    }

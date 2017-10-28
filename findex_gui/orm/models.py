@@ -1,6 +1,6 @@
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import request
 import humanfriendly
@@ -42,7 +42,7 @@ class Server(BASE, Extended):
     name = Column(String(64), unique=True, nullable=False)
     description = Column(String(4096), nullable=True)
 
-    parents = relationship("Resource", back_populates="server")
+    resources = relationship("Resource", back_populates="server")
 
     ix_address = Index("ix_resource_address", address)
     ix_name = Index("ix_resource_name", name)
@@ -62,13 +62,13 @@ class Resource(BASE, Extended):
     id = Column(Integer, primary_key=True)
 
     server_id = Column(Integer, ForeignKey("server.id"), nullable=False)
-    server = relationship("Server", back_populates="parents")
+    server = relationship("Server", back_populates="resources")
 
     meta_id = Column(Integer, ForeignKey("resource_meta.id"), nullable=False)
     meta = relationship("ResourceMeta", single_parent=True, cascade="all, delete-orphan", backref=backref("resources", uselist=False))
 
     group_id = Column(Integer, ForeignKey("resource_group.id"))
-    group = relationship("ResourceGroup", back_populates="parents")
+    group = relationship("ResourceGroup", back_populates="resources")
 
     created_by_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User")
@@ -76,11 +76,11 @@ class Resource(BASE, Extended):
     description = Column(String(), nullable=True)
 
     port = Column(Integer(), nullable=False)
-    protocol = Column(Integer(), nullable=False)
+    protocol = Column(Integer(), nullable=True)
 
     display_url = Column(String(), nullable=False)
 
-    date_added = Column(DateTime(), default=datetime.utcnow)
+    date_added = Column(DateTime(), default=datetime.now)
     date_crawl_start = Column(DateTime())
     date_crawl_end = Column(DateTime())
 
@@ -124,9 +124,35 @@ class Resource(BASE, Extended):
     def resource_id(self):
         return "%s:%d" % (self.server.address, self.port)
 
+    @property
+    def name_human(self):
+        return "%s://%s:%d%s" % (self.protocol_human, self.server.address, self.port, self.basepath)
+
     @staticmethod
     def make_valid_resourcename(resourcename):
         return re.sub("[^a-zA-Z0-9_\.]", "", resourcename)
+
+    @property
+    def scheduled_crawl_in_human(self):
+        """Returns the time when this task will be scheduled"""
+        # @TODO: it's better to let the crawler set the next date, so we can ORDER BY on it
+        # (we'll need to change this date when group.crawl_interval gets changed)
+        if not self.date_crawl_end:
+            return "scheduled"
+
+        _tmp = self.date_crawl_end + timedelta(seconds=self.group.crawl_interval)
+        seconds_till_scheduling = int((datetime.now() - _tmp).total_seconds() * -1)
+
+        if seconds_till_scheduling >= 0:
+            if seconds_till_scheduling <= 60:
+                rtn = "%d seconds" % seconds_till_scheduling
+            elif seconds_till_scheduling <= 3600:
+                rtn = "%d minute(s)" % int(seconds_till_scheduling / 60)
+            else:
+                rtn = "%.1f hour(s)" % float(seconds_till_scheduling / 3600)
+        else:
+            rtn = "scheduled"
+        return rtn
 
 
 class ResourceMeta(BASE, Extended):
@@ -136,22 +162,23 @@ class ResourceMeta(BASE, Extended):
     file_count = Column(Integer(), nullable=False, default=0)
     status = Column(Integer, nullable=False, default=0)
 
-    auth_user = Column(String, nullable=True, info={"exclude_json": True})
-    auth_pass = Column(String, nullable=True, info={"exclude_json": True})
-    auth_type = Column(String, nullable=True)
+    auth_user = Column(String(), nullable=True, info={"exclude_json": True})
+    auth_pass = Column(String(), nullable=True, info={"exclude_json": True})
+    auth_type = Column(String(), nullable=True)
 
-    web_user_agent = Column(String, nullable=True)
+    user_agent = Column(String(), nullable=True)
 
-    relay_user_agent = Column(String, nullable=True)
-    relay_proxy = Column(String, nullable=True)
+    relay_user_agent = Column(String(), nullable=True)
+    relay_proxy = Column(String(), nullable=True)
     relay_enabled = Column(Boolean, default=False, nullable=False)
 
     recursive_sizes = Column(Boolean, nullable=False, default=False)
     file_distribution = Column(MutableJson, nullable=True)
-    throttle_connections = Column(Boolean, nullable=False, default=False)
+    throttle_connections = Column(Integer, nullable=False, default=False)
 
     banner = Column(String(), nullable=True)
     response_time = Column(Integer(), nullable=True)
+    depth = Column(Integer(), nullable=True)  # nested directories - specifies crawl depth
     uid = Column(String(), nullable=True)
 
     def set_auth(self, username, password, auth_type):
@@ -172,18 +199,29 @@ class ResourceGroup(BASE, Extended):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False, unique=True)
-    description = Column(String, nullable=True)
-    added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    name = Column(String(), nullable=False, unique=True)
+    description = Column(String(), nullable=True)
+    added = Column(DateTime(), default=datetime.now, nullable=False)
     removable = Column(Boolean, nullable=False, default=True)
 
-    parents = relationship("Resource", back_populates="group")
-    #tasks = relationship("Task", back_populates="group")
+    crawl_interval = Column(Integer(), nullable=False, default=86400)  # default: 1 day
+
+    resources = relationship("Resource", back_populates="group")
+    nmap_rules = relationship("NmapRule", back_populates="group")
+
+    mq_id = Column(Integer, ForeignKey("mq.id"), nullable=True)
+    mq = relationship("Mq", back_populates="groups")
+
+    ix_name = Index("ix_resourcegroup_name", name)
 
     def __init__(self, name, description, removable=True):
         self.name = self.make_valid_groupname(name)
         self.removable = removable
         self.description = description
+
+    @property
+    def date_added_human(self):
+        return self.added.strftime("%d %b %Y %H:%M")
 
     @staticmethod
     def make_valid_groupname(groupname):
@@ -191,44 +229,6 @@ class ResourceGroup(BASE, Extended):
         if not groupname:
             raise Exception("group name cannot be empty or invalid")
         return groupname
-
-
-task_crawlers = Table(
-    "_task_crawlers",
-    BASE.metadata,
-    Column("task_id", Integer(), ForeignKey("tasks.id")),
-    Column("id", Integer(), ForeignKey("crawlers.id"))
-)
-
-task_groups = Table(
-    "_task_groups",
-    BASE.metadata,
-    Column("task_id", Integer(), ForeignKey("tasks.id")),
-    Column("id", Integer(), ForeignKey("resource_group.id"))
-)
-
-
-class Task(BASE, Extended):
-    __tablename__ = "tasks"
-
-    id = Column(Integer(), primary_key=True)
-
-    name = Column(String(), nullable=False, unique=True)
-    added = Column(DateTime(), default=datetime.utcnow, nullable=False)
-    description = Column(String(), nullable=True)
-    uid_frontend = Column(String(), nullable=True)  # @TODO change to false?
-    owner_id = Column(Integer(), ForeignKey("users.id"))
-    options = Column(MutableJson())
-
-    crawlers = relationship("Crawler", secondary=task_crawlers)
-    groups = relationship("ResourceGroup", secondary=task_groups)
-
-    ix_name = Index("ix_tasks_name", name)
-    ix_uid_frontend = Index("ix_tasks_uid_frontend", uid_frontend)
-
-    def __init__(self, name, owner):
-        self.name = name
-        self.owner_id = owner.id
 
 
 class Crawler(BASE, Extended):
@@ -240,35 +240,25 @@ class Crawler(BASE, Extended):
     crawler_name = Column(String(), nullable=False, unique=True)
     heartbeat = Column(TIMESTAMP())
 
-    amqp_id = Column(Integer, ForeignKey("amqp.id"), nullable=False)
-    amqp = relationship("Amqp", back_populates="crawlers")
 
-
-class Amqp(BASE, Extended):
-    __tablename__ = "amqp"
+class Mq(BASE, Extended):
+    __tablename__ = "mq"
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=False, unique=True)
-    host = Column(String, nullable=False)
-    port = Column(Integer, nullable=False)
-    vhost = Column(String, nullable=False)
-    queue = Column(String, nullable=False)
+    name = Column(String(), nullable=False, unique=True)
+    host = Column(String(), nullable=False)
+    port = Column(Integer(), nullable=False)
+    vhost = Column(String(), nullable=False)
+    queue = Column(String(), nullable=False)
+    broker_type = Column(String(), nullable=False, default="rabbitmq")
+    ssl = Column(Boolean(), nullable=True, default=False)
 
-    auth_user = Column(String, nullable=False, info={"exclude_json": True})
-    auth_pass = Column(String, info={"exclude_json": True})
+    auth_user = Column(String(), nullable=False, info={"exclude_json": True})
+    auth_pass = Column(String(), info={"exclude_json": True})
 
-    added = Column(DateTime(), default=datetime.utcnow)
-    crawlers = relationship("Crawler", back_populates="amqp")
-
-    def __init__(self, name, host, port, username, password, queue_name, virtual_host):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.queue_name = queue_name
-        self.virtual_host = virtual_host
+    added = Column(DateTime(), default=datetime.now)
+    groups = relationship("ResourceGroup", back_populates="mq")
 
 
 class Options(BASE, Extended):
@@ -329,7 +319,7 @@ class UserGroup(BASE, Extended):
     members = relationship("User", secondary=user_group_members)
     resources = relationship("Resource", secondary=user_group_resources)
 
-    created = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    created = Column(DateTime(), default=datetime.now, nullable=False)
     description = Column(String(), nullable=True)
     password = Column(String(32), nullable=True, info={"json_exclude": True})
     invite_only = Column(Boolean, default=False, nullable=False)
@@ -360,8 +350,8 @@ class User(BASE, AuthUser, Extended):
     password = Column(String(120), nullable=False, info={"json_exclude": True})
     salt = Column(String(32), default=random_str(16), info={"json_exclude": True})
 
-    created = Column(DateTime(), default=datetime.utcnow, nullable=False)
-    modified = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    created = Column(DateTime(), default=datetime.now, nullable=False)
+    modified = Column(DateTime(), default=datetime.now, nullable=False)
 
     admin = Column(Boolean, default=False, nullable=False)
     removable = Column(Boolean, default=True, nullable=False)
@@ -452,7 +442,7 @@ class Post(BASE, Extended):
 
     title = Column(String(), nullable=False)
     content = Column(String(), nullable=False)
-    date_added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    date_added = Column(DateTime(), default=datetime.now, nullable=False)
 
     def __init__(self, created_by, content, title):
         self.created_by = created_by
@@ -519,8 +509,8 @@ class Files(BASE, Extended):
     @property
     def file_name_human(self):
         return "%s%s%s" % (self.file_name,
-                           "." if not self.file_isdir else "",
-                           self.file_ext)
+                           "." if not self.file_isdir and self.file_ext is not None else "",
+                           self.file_ext if self.file_ext is not None else "")
 
     @property
     def file_modified_human(self):
@@ -577,16 +567,39 @@ class NmapRule(BASE, Extended):
     id = Column(SMALLINT, primary_key=True)
     rule = Column(String(), nullable=False, unique=True)
     name = Column(String(), nullable=False, unique=True)
-    output = Column(String(), nullable=True, default="")
-    date_added = Column(DateTime(), default=datetime.now(), nullable=False)
+    output = Column(MutableJson(), nullable=True, default={"data": {}})
+    date_added = Column(DateTime(), default=datetime.now, nullable=False)
     date_scanned = Column(DateTime(), nullable=True)
+    status = Column(Integer, nullable=False, default=0)
 
-    def __init__(self, rule, name):
+    crawl_interval = Column(Integer())
+
+    group_id = Column(Integer, ForeignKey("resource_group.id"))
+    group = relationship("ResourceGroup", back_populates="nmap_rules")
+
+    def __init__(self, rule, name, interval, group):
         self.rule = rule
         self.name = name
+        self.scan_interval = interval
+        self.group = group
 
     @property
     def last_scanned(self):
         if not self.date_scanned:
             return "Not scanned yet"
         return TimeMagic().ago_dt(self.date_scanned)
+
+
+class Logging(BASE, Extended):
+    __tablename__ = "logging"
+
+    id = Column(Integer(), primary_key=True)
+    message = Column(String(), nullable=False)
+    data = Column(MutableJson(), nullable=True)
+    category = Column(String(), nullable=True)
+    file = Column(String(), nullable=True)
+    date_added = Column(DateTime, nullable=False, default=datetime.now)
+    log_level = Column(Integer(), nullable=False, default=1)  # 0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR
+
+    ix_author = Index("ix_resource_category", category)
+    ix_date = Index("ix_resource_date_added", date_added)

@@ -7,12 +7,13 @@ class FindexGui {
         let _data = {
             url: `${APPLICATION_ROOT}api/v2${url}`,
             type: method,
-            contentType: 'application/json',
+            data: data,
             timeout: 15500
         };
 
-        if (method == "POST") {
-            _data.data = JSON.stringify(data);
+        if (method != "GET") {
+            if(typeof _data.data !== 'undefined') _data.data = JSON.stringify(data);
+            _data.contentType = 'application/json'
         }
 
         return $.ajax(_data).then(function(data){
@@ -50,54 +51,5 @@ class FindexGui {
             val = data;
         }
         return val;
-    }
-}
-
-class FancyTable {
-    /**
-     * dynatable.js helper function that initializes a table using ajax.
-     * @param {string} api - remote json api
-     * @param {string} target - jQuery object
-     * @param {function} func_rowWriter - function responsible for drawing html rows
-     * @param {function} func_drawErrorMsg - function responsible for drawing error messages
-     */
-    static init(api, target, func_rowWriter, func_drawErrorMsg, search_disabled){
-        if(func_drawErrorMsg) {
-            target.bind('dynatable:ajax:error', function (e, dynatable) {
-                func_drawErrorMsg("Could not fetch rows.");
-            });
-        }
-
-        let data = {
-            dataset: {
-                ajax: true,
-                ajaxUrl: api,
-                ajaxOnLoad: true,
-                records: []
-            },
-            table: {
-                defaultColumnIdStyle: 'underscore'
-            },
-            features: {
-                paginate: true,
-                sort: false,
-                pushState: false,
-                search: true,
-                recordCount: true,
-                perPageSelect: true
-            }
-        };
-
-        if(search_disabled){
-            data.features.search = false;
-        }
-
-        if(func_rowWriter){
-            if(!data.hasOwnProperty("writers")){
-                data["writers"] = {};
-            }
-            data["writers"]["_rowWriter"] = func_rowWriter;
-        }
-        target.dynatable(data);
     }
 }

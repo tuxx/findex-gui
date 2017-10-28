@@ -1,0 +1,224 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+    <style>
+        pre {
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-size: 9px;
+            font-family: monospace;
+            border:0;
+        }
+        table{
+            font-size: 11px;
+        }
+    </style>
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Scheduler Overview
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Description</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <p>
+                                The scheduler ensures that servers get indexed, either
+                                by spawning a <code>findex-crawl</code> instance, or sending a crawl task via
+                                the message queue (RabbitMQ).
+                            </p>
+
+                            <p>
+                                An entry in the cron is required to activate scheduler.
+                                By default, the cron is set to a 1 minute interval.
+                            </p>
+                            <p>
+                                <pre>{{ generated_cron }}</pre>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Scheduler</h3>
+                        </div>
+                        <div class="box-body">
+                            <span style="display:block;margin-top:6px;float:left;">
+                                Last ran: <span id="last_ran"></span>
+                            </span>
+                            <div class="btn-group pull-right" role="group" aria-label="submit">
+                                <button type="button" id="btn_manually_fire" class="btn btn-sm btn-success">
+                                    Fire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Cronjob</h3>
+                        </div>
+                        <div class="box-body">
+                            <span style="display:block;margin-top:6px;float:left;">
+                            Status:
+                            {% if has_cron %}
+                                <span style="color:green;">Active</span>
+                            {% else %}
+                                <span style="color:red;">Inactive</span>
+                            {% endif %}
+                            </span>
+
+                            <div class="btn-group pull-right" role="group" aria-label="submit">
+                            {% if has_cron %}
+                                <button type="button" id="rm_cron" class="btn btn-sm btn-warning">Remove from cron</button>
+                            {% else %}
+                                <button type="button" id="add_cron" class="btn btn-sm btn-success">Add to cron</button>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Scheduled servers</h3>
+                        </div>
+                        <div class="box-body">
+                            <table id="resources" class="display table table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Scheduled</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Logs</h3>
+                        </div>
+                        <div class="box-body">
+                            <table id="logs" class="display table table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Message</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // selectors
+            let table_server_overview = $("table#resources");
+            let table_logs = $("table#logs");
+            let last_ran = $("#last_ran");
+
+            function row_writer(column_name, row_data){
+                if(column_name === "name") return row_data.name;
+                else if(column_name === "address") return `<code>${row_data["name human"]}</code>`;
+                else if(column_name === "scheduled") {
+                    let value = row_data["scheduled crawl_in_human"];
+                    if(value === "scheduled"){
+                        return `<span style="color:green">scheduled</span>`
+                    }
+                    return value;
+                }
+            }
+
+            function log_row_writer(column_name, row_data){
+                if(column_name === "date") return row_data["date added_ago"];
+                if(column_name === "message") return row_data.message;
+                return "null";
+            }
+
+            table_logs.fintable({
+                endpoint: "/admin/logs/get",
+                ui_search: false,
+                row_writer: log_row_writer,
+                refresh: 1,
+                params: {
+                    category: "scheduler"
+                }
+            });
+
+            table_server_overview.fintable({
+                endpoint: "/resource/get",
+                row_writer: row_writer
+            });
+
+            $("#rm_cron").click(function(){
+                FindexGui.api("/admin/scheduler/cron_remove", "GET").then(function(){
+                    location.reload();
+                });
+            });
+
+            $("#add_cron").click(function(){
+                FindexGui.api("/admin/scheduler/cron_add", "GET").then(function(){
+                    location.reload();
+                });
+            });
+
+            $("#btn_manually_fire").click(function(){
+                let self = $(this);
+                self.attr("disabled", "disabled");
+
+                FindexGui.api("/admin/scheduler/fire", "GET").then(function(data){
+                    get_last_ran(false);
+                    self.prop("disabled", false);
+                });
+            });
+
+            function get_last_ran(loop){
+                FindexGui.api("/admin/scheduler/last_ran", "GET").then(function(data){
+                    if(!data.data){
+                        last_ran.html("never");
+                    } else last_ran.html(data.data);
+                });
+
+                if(loop) {
+                    setTimeout(function () {
+                        get_last_ran(true);
+                    }, 1000);
+                }
+            }
+
+            get_last_ran(true);
+        });
+    </script>
+
+{% endblock %}

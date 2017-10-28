@@ -2,13 +2,12 @@ from sqlalchemy_zdb import ZdbQuery
 
 from findex_gui.web import db, locales, auth
 from findex_gui.bin.config import config
-from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server
-from findex_gui.controllers.user.roles import role_req, check_role
+from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server, Mq
+from findex_gui.controllers.user.roles import role_req
 from findex_gui.controllers.user.user import UserController
 from findex_common.exceptions import DatabaseException, FindexException
 from findex_common.utils import is_ipv4, resolve_hostname
 from findex_common import static_variables
-from findex_common.utils_time import TimeMagic
 
 
 class ResourceController:
@@ -90,7 +89,7 @@ class ResourceController:
     def add_resource(resource_port, resource_protocol, server_name=None, server_address=None, server_id=None,
                      description="", display_url="/", basepath="/", recursive_sizes=True,
                      auth_user=None, auth_pass=None, auth_type=None, user_agent=static_variables.user_agent,
-                     throttle_connections=False):
+                     throttle_connections=-1, current_user=None, group="Default"):
         """
         Adds a local or remote file resource
         :param server_name: Server name
@@ -106,7 +105,7 @@ class ResourceController:
         :param auth_pass: resource pass authentication 'str'
         :param auth_type: resource type authentication 'str'
         :param user_agent: The string to identify ourselves with against the service 'str'
-        :param throttle_connections: Wait X seconds between each request/connection 'int'
+        :param throttle_connections: Wait X millisecond(s) between each request/connection 'int'
         :return: resource
         """
         if server_id:
@@ -131,8 +130,8 @@ class ResourceController:
         elif not basepath.startswith("/") and len(basepath) > 1:
             basepath = "/%s" % basepath
 
-        if _server.parents:
-            for parent in _server.parents:
+        if _server.resources:
+            for parent in _server.resources:
                 if parent.port == resource_port and parent.protocol == resource_protocol \
                         and parent.basepath == basepath:
                     raise FindexException("Duplicate resource previously defined with resource id \"%d\"" % parent.id)
@@ -152,7 +151,15 @@ class ResourceController:
         rm.throttle_connections = throttle_connections
         resource.meta = rm
 
-        current_user = UserController.get_current_user(apply_timeout=False)
+        if isinstance(current_user, int):
+            current_user = db.session.query(User).filter(User.admin == True).first()
+        elif current_user is None:
+            current_user = UserController.get_current_user(apply_timeout=False)
+        elif isinstance(current_user, User):
+            pass
+        else:
+            raise Exception("bad type for parameter current_user")
+
         if not current_user:
             raise FindexException("Could not fetch the current user")
 
@@ -161,7 +168,7 @@ class ResourceController:
         db.session.add(resource)
         db.session.commit()
 
-        resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == "Default").first()
+        resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == group).first()
         db.session.commit()
         db.session.flush()
 
@@ -196,7 +203,7 @@ class ResourceController:
         if auto_remove_server:
             # check for other server resource members before trying to delete
             server = resource.server
-            if [z for z in server.parents if z.id != resource_id]:
+            if [z for z in server.resources if z.id != resource_id]:
                 # cant remove server, it still has one or more member(s)
                 db.session.delete(resource)
             else:
@@ -281,4 +288,3 @@ class ResourceController:
             query = query.filter(ResourceGroup.name == name)
 
         return query.first()
-

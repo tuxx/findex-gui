@@ -47,7 +47,7 @@ Vagrant.configure(2) do |config|
     config.vm.define :postgres_dev do |postgres_config|
         postgres_config.vm.host_name = "postgres.findex"
         postgres_config.vm.network "private_network", ip:"192.168.1.11"
-        postgres_config.vm.network "forwarded_port", guest: 22, host: 2200, host_ip: "127.0.0.1", id: 'ssh'
+        postgres_config.vm.network "forwarded_port", guest: 22, host: 2205, host_ip: "127.0.0.1", id: 'ssh'
         postgres_config.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "2048"]
             vb.customize ["modifyvm", :id, "--cpus", "2"]

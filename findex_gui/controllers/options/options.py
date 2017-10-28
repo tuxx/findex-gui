@@ -11,18 +11,25 @@ class OptionsController:
         return Options.query.filter(Options.key == key).first()
 
     @staticmethod
-    def set(key: str, val):
+    def set(key: str, val: dict):
         option = Options.query.filter(Options.key == key).first()
 
         if key == 'theme_active':
-            if not val in themes.data:
+            if val not in themes.data:
                 raise Exception(gettext('theme name \'%s\' not found' % val))
 
         if option:
             option.val = val
             db.session.commit()
+            db.session.flush()
+            return
         else:
-            db.session.add(Options(key=key, val=val))
+            option = Options(key=key, val=val)
+
+        db.session.add(option)
+        db.session.commit()
+        db.session.flush()
+        return option
 
     @classmethod
     def theme_get_active(cls):

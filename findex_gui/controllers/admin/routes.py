@@ -1,6 +1,7 @@
 from flask import request, redirect, url_for
 
 from findex_gui.web import app, themes
+from findex_gui.bin.misc import version
 from findex_gui.controllers.admin.status.status import AdminStatusController
 from findex_gui.controllers.amqp.forms import FormAmqpAdd
 from findex_gui.controllers.user.decorators import admin_required
@@ -14,7 +15,7 @@ from findex_gui.controllers.news.news import NewsController
 @app.route("/admin")
 @admin_required
 def admin_home():
-    return themes.render("main/home", theme="_admin")
+    return themes.render("main/home", theme="_admin", version=version)
 
 @admin_required
 def admin_appearance():

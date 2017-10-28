@@ -1,5 +1,17 @@
 {% extends "_admin/templates/base.html" %}
 {% block content %}
+    <style>
+        pre {
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-size: 9px;
+            font-family: monospace;
+            border:0;
+        }
+        table{
+            font-size: 11px;
+        }
+    </style>
 
     <div class="content-wrapper" style="min-height: 946px;">
         <!-- Content Header (Page header) -->
@@ -16,7 +28,7 @@
         <!-- Main content -->
         <section class="content">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-8">
                     <div class="box box-solid">
                         <div class="box-header with-border ">
                             <h3 class="box-title">Description</h3>
@@ -37,23 +49,29 @@
                                 An entry in the cron is required to activate scheduler.
                                 By default, the cron is set to a 1 minute interval.
                             </p>
-
                             <p>
-                                If you're wondering what the exact command should be to run the scheduler:
-                            </p>
-                            <p>
-                                <code>{{ generated_cron }}</code>
-                            </p>
-                            <p>
-                                Use the form below to automatically add to cron if it's not activated yet.
+                                <pre>{{ generated_cron }}</pre>
                             </p>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
                 <div class="col-md-4">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Scheduler</h3>
+                        </div>
+                        <div class="box-body">
+                            <span style="display:block;margin-top:6px;float:left;">
+                                Last ran: <span id="last_ran"></span>
+                            </span>
+                            <div class="btn-group pull-right" role="group" aria-label="submit">
+                                <button type="button" id="btn_manually_fire" class="btn btn-sm btn-success">
+                                    Fire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="box box-solid">
                         <div class="box-header with-border ">
                             <h3 class="box-title">Cronjob</h3>
@@ -70,16 +88,18 @@
 
                             <div class="btn-group pull-right" role="group" aria-label="submit">
                             {% if has_cron %}
-                                <button type="button" id="rm_cron" class="btn btn-warning">Remove from cron</button>
+                                <button type="button" id="rm_cron" class="btn btn-sm btn-warning">Remove from cron</button>
                             {% else %}
-                                <button type="button" id="add_cron" class="btn btn-primary">Add to cron</button>
+                                <button type="button" id="add_cron" class="btn btn-sm btn-success">Add to cron</button>
                             {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6">
                     <div class="box box-solid">
                         <div class="box-header with-border ">
                             <h3 class="box-title">Scheduled servers</h3>
@@ -98,6 +118,25 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-6">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Logs</h3>
+                        </div>
+                        <div class="box-body">
+                            <table id="logs" class="display table table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Message</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -106,6 +145,8 @@
         $(document).ready(function() {
             // selectors
             let table_server_overview = $("table#resources");
+            let table_logs = $("table#logs");
+            let last_ran = $("#last_ran");
 
             function row_writer(column_name, row_data){
                 if(column_name === "name") return row_data.name;
@@ -118,6 +159,22 @@
                     return value;
                 }
             }
+
+            function log_row_writer(column_name, row_data){
+                if(column_name === "date") return row_data["date added_ago"];
+                if(column_name === "message") return row_data.message;
+                return "null";
+            }
+
+            table_logs.fintable({
+                endpoint: "/admin/logs/get",
+                ui_search: false,
+                row_writer: log_row_writer,
+                refresh: 1,
+                params: {
+                    category: "scheduler"
+                }
+            });
 
             table_server_overview.fintable({
                 endpoint: "/resource/get",
@@ -135,6 +192,32 @@
                     location.reload();
                 });
             });
+
+            $("#btn_manually_fire").click(function(){
+                let self = $(this);
+                self.attr("disabled", "disabled");
+
+                FindexGui.api("/admin/scheduler/fire", "GET").then(function(data){
+                    get_last_ran(false);
+                    self.prop("disabled", false);
+                });
+            });
+
+            function get_last_ran(loop){
+                FindexGui.api("/admin/scheduler/last_ran", "GET").then(function(data){
+                    if(!data.data){
+                        last_ran.html("never");
+                    } else last_ran.html(data.data);
+                });
+
+                if(loop) {
+                    setTimeout(function () {
+                        get_last_ran(true);
+                    }, 1000);
+                }
+            }
+
+            get_last_ran(true);
         });
     </script>
 

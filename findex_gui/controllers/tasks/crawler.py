@@ -2,6 +2,7 @@ import json
 import subprocess
 import os
 import tempfile
+from datetime import datetime
 
 import dsnparse
 from findex_common.crawl.crawl import CrawlController
@@ -21,7 +22,7 @@ class Crawler:
         :return:
         """
         path_fincrawl = "%s/findex-crawl/" % python_env["project_root"]
-        log_msg("Spawning local crawler in DIRECT mode for %d tasks" % len(tasks))
+        log_msg("Spawning local crawler in DIRECT mode for %d tasks" % len(tasks), category="scheduler")
 
         # construct tasks json file
         blobs = []
@@ -35,7 +36,7 @@ class Crawler:
             crawl_messages = json.dumps(blobs, indent=4, sort_keys=True)
             crawl_file = tempfile.mkstemp("_fincrawl.json")[1]
         except Exception as ex:
-            log_msg(":%s" % (str(ex)), level=3)
+            log_msg(":%s" % (str(ex)), level=3, category="scheduler")
             return
 
         print(crawl_messages)

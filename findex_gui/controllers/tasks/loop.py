@@ -5,6 +5,7 @@ from findex_common.nmap import NmapScan
 from findex_gui.web import db
 from findex_gui.bin.utils import log_msg
 from findex_gui.orm.models import NmapRule, ResourceGroup, Resource
+from findex_gui.controllers.options.options import OptionsController
 from findex_gui.controllers.amqp.amqp import AmqpConnectionController
 from findex_gui.controllers.tasks.crawler import Crawler
 
@@ -51,7 +52,8 @@ class Worker:
         if scheduled_resources:
             Crawler.spawn(scheduled_resources)
 
-        log_msg("Scheduler loop finished", level=1)
+        log_msg("Scheduler loop finished", level=1, category="scheduler")
+        OptionsController.set("scheduler_last_ran", {"date": datetime.now().isoformat()})
 
     @staticmethod
     def collect_tasks(check_resources: bool = True, check_nmap: bool = True):
@@ -60,11 +62,15 @@ class Worker:
         def _skipping(_task, level=1):
             if isinstance(_task, NmapRule):
                 log_msg("skipping nmap rule \'%s\': %s" % (_task.name,
-                                                           _task.rule), level=level)
+                                                           _task.rule),
+                        level=level,
+                        category="scheduler")
             elif isinstance(_task, Resource):
-                log_msg("skipping resource id: %d - \'%s\' [%s]" % (_task.id,
-                                                                    _task.resource_id,
-                                                                    _task.protocol_human.upper()), level=level)
+                log_msg("skipping id %d: \'%s://%s\'" % (_task.id,
+                                                         _task.protocol_human,
+                                                         _task.resource_id),
+                        level=level,
+                        category="scheduler")
         if check_nmap:
             for nmap_rule in db.session.query(NmapRule).filter(NmapRule.status == 0).all():
                 if isinstance(nmap_rule.crawl_interval, int) and isinstance(nmap_rule.date_scanned, datetime):
@@ -79,7 +85,8 @@ class Worker:
 
                 tasks.append(nmap_rule)
                 nmap_rule.status = 4  # task scheduled
-                log_msg("scheduled nmap rule for scanning \'%s\': %s" % (nmap_rule.name, nmap_rule.rule))
+                log_msg("scheduled nmap rule for scanning \'%s\': %s" % (nmap_rule.name, nmap_rule.rule),
+                        category="scheduler")
 
             db.session.commit()
             db.session.flush()
@@ -102,8 +109,9 @@ class Worker:
 
                     tasks.append(resource)
                     resource.meta.status = 4  # task scheduled
-                    log_msg("scheduled resource \'%s://%s\' (id: %d) for scanning" % (resource.protocol_human,
-                                                                                      resource.resource_id, resource.id))
+                    log_msg("scheduled resource \'%s://%s\' (id: %d) for scanning" % (
+                        resource.protocol_human,
+                        resource.resource_id, resource.id), category="scheduler")
                 db.session.commit()
                 db.session.flush()
         return tasks

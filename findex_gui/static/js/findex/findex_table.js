@@ -29,6 +29,7 @@ Array.prototype.insert = function ( index, item ) {
             column_writer: null
         }, data);
 
+        if(!settings.params) settings.params = {};
         if(!settings.hasOwnProperty("endpoint")){
             throw 'undefined option endpoint';
         }
@@ -47,6 +48,8 @@ class FinTable {
         this.limit = settings.limit;
         this.offset = settings.offset;
         this.page = settings.page;
+        this.refresh = settings.refresh;
+        this.params = settings.params;
 
         this._time = 0;
         this._queryRecordCount = -1;
@@ -62,6 +65,18 @@ class FinTable {
         this.draw_header();
         this.draw();
         this._events();
+
+        if(this.refresh && this.refresh >= 1) {
+            this._refresh();
+        }
+    }
+
+    _refresh(){
+        let self = this;
+        setTimeout(function() {
+            self.draw();
+            self._refresh();
+        }, this.refresh*1000)
     }
 
     draw(page, per_page){
@@ -70,11 +85,10 @@ class FinTable {
         this.offset = (this.page-1) * this.limit;
 
         let self = this;
-        let data = {
-            "offset": this.offset,
-            "limit": this.limit,
-            "search": this.search
-        };
+        let data = this.params;
+        if(this.settings.ui_search) data.search = this.search;
+        data.limit = this.limit;
+        data.offset = this.offset;
 
         let date_now = new Date();
 

@@ -128,7 +128,7 @@ def get_pip_freeze():
     return app.config["PIP_FREEZE"]
 
 
-def log_msg(msg: str, level: int = 1):
+def log_msg(msg: str, category: str, level: int = 1):
     """
     Logs a message
     :param msg: msg
@@ -141,6 +141,13 @@ def log_msg(msg: str, level: int = 1):
     from findex_gui.bin.config import config
     if not config("findex:findex:debug") and level == 0:
         return
+    categories = [
+        "scheduler"
+    ]
+
+    if category not in categories:
+        sys.stderr.write("cant log category %s - not in categories\n" % category)
+        return
 
     print("[%s] %s" % (["DEBUG", "INFO", "WARNING", "ERROR"][level], msg))
 
@@ -148,14 +155,16 @@ def log_msg(msg: str, level: int = 1):
         prev_frame = sys._getframe(1).f_code
         fn = prev_frame.co_filename
         fu = prev_frame.co_name
-        author = "%s:%s" % (fn, fu)
+        fn = "/".join(fn.split("/")[-3:])
+        file = "%s:%s" % (fn, fu)
     except:
-        author = None
+        file = None
 
     log = Logging()
-    log.author = author
+    log.file = file
     log.message = msg
     log.log_level = level
+    log.category = category
     db.session.add(log)
     db.session.commit()
     db.session.flush()

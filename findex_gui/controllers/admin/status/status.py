@@ -9,6 +9,8 @@ from findex_gui.web import db, app
 from findex_gui.bin.config import config
 from findex_gui.bin.misc import version, cwd
 from findex_gui.bin.utils import get_pip_freeze
+from findex_gui.controllers.tasks.crawler import Crawler
+from findex_gui.controllers.admin.scheduler.cron import CronController
 # from findex_gui.controllers.amqp.amqp import AmqpController
 
 SECTIONS = ["findex", "database", "system", "pip"]
@@ -77,6 +79,15 @@ class AdminStatusController(object):
         rtn["application_root"] = _item(config("findex:findex:application_root"))
         rtn["async mode"] = _item(config("findex:findex:async"))
         rtn["No. Findex Users"] = FindexStatus.findex_get_nousers()
+        try:
+            Crawler.can_crawl()
+            can_crawl = _item("True", cls="ok")
+        except Exception as ex:
+            can_crawl = _item(str(ex), cls="error")
+        rtn["'DIRECT' crawl mode"] = can_crawl
+
+        has_cron = CronController.has_cronjob()
+        rtn["Scheduler cronjob availabe"] = _item(has_cron, cls="info" if has_cron else "error")
         return rtn
 
     @staticmethod

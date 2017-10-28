@@ -80,7 +80,7 @@ class Resource(BASE, Extended):
 
     display_url = Column(String(), nullable=False)
 
-    date_added = Column(DateTime(), default=datetime.utcnow)
+    date_added = Column(DateTime(), default=datetime.now)
     date_crawl_start = Column(DateTime())
     date_crawl_end = Column(DateTime())
 
@@ -201,7 +201,7 @@ class ResourceGroup(BASE, Extended):
 
     name = Column(String(), nullable=False, unique=True)
     description = Column(String(), nullable=True)
-    added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    added = Column(DateTime(), default=datetime.now, nullable=False)
     removable = Column(Boolean, nullable=False, default=True)
 
     crawl_interval = Column(Integer(), nullable=False, default=86400)  # default: 1 day
@@ -257,7 +257,7 @@ class Mq(BASE, Extended):
     auth_user = Column(String(), nullable=False, info={"exclude_json": True})
     auth_pass = Column(String(), info={"exclude_json": True})
 
-    added = Column(DateTime(), default=datetime.utcnow)
+    added = Column(DateTime(), default=datetime.now)
     groups = relationship("ResourceGroup", back_populates="mq")
 
 
@@ -319,7 +319,7 @@ class UserGroup(BASE, Extended):
     members = relationship("User", secondary=user_group_members)
     resources = relationship("Resource", secondary=user_group_resources)
 
-    created = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    created = Column(DateTime(), default=datetime.now, nullable=False)
     description = Column(String(), nullable=True)
     password = Column(String(32), nullable=True, info={"json_exclude": True})
     invite_only = Column(Boolean, default=False, nullable=False)
@@ -350,8 +350,8 @@ class User(BASE, AuthUser, Extended):
     password = Column(String(120), nullable=False, info={"json_exclude": True})
     salt = Column(String(32), default=random_str(16), info={"json_exclude": True})
 
-    created = Column(DateTime(), default=datetime.utcnow, nullable=False)
-    modified = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    created = Column(DateTime(), default=datetime.now, nullable=False)
+    modified = Column(DateTime(), default=datetime.now, nullable=False)
 
     admin = Column(Boolean, default=False, nullable=False)
     removable = Column(Boolean, default=True, nullable=False)
@@ -442,7 +442,7 @@ class Post(BASE, Extended):
 
     title = Column(String(), nullable=False)
     content = Column(String(), nullable=False)
-    date_added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    date_added = Column(DateTime(), default=datetime.now, nullable=False)
 
     def __init__(self, created_by, content, title):
         self.created_by = created_by
@@ -568,7 +568,7 @@ class NmapRule(BASE, Extended):
     rule = Column(String(), nullable=False, unique=True)
     name = Column(String(), nullable=False, unique=True)
     output = Column(MutableJson(), nullable=True, default={"data": {}})
-    date_added = Column(DateTime(), default=datetime.utcnow, nullable=False)
+    date_added = Column(DateTime(), default=datetime.now, nullable=False)
     date_scanned = Column(DateTime(), nullable=True)
     status = Column(Integer, nullable=False, default=0)
 
@@ -596,9 +596,10 @@ class Logging(BASE, Extended):
     id = Column(Integer(), primary_key=True)
     message = Column(String(), nullable=False)
     data = Column(MutableJson(), nullable=True)
-    author = Column(String(), nullable=True)
-    date_added = Column(DateTime, nullable=False, default=datetime.utcnow)
-    log_level = Column(Integer(), nullable=False, default=0)  # 1: warning 2: error
+    category = Column(String(), nullable=True)
+    file = Column(String(), nullable=True)
+    date_added = Column(DateTime, nullable=False, default=datetime.now)
+    log_level = Column(Integer(), nullable=False, default=1)  # 0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR
 
-    ix_author = Index("ix_resource_author", author)
+    ix_author = Index("ix_resource_category", category)
     ix_date = Index("ix_resource_date_added", date_added)

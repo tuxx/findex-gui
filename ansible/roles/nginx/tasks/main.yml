@@ -29,6 +29,6 @@
     path: /etc/nginx/sites-available/default
 
 - name: add nginx default config
-  template: src=default.conf dest=/etc/nginx/sites-available/default.conf
+  template: src=default.conf dest=/etc/nginx/sites-enabled/default.conf
   tags: nginx
   notify: reload nginx

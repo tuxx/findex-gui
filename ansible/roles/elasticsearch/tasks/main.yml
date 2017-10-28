@@ -39,3 +39,16 @@
   service:
     name: elasticsearch
     enabled: yes
+
+- name: hard restart ES :(
+  shell:
+    cmd: "service elasticsearch restart"
+  args:
+    executable: /bin/bash
+
+- name: Wait 60 seconds for port 9200 (elasticsearch) to become open on the host
+  wait_for:
+    host: "{{ findex.es.host }}"
+    port: 9200
+    timeout: 60
+    delay: 2

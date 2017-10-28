@@ -1,17 +1,18 @@
 - name: deploy all
   hosts:
-    - all_in_one
+    - findex
   become: yes
   serial: 1
   any_errors_fatal: yes
   vars:
     git_repo: findex-gui
-    git_branch: scheduler
+    git_branch: master
   roles:
-#    - base
-#    - users
-#    - elasticsearch
-#    - postgres
-#    - rabbitmq
+    - base
+    - users
+    - supervisor
+    - elasticsearch
+    - postgres
+    - rabbitmq
     - nginx
     - gui

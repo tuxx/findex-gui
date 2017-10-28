@@ -10,6 +10,7 @@ from findex_gui.bin.config import config
 from findex_gui.bin.misc import version, cwd
 from findex_gui.bin.utils import get_pip_freeze
 from findex_gui.controllers.tasks.crawler import Crawler
+from findex_gui.bin.utils import is_gevent_monkey_patched
 from findex_gui.controllers.admin.scheduler.cron import CronController
 # from findex_gui.controllers.amqp.amqp import AmqpController
 
@@ -73,11 +74,13 @@ class AdminStatusController(object):
     @staticmethod
     def findex():
         rtn = OrderedDict()
-        rtn["version"] = _item(cls="info", data=version)
-        rtn["debug mode"] = _item(str(config("findex:findex:debug")))
-        rtn["config_location"] = _item(cwd())
-        rtn["application_root"] = _item(config("findex:findex:application_root"))
-        rtn["async mode"] = _item(config("findex:findex:async"))
+        rtn["Version"] = _item(cls="info", data=version)
+        rtn["Debug"] = _item(str(config("findex:findex:debug")))
+        rtn["Config Location"] = _item(cwd())
+        rtn["Application Root"] = _item(config("findex:findex:application_root"))
+
+        is_async = "True" if is_gevent_monkey_patched() else "False"
+        rtn["Async mode (Gevent monkey patch)"] = _item(is_async)
         rtn["No. Findex Users"] = FindexStatus.findex_get_nousers()
         try:
             Crawler.can_crawl()
@@ -165,7 +168,7 @@ class FindexStatus(AdminStatusController):
     def findex_get_nousers():
         from findex_gui.orm.models import User
         try:
-            return _item("%d user(s)" % len(db.session.query(User).all()), cls="info")
+            return _item("%d user(s)" % len(db.session.query(User).all()), cls="ok")
         except:
             db.session.rollback()
             return _item("error fetching users", cls="error")

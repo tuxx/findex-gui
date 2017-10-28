@@ -56,7 +56,7 @@
     executable: /bin/bash
   become_user: findex
 
-- name: Edit findex configuration (point to database VM)
+- name: Modify findex configuration (point to database VM)
   shell:
     cmd: |
       source /home/findex/findex-gui/venv/bin/activate
@@ -65,3 +65,11 @@
     chdir: /home/findex/findex-gui
     executable: /bin/bash
   become_user: findex
+
+- name: add supervisor findex-gui config
+  template: src=supervisor-findex-gui.conf dest=/etc/supervisor/conf.d/findex-gui.conf
+  notify:
+    - reload supervisor
+
+- name: restart findex-gui
+  supervisorctl: name=findex-gui state=restarted

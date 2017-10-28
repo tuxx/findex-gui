@@ -119,6 +119,8 @@ do_setup(
         "six",
         "python-dateutil",
         "unidecode",
+        "gunicorn",
+        "psycogreen"
     ],
     setup_requires=[
         "pytest-runner",

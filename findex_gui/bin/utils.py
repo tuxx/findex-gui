@@ -168,3 +168,12 @@ def log_msg(msg: str, category: str, level: int = 1):
     db.session.add(log)
     db.session.commit()
     db.session.flush()
+
+
+def is_gevent_monkey_patched():
+    try:
+        from gevent import monkey
+    except ImportError:
+        return False
+    else:
+        return monkey.is_module_patched('os')

@@ -20,7 +20,7 @@ Vagrant.configure(2) do |config|
         end
         aio.vm.provision "ansible" do |ansible|
             ansible.verbose = "v"
-            ansible.playbook = "ansible/all_in_one.yml"
+            ansible.playbook = "ansible/findex.yml"
             ansible.inventory_path = "ansible/development.inventory"
         end
     end

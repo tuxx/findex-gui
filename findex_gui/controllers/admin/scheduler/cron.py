@@ -23,7 +23,8 @@ class CronController:
         """
         tmp_file = tempfile.mkstemp("_fincron")[1]
         crontab = os.popen("crontab -l").read()
-        crontab += "\n%s %s\n" % (default_time, job)
+        if "no crontab for" not in crontab.lower():
+            crontab += "\n%s %s\n" % (default_time, job)
 
         f = open(tmp_file, "w")
         f.write(crontab)

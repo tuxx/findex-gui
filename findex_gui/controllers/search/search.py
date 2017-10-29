@@ -137,7 +137,9 @@ class SearchController:
                 val = "%s%%" % escape_like(kwargs["key"])
             else:
                 val = "%%%s%%" % escape_like(kwargs["key"])
-        q = q.filter(Files.searchable.like(val))
+
+        if val != "*":
+            q = q.filter(Files.searchable.like(val))
 
         q = q.order_by(Files.file_size.desc())
 

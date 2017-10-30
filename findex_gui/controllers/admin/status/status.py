@@ -84,13 +84,15 @@ class AdminStatusController(object):
         rtn["No. Findex Users"] = FindexStatus.findex_get_nousers()
         try:
             Crawler.can_crawl()
-            can_crawl = _item("True", cls="ok")
+            can_crawl = _item("Available", cls="ok")
         except Exception as ex:
             can_crawl = _item(str(ex), cls="error")
         rtn["'DIRECT' crawl mode"] = can_crawl
 
         has_cron = CronController.has_cronjob()
-        rtn["Scheduler cronjob availabe"] = _item(has_cron, cls="info" if has_cron else "error")
+        has_cron_err = "Not set, please activate it (Scheduler->Overview)"
+        has_cron = has_cron_err if not has_cron else "Set"
+        rtn["Scheduler cronjob"] = _item(has_cron, cls="info" if has_cron == "Set" else "error")
         return rtn
 
     @staticmethod

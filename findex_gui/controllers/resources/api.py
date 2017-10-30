@@ -81,9 +81,11 @@ def api_resource_add_post(server_name, server_address, server_id, resource_port,
     parameter("by_owner", type=int, required=False, default=None),
     parameter("limit", type=int, default=10),
     parameter("offset", type=int, default=0),
-    parameter("search", type=str, required=False, default=None)
+    parameter("search", type=str, required=False, default=None),
+    parameter("scheduled", type=str, required=False, default=None),
+    parameter("order_by", type=str, required=False, default=None, validator=validators.valid_column)
 )
-def api_resource_get(by_owner, limit, offset, search):
+def api_resource_get(by_owner, limit, offset, search, scheduled, order_by):
     """
     Get resources.
     :param by_owner: Filter on resources by owner id
@@ -99,6 +101,12 @@ def api_resource_get(by_owner, limit, offset, search):
 
     if by_owner:
         args["by_owner"] = by_owner
+
+    if scheduled:
+        args["scheduled"] = True if scheduled.lower() == "true" else False
+
+    if order_by:
+        args["order_by"] = order_by.split(":", 1)[1]
 
     # sanitize search query
     if search:

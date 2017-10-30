@@ -57,22 +57,18 @@ class Worker:
 
     @staticmethod
     def collect_tasks(check_resources: bool = True, check_nmap: bool = True):
+        log_msg("Collecting tasks", level=1, category="scheduler")
+        skipped = {"nmap": 0, "resources": 0}
         tasks = []
 
         def _skipping(_task, level=1):
             if isinstance(_task, NmapRule):
-                log_msg("skipping nmap rule \'%s\': %s" % (_task.name,
-                                                           _task.rule),
-                        level=level,
-                        category="scheduler")
+                skipped["nmap"] += 1
             elif isinstance(_task, Resource):
-                log_msg("skipping id %d: \'%s://%s\'" % (_task.id,
-                                                         _task.protocol_human,
-                                                         _task.resource_id),
-                        level=level,
-                        category="scheduler")
+                skipped["resources"] += 1
+
         if check_nmap:
-            for nmap_rule in db.session.query(NmapRule).filter(NmapRule.status == 0).all():
+            for nmap_rule in db.session.query(NmapRule).filter(NmapRule.status == 0):
                 if isinstance(nmap_rule.crawl_interval, int) and isinstance(nmap_rule.date_scanned, datetime):
                     # check last scan time
                     if (datetime.now() - nmap_rule.date_scanned).total_seconds() <= nmap_rule.scan_interval:
@@ -87,23 +83,19 @@ class Worker:
                 nmap_rule.status = 4  # task scheduled
                 log_msg("scheduled nmap rule for scanning \'%s\': %s" % (nmap_rule.name, nmap_rule.rule),
                         category="scheduler")
-
             db.session.commit()
             db.session.flush()
 
         if check_resources:
-            for group in db.session.query(ResourceGroup).all():
-                crawl_interval = group.crawl_interval
-
+            for group in db.session.query(ResourceGroup):
                 for resource in group.resources:
-                    # check last crawl time
-                    last = resource.date_crawl_end
-                    if isinstance(last, datetime):
-                        if (datetime.now() - last).total_seconds() <= crawl_interval:
-                            _skipping(resource, level=0)
-                            continue
-
                     if resource.meta.status != 0:
+                        _skipping(resource, level=0)
+                        continue
+
+                    # check last crawl time
+                    next_crawl = (datetime.now() - resource.date_crawl_next).total_seconds()
+                    if next_crawl <= 0:
                         _skipping(resource, level=0)
                         continue
 
@@ -114,5 +106,8 @@ class Worker:
                         resource.resource_id, resource.id), category="scheduler")
                 db.session.commit()
                 db.session.flush()
-        return tasks
 
+        if skipped["nmap"] or skipped["resources"]:
+            log_msg("skipping %d resource(s), %d nmap rule(s)" % (skipped["resources"], skipped["nmap"]),
+                    category="scheduler", level=1)
+        return tasks

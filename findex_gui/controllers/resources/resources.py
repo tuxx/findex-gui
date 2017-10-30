@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from sqlalchemy import desc
 from sqlalchemy_zdb import ZdbQuery
 
 from findex_gui.web import db, locales, auth
@@ -25,7 +28,8 @@ class ResourceController:
     @role_req("RESOURCE_VIEW")
     def get_resources(uid: int = None, name: str = None, address: str = None,
                       port: int = None, limit: int = None, offset: int = None,
-                      by_owner: int = None, search: str = None, protocol: int = None):
+                      by_owner: int = None, search: str = None, protocol: int = None,
+                      scheduled: bool = None, order_by: str = None):
         """
         Fetches some resources
         :param uid:
@@ -36,7 +40,9 @@ class ResourceController:
         :param offset:
         :param by_owner:
         :param protocol:
+        :param order_by: order_by a column
         :param search: performs a fulltext search on column 'search' which
+        :param scheduled: filter on scheduled
         includes: IP/DOMAIN, NAME, DISPLAY_URL, PROTOCOL
         :return:
         """
@@ -54,6 +60,12 @@ class ResourceController:
 
         if isinstance(protocol, int):
             q = q.filter(Resource.protocol == protocol)
+
+        if isinstance(scheduled, bool):
+            if scheduled:
+                q = q.filter(Resource.date_crawl_next <= datetime.now())
+            else:
+                q = q.filter(Resource.date_crawl_end.isnot(None))
 
         if isinstance(address, str) and address:
             qs = Server.query
@@ -75,6 +87,10 @@ class ResourceController:
                 raise Exception("Could not find server")
 
             q = q.filter(Resource.server_id == server.id)
+
+        if isinstance(order_by, str):
+            c = getattr(Resource, order_by)
+            q = q.order_by(desc(c))
 
         if offset and isinstance(offset, int):
             q = q.offset(offset)
@@ -142,7 +158,7 @@ class ResourceController:
                             display_url=display_url,
                             basepath=basepath)
         resource.description = description
-
+        resource.date_crawl_next = datetime.now()
         rm = ResourceMeta()
         if auth_user and auth_pass:
             rm.set_auth(auth_user, auth_pass, auth_type)

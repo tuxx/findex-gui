@@ -62,7 +62,8 @@
                         </div>
                         <div class="box-body">
                             <span style="display:block;margin-top:6px;float:left;">
-                                Last ran: <span id="last_ran"></span>
+                                Last ran: <span id="crawler_last_ran"></span><br>
+                                Crawlers: <span id="crawlers_active"></span>
                             </span>
                             <div class="btn-group pull-right" role="group" aria-label="submit">
                                 <button type="button" id="btn_manually_fire" class="btn btn-sm btn-success">
@@ -116,6 +117,21 @@
                                 <tbody></tbody>
                             </table>
                         </div>
+                        <div class="box-header with-border" style="padding-top: 0px;">
+                            <h3 class="box-title">Recently scheduled</h3>
+                        </div>
+                        <div class="box-body">
+                            <table id="recently" class="display table table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Date</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -145,10 +161,12 @@
         $(document).ready(function() {
             // selectors
             let table_server_overview = $("table#resources");
+            let table_server_recently = $("table#recently");
             let table_logs = $("table#logs");
-            let last_ran = $("#last_ran");
+            let last_ran = $("#crawler_last_ran");
+            let crawlers_active = $("#crawlers_active");
 
-            function row_writer(column_name, row_data){
+            function resources_row_writer(column_name, row_data){
                 if(column_name === "name") return row_data.name;
                 else if(column_name === "address") return `<code>${row_data["name human"]}</code>`;
                 else if(column_name === "scheduled") {
@@ -157,6 +175,14 @@
                         return `<span style="color:green">scheduled</span>`
                     }
                     return value;
+                }
+            }
+
+            function recently_row_writer(column_name, row_data){
+                if(column_name === "name") return row_data.name;
+                else if(column_name === "address") return `<code>${row_data["name human"]}</code>`;
+                else if(column_name === "date") {
+                    return row_data.updated;
                 }
             }
 
@@ -170,7 +196,7 @@
                 endpoint: "/admin/logs/get",
                 ui_search: false,
                 row_writer: log_row_writer,
-                refresh: 1,
+                refresh: 2,
                 params: {
                     category: "scheduler"
                 }
@@ -178,7 +204,24 @@
 
             table_server_overview.fintable({
                 endpoint: "/resource/get",
-                row_writer: row_writer
+                row_writer: resources_row_writer,
+                refresh: 2,
+                params: {
+                    scheduled: true
+                }
+            });
+
+            table_server_recently.fintable({
+                endpoint: "/resource/get",
+                row_writer: recently_row_writer,
+                ui_search: false,
+                ui_limit: false,
+                refresh: 2,
+                params: {
+                    scheduled: false,
+                    order_by: "Resource:date_crawl_end",
+                    limit: 3
+                }
             });
 
             $("#rm_cron").click(function(){
@@ -198,26 +241,26 @@
                 self.attr("disabled", "disabled");
 
                 FindexGui.api("/admin/scheduler/fire", "GET").then(function(data){
-                    get_last_ran(false);
+                    get_crawler_info(false);
                     self.prop("disabled", false);
                 });
             });
 
-            function get_last_ran(loop){
-                FindexGui.api("/admin/scheduler/last_ran", "GET").then(function(data){
-                    if(!data.data){
-                        last_ran.html("never");
-                    } else last_ran.html(data.data);
+            function get_crawler_info(loop){
+                FindexGui.api("/admin/scheduler/info", "GET").then(function(data){
+                    if(!data.data.last_ran) last_ran.html("never");
+                    else last_ran.html(data.data.last_ran);
+                    crawlers_active.html(`${data.data.active_crawlers} online`);
                 });
 
                 if(loop) {
                     setTimeout(function () {
-                        get_last_ran(true);
-                    }, 1000);
+                        get_crawler_info(true);
+                    }, 5000);
                 }
             }
 
-            get_last_ran(true);
+            get_crawler_info(true);
         });
     </script>
 

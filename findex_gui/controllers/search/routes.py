@@ -1,5 +1,5 @@
 import flask
-from flask import session
+from flask import session, redirect, url_for
 import findex_gui.controllers.search.converters
 from findex_gui.web import app, themes
 from findex_gui.controllers.search.search import SearchController
@@ -7,7 +7,7 @@ from findex_gui.controllers.search.search import SearchController
 
 @app.route('/search')
 def search_home():
-    return themes.render('main/search')
+    return redirect("%ssearch/*&type=[files]" % app.config["APPLICATION_ROOT"], 302)
 
 
 @app.route('/search/<search:parsed>')

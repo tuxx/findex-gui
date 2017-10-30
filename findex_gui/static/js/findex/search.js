@@ -13,7 +13,7 @@ class Search {
      * @return
      */
     search(page){
-        if (page == null){
+        if (page === null){
             page = 0;
         }
 
@@ -24,7 +24,7 @@ class Search {
         params['page'] = page;
         params['key'] = this.get_key();
 
-        if(params['key'] == '') return;
+        if(params['key'] === '') params['key'] = '*';
 
         return this._search_post({
             'params': params
@@ -37,8 +37,8 @@ class Search {
      */
     get_key(){
         let key = $(this.selectors['search_input']).val();
-        if(key == '') {
-            if(window.location.pathname == '/search') this.error('');
+        if(key === '') {
+            if(window.location.pathname === '/search') this.error('');
             else this.error('Error: Empty search...');
         }
 
@@ -82,7 +82,7 @@ class Search {
      */
     static get_urlbar(){
         let val = document.location.href.substr(document.location.href.indexOf('/search') + 7);
-        if(val == '') return {'key': val};
+        if(val === '') return {'key': "*"};
         else val = val.substr(1);
 
         return Search.get_urlbar_items(val);
@@ -92,9 +92,9 @@ class Search {
         let params = {};
         val.split("&").forEach(function (part, index) {
             let item = part.split("=");
-            var obj = [decodeURIComponent(item[0]), decodeURIComponent(item[1])];
+            let obj = [decodeURIComponent(item[0]), decodeURIComponent(item[1])];
 
-            if (index == 0 && has_key) {
+            if (index === 0 && has_key) {
                 params['key'] = obj[0];
             } else {
                 if(obj[1].startsWith('[') && obj[1].endsWith(']')){
@@ -136,7 +136,7 @@ class Search {
             }
         });
 
-        if(data[key].hasOwnProperty('size') && data[key]['size'] != ''){
+        if(data[key].hasOwnProperty('size') && data[key]['size'] !== ''){
             params[key]['file_size'] = data[key]['size'];
         }
 
@@ -160,15 +160,16 @@ class Search {
      */
     _search_post({params = {}} = {}){
         let url_data = this.get_url();
+        if(url_data === "/search/") url_data = `${url_data}*`;
+
         Search.set_urlbar(url_data);
 
         let key = params['key'];
         delete params['key'];
 
         let _url = `/search/${key}`;
-        let _data = params;
 
-        return FindexGui.api(_url, "POST", _data).then(function(data){
+        return FindexGui.api(_url, "POST", params).then(function(data){
             this.parse_results(data);
         }.bind(this)).fail(function(data){
             this.error(data);

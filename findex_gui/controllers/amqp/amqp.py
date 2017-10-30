@@ -107,7 +107,8 @@ class AmqpConnectionController(MqConnectionController):
                         "recursive_foldersizes": True,
                         "port": resource.port,
                         "auth_user": resource.meta.auth_user,
-                        "auth_pass": resource.meta.auth_pass
+                        "auth_pass": resource.meta.auth_pass,
+                        "depth": resource.meta.depth
                     }
                 }
             }

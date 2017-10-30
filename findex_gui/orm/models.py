@@ -83,6 +83,7 @@ class Resource(BASE, Extended):
     date_added = Column(DateTime(), default=datetime.now)
     date_crawl_start = Column(DateTime())
     date_crawl_end = Column(DateTime())
+    date_crawl_next = Column(DateTime())
 
     # this search column will be used for front-end
     # searching capabilities, it will include:
@@ -140,9 +141,7 @@ class Resource(BASE, Extended):
         if not self.date_crawl_end:
             return "scheduled"
 
-        _tmp = self.date_crawl_end + timedelta(seconds=self.group.crawl_interval)
-        seconds_till_scheduling = int((datetime.now() - _tmp).total_seconds() * -1)
-
+        seconds_till_scheduling = int((datetime.now() - self.date_crawl_next).total_seconds() * -1)
         if seconds_till_scheduling >= 0:
             if seconds_till_scheduling <= 60:
                 rtn = "%d seconds" % seconds_till_scheduling
@@ -178,7 +177,7 @@ class ResourceMeta(BASE, Extended):
 
     banner = Column(String(), nullable=True)
     response_time = Column(Integer(), nullable=True)
-    depth = Column(Integer(), nullable=True)  # nested directories - specifies crawl depth
+    depth = Column(Integer(), nullable=True, default=20)  # nested directories - specifies crawl depth
     uid = Column(String(), nullable=True)
 
     def set_auth(self, username, password, auth_type):
@@ -240,6 +239,7 @@ class Crawler(BASE, Extended):
     crawler_name = Column(String(), nullable=False, unique=True)
     heartbeat = Column(TIMESTAMP())
 
+    ix_crawler_name = Index("ix_crawler_name", crawler_name)
 
 class Mq(BASE, Extended):
     __tablename__ = "mq"

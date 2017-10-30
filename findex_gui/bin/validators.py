@@ -1,4 +1,8 @@
+import importlib
+
 from findex_common.static_variables import FileProtocols
+
+from findex_gui.orm.models import BASE
 
 def amqp_broker(value):
     if value not in ["rabbitmq"]:
@@ -26,3 +30,27 @@ def strong_password(value):
     min_length = 6
     if len(value) <= min_length:
         raise Exception("Password length must be %d characters or more" % min_length)
+
+def valid_column(value):
+    """Introspects SQLa class - checks for column_name"""
+    try:
+        model_name, column_name = value.split(":", 1)
+    except:
+        raise Exception("invalid input")
+
+    try:
+        module = importlib.import_module("findex_gui.orm.models")
+        dmodule = dir(module)
+        if model_name not in dmodule:
+            raise Exception()
+        model = getattr(module, model_name)
+        if not issubclass(model, BASE):
+            raise Exception()
+        columns = [c.name for c in model.get_columns()]
+    except:
+        raise Exception("database table not found by the name \"%s\"" % model_name)
+    try:
+        if column_name not in columns:
+            raise Exception()
+    except:
+        raise Exception("column name \"%s\" not found" % column_name)

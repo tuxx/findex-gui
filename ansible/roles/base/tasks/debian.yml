@@ -1,0 +1,43 @@
+- name: set the max open file descriptors
+  sysctl: name=fs.file-max value=64000 state=present
+  become_user: root
+
+- name: set the max map count
+  sysctl: name=vm.max_map_count value=262144 state=present
+
+- name: switch to Google DNS
+  copy: src=resolv dest=/etc/resolv.conf
+
+- name: installing alternative (dutch) apt repos
+  copy: src=sources.list dest=/etc/apt/sources.list
+  become_user: root
+
+- name: install base requirements
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - net-tools
+    - curl
+    - nmap
+    - aptitude
+    - nload
+    - build-essential
+    - wget
+    - gcc
+    - ngrep
+    - git
+    - screen
+    - libssl-dev
+
+- name: install setfacl support
+  become: yes
+  apt: pkg=acl
+
+- name: Add PostgreSQL repository key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- name: Add PostgreSQL repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' state=present
+
+- name: update apt
+  apt:
+    update_cache: yes

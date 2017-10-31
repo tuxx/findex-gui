@@ -54,7 +54,7 @@ def do_setup(**kwargs):
 
 do_setup(
     name="Findex-GUI",
-    version="0.2.18",
+    version="0.3.0.1",
     author="Sander Ferdinand",
     author_email="sa.ferdinand@gmail.com",
     packages=[
@@ -89,24 +89,38 @@ do_setup(
     },
     install_requires=[
         "gevent==1.2.1",
-        "flask==0.12",
+        "psycopg2==2.7.1",
+        "cryptography",
+        "pyopenssl",
+        "requests[security]",
+        "flask==0.12.2",
+        "jinja2",
         "click",
-        "findex_common",
         "flask-wtf==0.14.2",
         "flask-auth==0.85",
-        "psycopg2==2.7.1",
+        "flask-yoloapi==0.0.6",
+        "flask-babel",
+        "findex_common",
         "sqlalchemy>=1.1.6",
         "sqlalchemy-utils>=0.32.13",
         "sqlalchemy-zdb>=0.1.0",
-        "jinja2==2.9.5",
+        "sqlalchemy-json",
+        "dsnparse==0.1.10",
         "furl==0.5.7",
-        "flask-babel",
         "humanfriendly==3.2",
         "IPy==0.83",
         "pysocks",
         "python-magic",
-        "requests==2.13.0",
-        "markupsafe"
+        "markupsafe",
+        "pika",
+        "beautifulsoup4",
+        "pyasn1",
+        "pysmb==1.1.19",
+        "six",
+        "python-dateutil",
+        "unidecode",
+        "gunicorn",
+        "psycogreen"
     ],
     setup_requires=[
         "pytest-runner",
@@ -118,6 +132,6 @@ do_setup(
         "pytest-django",
         "pytest-pythonpath",
         "mock==2.0.0",
-        "responses==0.5.1",
+        "responses==0.5.1"
     ],
 )

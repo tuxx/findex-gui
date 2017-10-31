@@ -1,0 +1,160 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Overview
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#servers" data-toggle="tab">Servers</a></li>
+                            <li class=""><a href="#groups" data-toggle="tab">Groups</a></li>
+                            <li class=""><a href="#nmap_rules" data-toggle="tab">Nmap Rules</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="servers">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="resources" class="display table table-bordered" cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th style="width: 30px;"></th>
+                                                <th style="width: 80px;">Protocol</th>
+                                                <th style="width: 30px;">Location</th>
+                                                <th style="width: 150px;">Name</th>
+                                                <th>Files</th>
+                                                <th>Updated</th>
+                                                <th>Group</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="groups">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="server_groups" class="display table table-bordered"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Description</th>
+                                                    <th>Date Added</th>
+                                                    <th>Crawl Interval</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="nmap_rules">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="nmap" class="display table table-bordered"
+                                               cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Rule</th>
+                                                <th>Output</th>
+                                                <th>Last Scanned</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <style>
+        table tbody tr:hover{
+            background: #f9f9f9;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            // @TODO: auto-refresh
+
+            // jump to menu item via anchor/hash in url
+            let hash = window.location.hash;
+            if(hash) $(`ul.nav li a[href="${hash}"]`).trigger('click');
+
+            // selectors
+            let table_server_overview = $("table#resources");
+            let table_server_nmap = $("table#nmap");
+            let table_servergroups = $("table#server_groups");
+
+            function server_column_writer(column_name, value){
+                if(column_name === ""){
+                    return `<label><input type="checkbox" value=""></label>`;
+                }
+                if(column_name === "group") return value.name;
+                return value;
+            }
+
+            table_server_overview.fintable({
+                endpoint: "/resource/get",
+                column_writer: server_column_writer
+            });
+
+            function groups_column_writer(column_name, value){
+                return value;
+            }
+
+            table_servergroups.fintable({
+                endpoint: "/resourcegroup/get",
+                column_writer: groups_column_writer
+            });
+
+            function nmap_column_writer(column_name, value){
+                if(!value) return "";
+                if(column_name === "output") {
+                    let output = "No data";
+                    if(!value.data.hasOwnProperty("output")) return output;
+                    if(!value.data.output) return output;
+                    output = "";
+                    value.data.output.forEach(function (obj, i) {
+                        output += `<code>${obj.host}:${obj.port}</code><br>`;
+                    });
+                    return output;
+                }
+                else if(column_name === "rule"){
+                    return `<code>${value}</code>`;
+                } else {
+                    return value;
+                }
+            }
+
+            table_server_nmap.fintable({
+                endpoint: "/admin/server/nmap/get",
+                column_writer: nmap_column_writer
+            });
+        });
+    </script>
+
+{% endblock %}

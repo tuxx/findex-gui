@@ -1,0 +1,75 @@
+- name: clone findex-gui
+  git: >
+    repo=https://github.com/skftn/{{ git_repo }}.git
+    dest=/home/findex/{{ git_repo }}/
+    version={{ git_branch }}
+    force=yes
+  become_user: findex
+
+- name: install additional system requirements for findex-gui
+  apt: name={{ item }} state=present
+  with_items:
+    - postgresql-client-9.5
+    - libpq-dev
+    - python-dev
+    - python3.5
+    - python3.5-dev
+    - python-pip
+    - python-virtualenv
+    - python3-pip
+    - libffi-dev
+
+- name: Create virtualenv
+  shell: /usr/bin/virtualenv -p /usr/bin/python3.5 venv
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: Install findex-gui python requirements
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      pip install -e .
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: Install findex-crawl python requirements
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      pip install -r requirements.txt
+  args:
+    chdir: /home/findex/findex-gui/findex-crawl
+    executable: /bin/bash
+  become_user: findex
+
+- name: Make findex conf dir
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      /home/findex/findex-gui/venv/bin/findex
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: Modify findex configuration (point to database VM)
+  shell:
+    cmd: |
+      source /home/findex/findex-gui/venv/bin/activate
+      findex edit_config database.connection="postgresql://{{ findex.postgres.user }}:{{ findex.postgres.passwd }}@{{ findex.postgres.host }}:{{ findex.postgres.port }}/findex" elasticsearch.host="http://{{ findex.es.host }}:9200/"
+  args:
+    chdir: /home/findex/findex-gui
+    executable: /bin/bash
+  become_user: findex
+
+- name: add supervisor findex-gui config
+  template: src=supervisor-findex-gui.conf dest=/etc/supervisor/conf.d/findex-gui.conf
+  notify:
+    - reload supervisor
+
+- name: restart findex-gui
+  supervisorctl: name=findex-gui state=restarted

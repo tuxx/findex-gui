@@ -1,0 +1,89 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                News
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> News</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#news" data-toggle="tab">Overview</a></li>
+                            <li><a href="#" id="news_add" data-toggle="tab">Add News</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="news">
+                            {% if not posts %}
+                                {{ _("No news added yet") }}
+                            {% endif %}
+                            {% for post in posts %}
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    <div class="box box-solid">
+                                        <div class="box-header with-border">
+                                            <i class="fa fa-pencil-square-o"></i>
+
+                                            <h3 class="box-title"><b>{{ post.title }}</b> - {{ post.date_added_human }}</h3>
+                                         </div>
+                                        <!-- /.box-header -->
+                                        <div class="box-body">
+                                            <blockquote>
+                                            <p>
+                                                {{ post.content | safe }}
+                                            </p>
+                                            <small>{{ post.created_by.realname }} <cite title="Source Title">{{ post.ago }}</cite></small>
+                                            </blockquote>
+                                        </div>
+                                        <div class="box-footer">
+                                            <div class="pull-right">
+                                                <a id="post_remove" href="#" data-uid="{{ post.id }}" class="uppercase">Remove post</a>
+                                            </div>
+                                            <div class="pull-left">
+                                                <a id="post_edit" href="#" data-uid="{{ post.id }}" class="uppercase">Edit</a>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-body -->
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#news_add").click(function(){
+                goto_uri(url_for(`/admin/news/add`));
+            });
+
+            $("a#post_edit").click(function(){
+                let uid = $(this).attr('data-uid');
+                goto_uri(url_for(`/admin/news/edit/${uid}`));
+            });
+
+            $("a#post_remove").click(function(){
+                let uid = $(this).attr('data-uid');
+                goto_uri(url_for(`/admin/news/remove/${uid}`));
+            });
+        });
+    </script>
+
+{% endblock %}

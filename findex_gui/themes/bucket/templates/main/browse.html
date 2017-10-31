@@ -21,6 +21,9 @@
                 <div class="col-md-12">
                     <hr>
                     <div class="col-md-8">
+                        {% if not resources %}
+                            None indexed yet.
+                        {% else %}
                         <style>
                             tr{
                                 cursor:pointer;
@@ -70,6 +73,7 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                        {% endif %}
                     </div>
 {#                    <div class="col-md-4">#}
 {#                        <div class="panel panel-default">#}

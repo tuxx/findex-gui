@@ -1,0 +1,54 @@
+- name: install postgres + stuff
+  apt: name={{ item }} state=present
+  with_items:
+    - postgresql-client-9.5
+    - postgresql-9.5
+    - libpq-dev
+    - python-psycopg2
+
+- name: add pg_hba.conf
+  template: src=pg_hba.conf dest=/etc/postgresql/9.5/main/pg_hba.conf
+  tags: postgres
+
+- name: add postgres.conf
+  template: src=postgresql.conf dest=/etc/postgresql/9.5/main/postgresql.conf
+  tags: postgres
+
+- name: download zombodb_jessie_pg95-3.1.15_amd64.deb
+  get_url:
+    url="https://github.com/zombodb/zombodb/releases/download/v3.1.15/zombodb_jessie_pg95-3.1.15_amd64.deb"
+    dest="/tmp/zombodb_jessie_pg95-3.1.15_amd64.deb"
+
+- name: install zombodb_jessie_pg95-3.1.15_amd64.deb
+  apt: deb="/tmp/zombodb_jessie_pg95-3.1.15_amd64.deb"
+  notify: restart postgresql
+
+- name: Create findex database
+  postgresql_db:
+    name: findex
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    login_user: postgres
+  become_user: postgres
+
+- name: Create findex database user
+  postgresql_user:
+    name: findex
+    login_user: postgres
+    db: findex
+    password: oughtToChangeThis
+    role_attr_flags: SUPERUSER
+    priv: ALL
+  become_user: postgres
+  notify: restart postgresql
+
+- name: Enable required extensions
+  postgresql_ext:
+    name: "{{ item }}"
+    login_user: findex
+    db: findex
+  with_items:
+    - zombodb
+    - pg_trgm
+  become_user: findex

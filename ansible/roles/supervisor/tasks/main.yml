@@ -1,0 +1,5 @@
+- name: get supervisor
+  apt: name=supervisor state=present
+
+- name: start supervisor
+  service: name=supervisor state=started enabled=yes

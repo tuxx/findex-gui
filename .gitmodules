@@ -1,0 +1,4 @@
+[submodule "findex-crawl"]
+	path = findex-crawl
+	url = https://github.com/skftn/findex-crawl.git
+	branch = master

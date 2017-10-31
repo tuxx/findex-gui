@@ -5,3 +5,22 @@ $(function(){
     menu_selection.parent().parent().parent().addClass('active');
     menu_selection.parent().addClass('active');
 });
+
+function msgbox_error(msg){
+    $("div.box-body").prepend(`
+    <div class="col-xs-4 no-padding">
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4><i class="icon fa fa-ban"></i> Error!</h4>
+            ${msg}
+        </div>
+    </div>
+    `);
+}
+
+var get_form_data = function (selector) {
+    return $(selector).serializeArray().reduce(function (obj, item) {
+        obj[item.name] = item.value;
+        return obj;
+    }, {})
+};

@@ -1,0 +1,13 @@
+findex:
+  host: "192.168.1.13"
+  es:
+    host: "127.0.0.1"
+  postgres:
+    host: "127.0.0.1"
+    passwd: "oughtToChangeThis"
+    user: "findex"
+    port: 5432
+    shared_buffers: "512MB"
+    pg_hba_whitelist: "host findex findex 127.0.0.1/24 md5"
+  rabbitmq:
+    passwd: "changeme"

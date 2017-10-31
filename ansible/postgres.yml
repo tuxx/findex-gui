@@ -1,0 +1,12 @@
+- name: deploy postgres
+  hosts:
+    - postgres
+    - postgres_dev
+  become: yes
+  serial: 1
+  any_errors_fatal: yes
+  roles:
+    - base
+    - users
+    - postgres
+    - rabbitmq

@@ -147,3 +147,18 @@ function url_for(inp){
     if(inp.startsWith("/")) inp = inp.slice(1);
     return `${APPLICATION_ROOT}${inp}`;
 }
+
+
+function extend(obj, src) {
+    for (var key in src) {
+        if (src.hasOwnProperty(key)) obj[key] = src[key];
+    }
+    return obj;
+}
+
+var get_form_data = function (selector) {
+    return $(selector).serializeArray().reduce(function (obj, item) {
+        obj[item.name] = item.value;
+        return obj;
+    }, {})
+};

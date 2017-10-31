@@ -1,0 +1,54 @@
+- name: set swappiness
+  sysctl: name=vm.swappiness value=1 state=present
+
+- name: install openjdk
+  apt: name=openjdk-8-jre-headless state=present
+
+- name: download elasticsearch-1.7.6.deb
+  get_url:
+    url="https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.6.deb"
+    dest="/tmp/elasticsearch-1.7.6.deb"
+
+- name: install elasticsearch-1.7.6.deb
+  apt: deb="/tmp/elasticsearch-1.7.6.deb"
+
+- name: copy more elasticsearch configuration
+  copy: src=default_elasticsearch dest=/etc/default/elasticsearch
+
+- name: copy elasticsearch configuration
+  template: src=elasticsearch.yml dest=/etc/elasticsearch/elasticsearch.yml
+  notify:
+    - start elasticsearch
+
+- name: download zombodb-es-plugin-3.1.15.zip
+  get_url:
+    url="https://github.com/zombodb/zombodb/releases/download/v3.1.15/zombodb-es-plugin-3.1.15.zip"
+    dest="/tmp/zombodb-es-plugin-3.1.15.zip"
+
+- name: install zombodb-es-plugin-3.1.15.zip
+  shell:
+    cmd: /usr/share/elasticsearch/bin/plugin -r zombodb && /usr/share/elasticsearch/bin/plugin -i zombodb -u file:///tmp/zombodb-es-plugin-3.1.15.zip
+  args:
+    executable: /bin/bash
+  become_user: root
+  notify:
+    - start elasticsearch
+    - restart elasticsearch
+
+- name: add elasticsearch to system boot
+  service:
+    name: elasticsearch
+    enabled: yes
+
+- name: hard restart ES :(
+  shell:
+    cmd: "service elasticsearch restart"
+  args:
+    executable: /bin/bash
+
+- name: Wait 60 seconds for port 9200 (elasticsearch) to become open on the host
+  wait_for:
+    host: "{{ findex.es.host }}"
+    port: 9200
+    timeout: 60
+    delay: 2

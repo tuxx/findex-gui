@@ -1,0 +1,53 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Status Overview
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Servers</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12 no-padding">
+
+                    <style>
+                        .info-box:hover{
+                            cursor: pointer;
+                        }
+                    </style>
+                    {% for name, options in results.items() %}
+                        {% set color = 'green' %}
+                        {% if options.has_errors >= 1 %}
+                            {% set color = 'red' %}
+                        {% endif %}
+
+                        <div class="col-md-4">
+                            <a href="{{ url_for("admin_status_"+name) }}" class="info-box bg-{{ color }}">
+                                <span class="info-box-icon"><i class="ion ion-ios-pricetag-outline"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">{{ name }}</span>
+                                    <span class="info-box-number">{{ options.has_errors }} error(s)</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: 100%"></div>
+                                    </div>
+                                    <span class="progress-description">
+                                        Details...
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+        </section>
+    </div>
+
+
+{% endblock %}

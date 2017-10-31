@@ -1,0 +1,16 @@
+- name: install rabbitmq
+  apt: name={{ item }} state=present
+  with_items:
+    - rabbitmq-server
+    - librabbitmq-dev
+
+- name: configure rabbitmq
+  shell:
+    cmd: "{{item}}"
+  with_items:
+    - /usr/sbin/rabbitmq-plugins enable rabbitmq_management
+    - /usr/sbin/rabbitmqctl add_user findex {{ findex.rabbitmq.passwd }}
+    - /usr/sbin/rabbitmqctl set_user_tags findex administrator
+    - /usr/sbin/rabbitmqctl set_permissions -p / findex ".*" ".*" ".*"
+  args:
+    executable: /bin/bash

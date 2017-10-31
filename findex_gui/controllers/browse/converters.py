@@ -35,6 +35,8 @@ class BrowseUrlConverter(BaseConverter):
 
         if not file_isdir:
             file_name, file_ext = os.path.splitext(ntpath.basename(path))
+            if not file_ext:
+                file_ext = None
 
         file_path = "%s/" % "/".join(path.split("/")[:-1])
 

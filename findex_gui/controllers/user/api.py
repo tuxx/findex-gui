@@ -1,70 +1,68 @@
 import flask
-from flask import request
+from flask_yoloapi import endpoint, parameter
 
 from findex_gui.web import app, locales
+from findex_gui.bin import validators
 from findex_gui.orm.models import User
-from findex_gui.controllers.helpers import findex_api, ApiArgument as api_arg
 from findex_gui.controllers.auth.auth import get_current_user_data
 from findex_gui.controllers.user.decorators import login_required
 from findex_gui.controllers.user.user import UserController
 
 
-@app.route('/api/v2/user/locale', methods=['POST'])
-def api_user_locale():
-    e = ''
-
-
-@app.route('/api/v2/user/locale/all', methods=['GET'])
-def api_user_locale_available():
-    return flask.jsonify(**locales)
-
-
-@app.route('/api/v2/user/locale/set', methods=['POST'])
-def api_user_locale_set():
-    if "lang" in request.form:
-        lang = request.form["lang"]
-    elif "lang" in request.json:
-        lang = request.json["lang"]
-    else:
-        return flask.jsonify(**{'fail': 'parameter \'lang\' not given'}), 400
-
-    try:
-        if request.authorization or get_current_user_data():
-            if request.authorization:
-                user = UserController.authenticate_basic()
-            else:
-                user = User.query.filter(
-                    User.id == get_current_user_data()['id']).one()
-            if user:
-                UserController.locale_set(
-                    locale=lang, user=user)
-                return flask.jsonify(**{'success': True}), 201
-
-        UserController.locale_set(locale=request.form['lang'])
-        return flask.jsonify(**{'status': True}), 201
-    except Exception as ex:
-        return flask.jsonify(**{'fail': str(ex)}), 400
-
-
 @app.route("/api/v2/user/delete", methods=["POST"])
-@findex_api(
-    api_arg("username", type=str, required=True, help="Username")
+@endpoint.api(
+    parameter("username", type=str, required=True)
 )
-def api_user_delete(data):
-    user = UserController.user_delete(username=data['username'])
-    if isinstance(user, Exception):
-        return user
-    return data
+def api_user_delete(username):
+    """
+    Deletes an user.
+    :param username: the username in question
+    :return:
+    """
+    user = UserController.user_delete(username=username)
+    return "user '%s' deleted" % username
 
 
 @app.route("/api/v2/user/register", methods=["POST"])
-@findex_api(
-    api_arg("username", type=str, required=True, help="Username"),
-    api_arg("password", type=str, required=True, help="Password")
+@endpoint.api(
+    parameter("username", type=str, required=True),
+    parameter("password", type=str, required=True, validator=validators.strong_password)
 )
-def api_user_register(data):
-    user = UserController.user_add(username=data['username'], password=data['password'])
-    if isinstance(user, Exception):
-        return user
+def api_user_register(username, password):
+    """
+    Register a new user
+    :param username: the username in question
+    :param password: super secure password
+    :return:
+    """
+    user = UserController.user_add(username=username, password=password)
+    return "user '%s' registered" % username
 
-    return "user registered"
+
+@app.route("/api/v2/user/locale", methods=["POST"])
+def api_user_locale():
+    e = ""
+
+
+@app.route("/api/v2/user/locale/all", methods=["GET"])
+def api_user_locale_available():
+    return locales
+
+
+@app.route("/api/v2/user/locale/set", methods=["POST"])
+@endpoint.api(
+    parameter("lang", type=str, required=True)
+)
+def api_user_locale_set(lang):
+    """
+    Sets the web interface locale.
+    :param lang: The language as "en" or "nl", etc.
+    :return:
+    """
+    current_user = get_current_user_data()
+    if get_current_user_data():
+        UserController.locale_set(locale=lang, user_id=current_user["id"])
+        return "locale set to %s" % lang
+
+    UserController.locale_set(locale=lang)
+    return "local set to %s" % lang

@@ -1,0 +1,113 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+    <style>
+        table.system-status-report tr.error {
+            color: #C70000;
+            background-color: #FFDDDD;
+        }
+        table.system-status-report{
+            width:100%;
+        }
+
+        table.system-status-report tr.merge-up td {
+            padding: 0 6px 8px 28px;
+        }
+
+        table.system-status-report td {
+            padding: 6px;
+            vertical-align: middle;
+        }
+
+        .element-invisible {
+            position: absolute !important;
+            clip: rect(1px 1px 1px 1px);
+            clip: rect(1px, 1px, 1px, 1px);
+            overflow: hidden;
+            height: 1px;
+        }
+
+        table.system-status-report tr.info {
+            color: #040f37;
+            background-color: #bdf;
+        }
+
+        table.system-status-report td.status-icon {
+            width: 16px;
+            padding-right: 0;
+        }
+
+        table.system-status-report td.status-icon div {
+            background-repeat: no-repeat;
+            height: 16px;
+            width: 16px;
+        }
+
+        table.system-status-report tr {
+            border-bottom: 1px solid #ccc;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        table.system-status-report tr.ok {
+            color: #255b1e;
+            background-color: #e5ffe2;
+        }
+
+        table.system-status-report tr.info {
+            color: #040f37;
+            background-color: #bdf;
+        }
+
+        table.system-status-report tr.err {
+            color: #840;
+            background-color: #fffbe2;
+        }
+    </style>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                {{ name.capitalize() }} Status
+                <small></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <table class="system-status-report">
+                                <tbody>
+                                {% for _k, _v in data.items() %}
+                                    <tr class="{{ _v.cls }}">
+                                        <td class="status-icon">
+                                            <div title="Info"><span class="element-invisible">Info</span></div>
+                                        </td>
+                                        <td class="status-title"><b>{{ _k }}</b></td>
+                                        <td class="status-value">{{ _v.data }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 2.3.1
+        </div>
+        <strong>zzz</a>.</strong> zzz
+    </footer>
+
+{% endblock %}

@@ -103,8 +103,8 @@ def migrate_cwd():
         return
 
     log.warning(
-        "This is the first time you're running Cuckoo after updating your "
-        "local version of Cuckoo. We're going to update files in your CWD "
+        "This is the first time you're running Findex after updating your "
+        "local version of Findex. We're going to update files in your CWD "
         "that require updating. Note that we'll first ensure that no custom "
         "patches have been applied by you before applying any modifications "
         "of our own."
@@ -161,5 +161,5 @@ def migrate_cwd():
 
     log.info(
         "Automated migration of your CWD was successful! Continuing "
-        "execution of Cuckoo as expected."
+        "execution of Findex as expected."
     )

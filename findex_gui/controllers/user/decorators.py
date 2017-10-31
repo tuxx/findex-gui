@@ -6,14 +6,11 @@ from flask_babel import gettext
 from findex_gui.controllers.auth.auth import get_current_user_data, not_logged_in
 from findex_gui.controllers.user.user import UserController
 
-
 def _not_logged_in():
     return abort(401, gettext('Unauthorized'))
 
-
 def _not_admin():
     return abort(401, gettext('Admin privileges required'))
-
 
 def admin_required(f):
     @wraps(f)
@@ -23,7 +20,6 @@ def admin_required(f):
 
         return f(*args, **kwargs)
     return decorator
-
 
 def login_required(f):
     @wraps(f)

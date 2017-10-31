@@ -1,0 +1,49 @@
+{% macro render_field(field, label_visible=true) -%}
+    <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
+    {% if field.type == "BooleanField" %}
+        <div class="row">
+            <div class="col-md-12">
+                <label for="{{ field.id }}" class="control-label"><label for="{{ field.id }}">{{ field.name }}</label></label>
+            </div>
+            <div class="col-md-12">
+                {{ field(class_='', **kwargs) }}
+            </div>
+        </div>
+    {% elif field.type == "RadioField" %}
+        {% set default_value = field.default %}
+        {% for value, label, _ in field.iter_choices() %}
+            {% set checked = value == default_value %}
+            <div class="radio">
+                <label>
+                    <input type="radio" name="{{ field.id }}" id="{{ field.id }}" value="{{ value }}" {% if checked %}checked{% endif %}>{{ label }}
+                </label>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+            {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
+                <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+                {% if field.flags.required %}<span style="color:red;font-weight:bold;">*</span>{% endif %}
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            {% set size = "col-md-12" %}
+            {% if field.type == "SelectField" %}
+                {% set size = "col-md-6" %}
+            {% endif %}
+
+            <div class="{{ size }}">
+                {{ field(class_='form-control', **kwargs) }}
+            </div>
+        </div>
+        {% if field.errors %}
+            {% for e in field.errors %}
+                <p class="help-block">{{ e }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+    </div>
+{%- endmacro %}

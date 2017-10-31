@@ -29,16 +29,42 @@ Requirements
 ### Screenshot
 [![pic](http://i.imgur.com/WpTTkxx.png)](w0w)
 
-### Installation
+Installation
+------------
 
-Please follow the [manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) document. It should include all the steps involved in getting `findex-gui` running.
+**warning: findex is still in development and not in alpha mode.**
 
-As for Docker, containers will be provided soon.
+The easiest way to get findex up and running is via Vagrant. This will create a single virtual machine running Findex.
 
+To get up and running, make sure you have the correct versions installed:
 
+```sh
+$ ansible --version
+ansible 2.3.2.0
 
-### Streetcred
-- Volkskrant (http://i.imgur.com/9oqlKU2.png) (dutch)
-- Security.nl (dutch): [Duizenden openstaande FTP-servers in Nederland](https://www.security.nl/posting/440684)
-- Motherboard (dutch) [440 terabytes aan Nederlandse privébestanden zijn nu makkelijk doorzoekbaar](https://motherboard.vice.com/nl/article/440-terabytes-aan-nederlandse-privbestanden-zijn-nu-makkelijk-doorzoekbaar)
-- [@hdmoore](http://i.imgur.com/nyP0EEq.png)
+$ vagrant -v
+Vagrant 2.0.0
+
+$ virtualbox -h
+Oracle VM VirtualBox Manager 5.1.3
+(however, can be a lower version)
+```
+
+Bring the machine up.
+
+```sh
+$ vagrant up findex
+```
+
+The web interface can now be reached: `http://192.168.1.13`
+
+Login to the admin interface:
+
+1. Go to `/login`
+2. username: `root` pass: `changeme`
+3. Go to `/admin`
+
+As previously mentioned, findex is still in development.
+
+### Manual install
+[manual installation](https://github.com/skftn/findex-gui/blob/master/docs/INSTALL.md) (not recommended).

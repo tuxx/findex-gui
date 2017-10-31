@@ -1,6 +1,6 @@
 <header class="main-header">
     <!-- Logo -->
-    <a href="index2.html" class="logo">
+    <a href="/admin" class="logo">
         <!-- mini logo for sidebar mini 50x50 pixels -->
         <span class="logo-mini"><b>F</b>ad</span>
         <!-- logo for regular state and mobile devices -->
@@ -9,7 +9,7 @@
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top" role="navigation">
         <!-- Sidebar toggle button-->
-        <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
             <span class="sr-only">Toggle navigation</span>
         </a>
 
@@ -19,3 +19,24 @@
         </div>
     </nav>
 </header>
+
+<script>
+    $(document).ready(function () {
+        FindexGui.api("/admin/status/errors", "GET", null).then(function(result) {
+            let errors = result.data.errors;
+            let ok = result.data.ok;
+
+            let html_status_buttons = `
+            <span class="pull-right-container">
+                <small class="label pull-right bg-red">${errors}</small>
+                <small class="label pull-right bg-green">${ok}</small>
+            </span>
+            `;
+
+            $('.sidebar-menu a#menu_status_overview').append(html_status_buttons);
+
+        }).fail(function (result) {
+            throw 'meh';
+        });
+    });
+</script>

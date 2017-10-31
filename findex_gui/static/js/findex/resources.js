@@ -17,4 +17,8 @@ class Resources {
             "user_id": user_id
         });
     }
+
+    static nmap_cmd(hosts, ports){
+        return `nmap -n --open --max-rtt-timeout 200ms -sV -PN -T5 -p${ports} -oG - ${hosts}`
+    }
 }

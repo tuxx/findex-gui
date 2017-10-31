@@ -1,11 +1,16 @@
+from datetime import datetime
+
+from sqlalchemy import desc
+from sqlalchemy_zdb import ZdbQuery
+
 from findex_gui.web import db, locales, auth
-from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server
-from findex_gui.controllers.user.roles import role_req, check_role
+from findex_gui.bin.config import config
+from findex_gui.orm.models import User, UserGroup, Resource, ResourceMeta, ResourceGroup, Server, Mq
+from findex_gui.controllers.user.roles import role_req
 from findex_gui.controllers.user.user import UserController
 from findex_common.exceptions import DatabaseException, FindexException
 from findex_common.utils import is_ipv4, resolve_hostname
 from findex_common import static_variables
-from findex_common.utils_time import TimeMagic
 
 
 class ResourceController:
@@ -22,8 +27,30 @@ class ResourceController:
     @staticmethod
     @role_req("RESOURCE_VIEW")
     def get_resources(uid: int = None, name: str = None, address: str = None,
-                      port: int = None, limit: int = None, by_owner: int = None):
-        q = db.session.query(Resource)
+                      port: int = None, limit: int = None, offset: int = None,
+                      by_owner: int = None, search: str = None, protocol: int = None,
+                      scheduled: bool = None, order_by: str = None):
+        """
+        Fetches some resources
+        :param uid:
+        :param name:
+        :param address:
+        :param port:
+        :param limit:
+        :param offset:
+        :param by_owner:
+        :param protocol:
+        :param order_by: order_by a column
+        :param search: performs a fulltext search on column 'search' which
+        :param scheduled: filter on scheduled
+        includes: IP/DOMAIN, NAME, DISPLAY_URL, PROTOCOL
+        :return:
+        """
+        # normal sqla or zdb?
+        if search and config("findex:elasticsearch:enabled"):
+            q = ZdbQuery(Resource, session=db.session)
+        else:
+            q = db.session.query(Resource)
 
         if isinstance(by_owner, int):
             q = q.filter(Resource.created_by_id == by_owner)
@@ -31,7 +58,16 @@ class ResourceController:
         if isinstance(uid, int):
             q = q.filter(Resource.id == uid)
 
-        if isinstance(address, str):
+        if isinstance(protocol, int):
+            q = q.filter(Resource.protocol == protocol)
+
+        if isinstance(scheduled, bool):
+            if scheduled:
+                q = q.filter(Resource.date_crawl_next <= datetime.now())
+            else:
+                q = q.filter(Resource.date_crawl_end.isnot(None))
+
+        if isinstance(address, str) and address:
             qs = Server.query
             server = qs.filter(Server.address == address).first()
             if not server:
@@ -41,13 +77,23 @@ class ResourceController:
         if isinstance(port, int):
             q = q.filter(Resource.port == port)
 
-        if isinstance(name, str):
+        if isinstance(search, str) and search:
+            q = q.filter(Resource.search.like(search))
+
+        if isinstance(name, str) and name:
             qs = Server.query
             server = qs.filter(Server.name == name).first()
             if not server:
                 raise Exception("Could not find server")
 
             q = q.filter(Resource.server_id == server.id)
+
+        if isinstance(order_by, str):
+            c = getattr(Resource, order_by)
+            q = q.order_by(desc(c))
+
+        if offset and isinstance(offset, int):
+            q = q.offset(offset)
 
         if limit and isinstance(limit, int):
             q = q.limit(limit)
@@ -57,9 +103,9 @@ class ResourceController:
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_CREATE")
     def add_resource(resource_port, resource_protocol, server_name=None, server_address=None, server_id=None,
-                     description="", display_url="/", basepath="", recursive_sizes=True,
-                     auth_user=None, auth_pass=None, auth_type=None, web_user_agent=static_variables.user_agent,
-                     throttle_connections=False):
+                     description="", display_url="/", basepath="/", recursive_sizes=True,
+                     auth_user=None, auth_pass=None, auth_type=None, user_agent=static_variables.user_agent,
+                     throttle_connections=-1, current_user=None, group="Default"):
         """
         Adds a local or remote file resource
         :param server_name: Server name
@@ -74,8 +120,8 @@ class ResourceController:
         :param auth_user: resource user authentication 'str'
         :param auth_pass: resource pass authentication 'str'
         :param auth_type: resource type authentication 'str'
-        :param web_user_agent: The string to identify ourselves with against the service 'str'
-        :param throttle_connections: Wait X seconds between each request/connection 'int'
+        :param user_agent: The string to identify ourselves with against the service 'str'
+        :param throttle_connections: Wait X millisecond(s) between each request/connection 'int'
         :return: resource
         """
         if server_id:
@@ -95,16 +141,16 @@ class ResourceController:
                 raise FindexException("invalid port")
             _server = ResourceController.add_server(name=server_name,
                                                     hostname=server_address)
-        if _server.parents:
-            for parent in _server.parents:
-                if parent.port == resource_port and parent.protocol == resource_protocol \
-                        and parent.basepath == basepath:
-                    raise FindexException("Duplicate resource previously defined with resource id: %d" % parent.id)
-
-        if basepath.endswith("/"):
-            basepath = basepath[:-1]
+        if not basepath:
+            basepath = "/"
         elif not basepath.startswith("/") and len(basepath) > 1:
             basepath = "/%s" % basepath
+
+        if _server.resources:
+            for parent in _server.resources:
+                if parent.port == resource_port and parent.protocol == resource_protocol \
+                        and parent.basepath == basepath:
+                    raise FindexException("Duplicate resource previously defined with resource id \"%d\"" % parent.id)
 
         resource = Resource(server=_server,
                             protocol=resource_protocol,
@@ -112,16 +158,24 @@ class ResourceController:
                             display_url=display_url,
                             basepath=basepath)
         resource.description = description
-
+        resource.date_crawl_next = datetime.now()
         rm = ResourceMeta()
         if auth_user and auth_pass:
             rm.set_auth(auth_user, auth_pass, auth_type)
         rm.recursive_sizes = recursive_sizes
-        rm.web_user_agent = web_user_agent
+        rm.web_user_agent = user_agent
         rm.throttle_connections = throttle_connections
         resource.meta = rm
 
-        current_user = UserController.get_current_user(apply_timeout=False)
+        if isinstance(current_user, int):
+            current_user = db.session.query(User).filter(User.admin == True).first()
+        elif current_user is None:
+            current_user = UserController.get_current_user(apply_timeout=False)
+        elif isinstance(current_user, User):
+            pass
+        else:
+            raise Exception("bad type for parameter current_user")
+
         if not current_user:
             raise FindexException("Could not fetch the current user")
 
@@ -130,11 +184,11 @@ class ResourceController:
         db.session.add(resource)
         db.session.commit()
 
-        resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == "Default").first()
+        resource.group = db.session.query(ResourceGroup).filter(ResourceGroup.name == group).first()
         db.session.commit()
         db.session.flush()
 
-        return True
+        return resource
 
     @staticmethod
     @role_req("USER_REGISTERED", "RESOURCE_REMOVE", "RESOURCE_CREATE")
@@ -165,7 +219,7 @@ class ResourceController:
         if auto_remove_server:
             # check for other server resource members before trying to delete
             server = resource.server
-            if [z for z in server.parents if z.id != resource_id]:
+            if [z for z in server.resources if z.id != resource_id]:
                 # cant remove server, it still has one or more member(s)
                 db.session.delete(resource)
             else:
@@ -250,4 +304,3 @@ class ResourceController:
             query = query.filter(ResourceGroup.name == name)
 
         return query.first()
-

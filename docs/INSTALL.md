@@ -5,7 +5,7 @@ Installing Findex can be a little bit of a pain due to multiple software package
 - Python **3.5**
 - Postgres **9.5** (on x86_64 Linux)
 - ElasticSearch **1.7.6**
-- ZomboDB **3.1.12**
+- ZomboDB **3.1.15**
 - Findex-gui (web-interface)
 
 
@@ -79,21 +79,10 @@ sudo service postgresql restart
 
 ## ElasticSearch 1.7
 
-ElasticSearch runs on java. First grab the jdk from [here](http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz) (Linux x64 .tar.gz).
+ElasticSearch runs on java. Lets grab openjdk.
 
 ```sh
-# the version you downloaded might not be '8u121' - change accordingly
-tar -xvzf jdk-8u121-linux-x64.tar.gz
-mkdir /usr/lib/jvm
-mv jdk1.8.0_121 /usr/lib/jvm/
-
-sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk1.8.0_121/bin/javac 1
-sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_121/bin/java 1
-sudo update-alternatives --install /usr/bin/javaws javaws /usr/lib/jvm/jdk1.8.0_121/bin/javaws 1
-
-sudo update-alternatives --config javac 
-sudo update-alternatives --config java 
-sudo update-alternatives --config javaws
+sudo apt-get install openjdk-8-jre-headless
 ```
 
 Confirm that java is working:
@@ -141,15 +130,15 @@ Next up is installing [ZomboDB](https://github.com/zombodb/zombodb) as a plugin/
 
 For ElasticSearch, execute the following:
 ```sh
-cd /tmp && wget https://github.com/zombodb/zombodb/releases/download/v3.1.12/zombodb-es-plugin-3.1.12.zip
-/usr/share/elasticsearch/bin/plugin -i zombodb -u file:///tmp/zombodb-es-plugin-3.1.12.zip
+cd /tmp && wget https://github.com/zombodb/zombodb/releases/download/v3.1.15/zombodb-es-plugin-3.1.15.zip
+/usr/share/elasticsearch/bin/plugin -i zombodb -u file:///tmp/zombodb-es-plugin-3.1.15.zip
 sudo service elasticsearch restart
 ```
 
 For Postgres, execute the following:
 ```sh
-cd /tmp && wget https://github.com/zombodb/zombodb/releases/download/v3.1.12/zombodb_jessie_pg95-3.1.12_amd64.deb
-sudo dpkg -i zombodb_jessie_pg95-3.1.12_amd64.deb
+cd /tmp && wget https://github.com/zombodb/zombodb/releases/download/v3.1.15/zombodb_jessie_pg95-3.1.15_amd64.deb
+sudo dpkg -i zombodb_jessie_pg95-3.1.15_amd64.deb
 ```
 
 A small change is needed to `/etc/postgresql/9.5/main/postgresql.conf`, add the following at the end of the file:

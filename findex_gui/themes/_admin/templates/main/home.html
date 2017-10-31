@@ -1,46 +1,42 @@
 {% extends "_admin/templates/base.html" %}
 {% block content %}
 
-        <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper">
-            <!-- Content Header (Page header) -->
-            <section class="content-header">
-                <h1>
-                    Admin dashboard
-                    <small>Admin dashboard</small>
-                </h1>
-                <ol class="breadcrumb">
-                    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                </ol>
-            </section>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Home
+                <small></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            </ol>
+        </section>
 
-            <!-- Main content -->
-            <section class="content">
-                <!-- Default box -->
-                <div class="box">
-                    <div class="box-body">
-                        Welcome
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <h4><i class="icon fa fa-warning"></i> Welcome!</h4>
+                    You are running a very early version of Findex ({{ version }}).
+                    <br><br>
+                        Keep an eye out on <a href="https://github.com/skftn/findex-gui">our Github</a> to see if new versions are available.
                     </div>
-                    <!-- /.box-body -->
                 </div>
-                <!-- /.box -->
-            </section>
-            <!-- /.content -->
-        </div>
-        <!-- /.content-wrapper -->
-
-        <footer class="main-footer">
-            <div class="pull-right hidden-xs">
-                <b>Version</b> 2.3.1
             </div>
-            <strong>zzz</a>.</strong> zzz
-        </footer>
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
 
-
-    <script>
-        $(document).ready(function () {
-            //$.getJSON("/api/themes/list", json_themes);
-        });
-    </script>
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 2.3.1
+        </div>
+        <strong>zzz</a>.</strong> zzz
+    </footer>
 
 {% endblock %}

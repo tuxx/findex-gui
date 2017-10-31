@@ -1,0 +1,99 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <div class="content-wrapper" style="min-height: 946px;">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Overview
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Mq</a></li>
+                <li><a href="#">Overview</a></li>
+            </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active "><a href="#amqps" data-toggle="tab">Endpoints</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="amqps">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="mq" class="display table table-bordered" cellspacing="0" width="100%">
+                                            <thead>
+                                            <tr>
+                                                <th>Broker Type</th>
+                                                <th>Name</th>
+                                                <th>Host</th>
+                                                <th>Port</th>
+                                                <th>Vhost</th>
+                                                <th>Queue</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <style>
+        table tbody tr:hover{
+            background: #f9f9f9;
+        }
+
+        table tbody tr td:first-child > img{
+            height:22px;
+            float:left;
+        }
+
+        table tbody tr td:first-child > span{
+            margin-top: 2px;
+            display: block;
+            float: left;
+            margin-left: 6px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            // @TODO: auto-refresh
+            let table_amqp_overview = $("table#mq");
+
+            function mq_column_writer(column_name, value){
+                if(!value) return "";
+                if(column_name == "broker type") {
+                    let output = "";
+                    if(value == "rabbitmq"){
+                        output = `
+                            <img src="/static/img/logos/rabbitmq_small.png"/>
+                            <span>RabbitMQ</span>
+                        `;
+                    } else {
+                        output = value;
+                    }
+                    return output;
+                } else {
+                    return value;
+                }
+            }
+
+            table_amqp_overview.fintable({
+                endpoint: "/admin/mq/get",
+                column_writer: mq_column_writer
+            });
+        });
+    </script>
+
+{% endblock %}

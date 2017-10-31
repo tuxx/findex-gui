@@ -26,11 +26,6 @@ class bucket_search extends Search {
             throw "bleh";
         }
 
-        if(!data.status){
-            bucket_search.error(data.data);
-            throw "bleh";
-        }
-
         data = data.data;
 
         if(!this._loading){
@@ -224,7 +219,7 @@ class bucket_search extends Search {
      */
     parse_urlbar(params){
         this.set_key(params['key']);
-        if(params['key'] == '') return;
+        //if(params['key'] == '') return;
 
         let filters = ['cats', 'type'];
 

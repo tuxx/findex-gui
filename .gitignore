@@ -7,3 +7,4 @@ findex_gui/data-private/.cwd
 .egg*
 build/*
 dist/*
+*.retry

@@ -5,10 +5,10 @@ Usage: script.py
 Enjoy this unmaintainable piece of spaghetti! It parses
 the IDMB plain text files over at http://imdb.com/interfaces.
 
-Takes about 20 minutes on my pc.
+Takes about 20 minutes on my pc (through pypy3), cPython should be
+around a hour.
 
 Requirements:
-- needs to be run through pypy3 (not cPython)
 - 4GB RAM or higher (may lock up your pc)
 
 Steps this script takes:
@@ -42,8 +42,6 @@ import subprocess
 import gzip
 import json
 
-from findex_gui.bin.config import config
-
 
 TMP_FOLDER = None
 IMDB_ENCODING = "ISO-8859-1"
@@ -55,7 +53,7 @@ def read_data_file(filename=None, start_from=None, filepath=None):
     if filepath:
         filename = filepath
     else:
-        filename = "%s%s.list" % (TMP_FOLDER, filename)
+        filename = "%s.list" % filename
 
     print("loading: %s" % filename)
     f = open(filename, "r", encoding=IMDB_ENCODING)
@@ -70,7 +68,7 @@ def read_data_file(filename=None, start_from=None, filepath=None):
 
 def read_data_file_chunks(filename, chunk=0):
     global TMP_FOLDER
-    filename = "%s%s.list" % (TMP_FOLDER, filename)
+    filename = "%s.list" % filename
     max_bytes = 128598041
 
     print("loading: %s, chunk: %d" % (filename, chunk))
@@ -177,7 +175,7 @@ class ToSql:
         DELETE FROM meta_actors;
         COPY meta_imdb_actors FROM 'path';
         """
-        out_file = "%sfindex_imdb-%s-actors.sql" % (TMP_FOLDER, self._now)
+        out_file = "findex_imdb-%s-actors.sql" % self._now
         f = open(out_file, "w", encoding="UTF-8")
 
         actors = []
@@ -207,7 +205,7 @@ class ToSql:
         COPY meta_imdb_directors FROM 'path';
         """
         global TMP_FOLDER
-        out_file = "%sfindex_imdb-%s-directors.sql" % (TMP_FOLDER, self._now)
+        out_file = "findex_imdb-%s-directors.sql" % self._now
         f = open(out_file, "w", encoding="UTF-8")
 
         directors = []
@@ -243,7 +241,7 @@ class ToSql:
         COPY meta_imdb FROM 'path';
         """
         global TMP_FOLDER
-        out_file = "%sfindex_imdb-%s-ratings.sql" % (TMP_FOLDER, self._now)
+        out_file = "findex_imdb-%s-ratings.sql" % self._now
         f = open(out_file, "w", encoding="UTF-8")
 
         for i, rating in enumerate(self._ratings.ratings):
@@ -310,7 +308,7 @@ class RatingsResult:
 
 class Ratings:
     @staticmethod
-    def get(min_rank=None, min_votes=15000, min_year=1960,
+    def get(min_rank=None, min_votes=8000, min_year=1950,
             exclude_formats="VG", debug_max_lines=-1,
             include_genres=True):
         """
@@ -584,15 +582,15 @@ class Plot:
         return ratings
 
 
-def ps_exe(cmd, do_print=True):
-    cmd = """/usr/bin/psql -t -h "%s" -p%d -U "%s" -d "%s" -c "%s" """ % (
-        settings.db_hosts[0], settings.db_port, settings.db_user, settings.db_name, cmd)
-    if do_print: print("Executing SQL: %s" % cmd)
-    env = os.environ.copy()
-    env["PGPASSWORD"] = settings.db_pass
-    output = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, shell=True)
-    rtn = output.stdout.read()
-    return rtn
+# def ps_exe(cmd, do_print=True):
+#     cmd = """/usr/bin/psql -t -h "%s" -p%d -U "%s" -d "%s" -c "%s" """ % (
+#         settings.db_hosts[0], settings.db_port, settings.db_user, settings.db_name, cmd)
+#     if do_print: print("Executing SQL: %s" % cmd)
+#     env = os.environ.copy()
+#     env["PGPASSWORD"] = settings.db_pass
+#     output = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, shell=True)
+#     rtn = output.stdout.read()
+#     return rtn
 
 
 def ps_parse(results, columns):
@@ -607,12 +605,10 @@ def ps_parse(results, columns):
     return rtn
 
 
-def update(tmp_folder="/tmp/", download_files=True, relink_files=True):
+def update(tmp_folder="", download_files=True, relink_files=True):
     """command injection through tmp_folder"""
     global TMP_FOLDER
-    if not tmp_folder.endswith("/"):
-        tmp_folder += "/"
-    TMP_FOLDER = tmp_folder
+    TMP_FOLDER = ""
 
     if download_files:
         for name in ["actors.list", "actresses.list", "directors.list", "genres.list", "plot.list", "ratings.list"]:
@@ -629,32 +625,33 @@ def update(tmp_folder="/tmp/", download_files=True, relink_files=True):
             #     for chunk in r.iter_content(1024 * 1024 * 4):
             #         f.write(chunk)
 
-            url = "ftp://ftp.fu-berlin.de/pub/misc/movies/database/%s.gz" % name
-            print("Fetching: %s" % url)
-            fn = "%s%s.gz" % (tmp_folder, name)
-            if os.path.isfile("%s%s.gz" % (tmp_folder, name)):
-                try: os.remove("%s%s.gz" % (tmp_folder, name))
-                except: pass
-            if os.path.isfile("%s%s" % (tmp_folder, name)):
-                try: os.remove("%s%s" % (tmp_folder, name))
-                except: pass
+            # url = "ftp://ftp.fu-berlin.de/pub/misc/movies/database/%s.gz" % name
+            # print("Fetching: %s" % url)
+            # fn = "%s%s.gz" % (tmp_folder, name)
+            # if os.path.isfile("%s%s.gz" % (tmp_folder, name)):
+            #     try: os.remove("%s%s.gz" % (tmp_folder, name))
+            #     except: pass
+            # if os.path.isfile("%s%s" % (tmp_folder, name)):
+            #     try: os.remove("%s%s" % (tmp_folder, name))
+            #     except: pass
+            #
+            # os.popen("wget %s -O %s" % (url, fn)).read()
+            # print("Done. Unpacking...")
 
-            os.popen("wget %s -O %s" % (url, fn)).read()
-            print("Done. Unpacking...")
+            # f = gzip.open(fn, 'rb')
+            # file_content = f.read()
+            # f.close()
+            # print("Unpacked.")
 
-            f = gzip.open(fn, 'rb')
-            file_content = f.read()
-            f.close()
-            print("Unpacked.")
+            # f = open("%s%s" % (tmp_folder, name), "w")
+            # f.write(file_content)
+            # f.close()
+            # print("Saved as %s%s" % (tmp_folder, name))
+            pass
 
-            f = open("%s%s" % (tmp_folder, name), "w")
-            f.write(file_content)
-            f.close()
-            print("Saved as %s%s" % (tmp_folder, name))
-
-    ratings = Ratings.get(min_votes=10000,
-                          min_year=1960,
-                          debug_max_lines=9000,
+    ratings = Ratings.get(min_votes=8000,
+                          min_year=1950,
+                          debug_max_lines=-1,
                           exclude_formats="VG,TV,V",
                           include_genres=True)
     ratings = Plot.get(ratings=ratings)
@@ -664,53 +661,54 @@ def update(tmp_folder="/tmp/", download_files=True, relink_files=True):
 
     tosql = ToSql(ratings)
     copy_from = tosql()
+    print(copy_from)
 
-    print("Updating postgres.")
-    a1 = ps_exe("DELETE FROM meta_imdb_actors; DELETE FROM meta_imdb_directors; DELETE FROM meta_imdb;")
-    print(a1)
-    b1 = ps_exe("COPY meta_imdb FROM \'%s\'; REINDEX TABLE meta_imdb;" % copy_from["ratings"])
-    print(b1)
-    b2 = ps_exe("COPY meta_imdb_actors FROM \'%s\'; REINDEX TABLE meta_imdb_actors;" % copy_from["actors"])
-    print(b2)
-    b3 = ps_exe("COPY meta_imdb_directors FROM \'%s\'; REINDEX TABLE meta_imdb_directors;" % copy_from["directors"])
-    print(b3)
-    print("Cleanup files from tmp folder.")
+    # print("Updating postgres.")
+    # a1 = ps_exe("DELETE FROM meta_imdb_actors; DELETE FROM meta_imdb_directors; DELETE FROM meta_imdb;")
+    # print(a1)
+    # b1 = ps_exe("COPY meta_imdb FROM \'%s\'; REINDEX TABLE meta_imdb;" % copy_from["ratings"])
+    # print(b1)
+    # b2 = ps_exe("COPY meta_imdb_actors FROM \'%s\'; REINDEX TABLE meta_imdb_actors;" % copy_from["actors"])
+    # print(b2)
+    # b3 = ps_exe("COPY meta_imdb_directors FROM \'%s\'; REINDEX TABLE meta_imdb_directors;" % copy_from["directors"])
+    # print(b3)
+    # print("Cleanup files from tmp folder.")
+    #
+    # try:
+    #     os.remove(copy_from["ratings"])
+    #     os.remove(copy_from["actors"])
+    #     os.remove(copy_from["directors"])
+    # except:
+    #     pass
 
-    try:
-        os.remove(copy_from["ratings"])
-        os.remove(copy_from["actors"])
-        os.remove(copy_from["directors"])
-    except:
-        pass
-
-    if relink_files:
-        relink()
+    # if relink_files:
+    #     relink()
 
 
-def relink():
-    print("Syncing/Linking old file entries in DB.")
-    updates = ""
-
-    meta_imdb = ps_exe("SELECT id,title,year FROM meta_imdb;")
-    meta_imdb = ps_parse(meta_imdb, columns=3)
-
-    files = ps_exe("SELECT id,meta_info FROM files WHERE meta_info->>'ptn' != 'null' and file_size > 134217728;")
-    files = ps_parse(files, columns=2)
-    for f in files:
-        blob = json.loads(f[1])
-        year = blob["ptn"].get("year")
-        title = blob["ptn"].get("title")
-        if not year or not title:
-            continue
-        for meta in meta_imdb:
-            if meta[1] == title and int(meta[2]) == year:
-                updates += """UPDATE files SET meta_imdb_id=%d;""" % meta[0]
-    if updates:
-        ps_exe(cmd=updates, do_print=False)
-        print("Done.")
+# def relink():
+#     print("Syncing/Linking old file entries in DB.")
+#     updates = ""
+#
+#     meta_imdb = ps_exe("SELECT id,title,year FROM meta_imdb;")
+#     meta_imdb = ps_parse(meta_imdb, columns=3)
+#
+#     files = ps_exe("SELECT id,meta_info FROM files WHERE meta_info->>'ptn' != 'null' and file_size > 134217728;")
+#     files = ps_parse(files, columns=2)
+#     for f in files:
+#         blob = json.loads(f[1])
+#         year = blob["ptn"].get("year")
+#         title = blob["ptn"].get("title")
+#         if not year or not title:
+#             continue
+#         for meta in meta_imdb:
+#             if meta[1] == title and int(meta[2]) == year:
+#                 updates += """UPDATE files SET meta_imdb_id=%d;""" % meta[0]
+#     if updates:
+#         ps_exe(cmd=updates, do_print=False)
+#         print("Done.")
 
 
 if not hasattr(sys, "pypy_translation_info"):
     raise Exception("requires pypy3 to run, not cPython")
 
-update(download_files=True, relink_files=True)
+update(download_files=False, relink_files=False)

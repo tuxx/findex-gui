@@ -4,132 +4,6 @@
     <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
     {% import 'bucket/templates/main/meta/_macros.html' as macros %}
 
-    <style>
-        div.overview h1,
-        div.overview h2,
-        div.overview h3,
-        div.overview h4{
-            padding-top:0;
-            margin-top:0;
-            margin-bottom:0;
-            padding-bottom:0;
-            font-weight:bold;
-        }
-        div.overview{
-            overflow: hidden;
-            margin-bottom:40px;
-        }
-        div.overview>div.item{
-            float:left;
-            width:50%;
-            margin-top: 20px;
-            min-height: 200px;
-        }
-        div.overview>div.item>div.options>a.details{
-            text-align: right;
-        }
-        div.overview>div.item>div.content>div{
-            float:left;
-        }
-        div.overview>div.item>div.content>div.poster{
-            width:20%;
-            height:160px;
-            background-size:cover;
-            background-repeat: no-repeat;
-
-        }
-        div.overview>div.item>div.content>div.info{
-            width:80%;
-            padding-left:10px;
-            padding-right:10px;
-        }
-        div.overview>div.item>div.content>div.info>div.title_container{
-            overflow:hidden;
-            border-bottom:1px solid #e0e0e0;
-        }
-        div.overview>div.item>div.content>div.info>div.title_container>.title{
-            float:left;
-            width:100%;
-            font-weight:bold;
-            font-size:16px;
-            padding-bottom:2px;
-            line-height: 20px;
-        }
-        div.overview span.year_release{
-            font-size:12px;
-            color: darkgrey;
-            float: right;
-        }
-        div.overview>div.item span.people{
-            display:block;
-            margin-top:6px;
-        }
-        div.overview>div.item span.synopsis{
-            margin-top:6px;
-            color: #505050;
-            display: block;
-        }
-        div.overview div.options>span.rating_stars{
-            padding-top: 5px;
-            padding-left: 4px;
-            float: left;
-        }
-        div.overview div.details{
-            display:none;
-        }
-        div.overview>div.item>div.content{
-            width:100%;
-            float:left;
-        }
-        div.overview>div.item>div.options{
-            width: 100%;
-            float: left;
-            padding-right: 10px;
-            padding-bottom: 4px;
-            padding-top: 4px;
-            margin-top: 8px;
-        }
-        div.overview>div.item>div.options>div.rating{
-            border-radius: 1px;
-            float: left;
-            font-size:14px;
-            font-weight: normal;
-        }
-        div.overview>div.item>div.options>button#more{
-            border-radius: 1px;
-            float: right;
-            font-size: 12px;
-            font-weight: normal;
-            padding-top: 0px;
-            padding-bottom: 0px;
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-        div.overview>div.item>div.options>div.genres{
-            padding-left: 6px;
-            padding-top: 1px;
-            float: left;
-        }
-        div.overview>div.item>div.options>div.genres>div.label{
-            background-color: #b1b1b1;
-            cursor: pointer;
-            border-radius: 0;
-        }
-        div.overview>div.item>div.options>div.genres>div.label:hover{
-            background-color: #8f8f8f;
-            cursor: pointer;
-        }
-
-        @media screen and (max-width: 920px) and (min-width: 0px) {
-            div.overview>div.item>div.content>div.poster{
-                display: none;
-            }
-            div.overview>div.item>div.content>div.info{
-                width:100%;
-            }
-        }
-    </style>
-
     <!-- Page Content -->
     <div id="page-content-wrapper">
         <div id="popcorn" class="container-fluid" style="max-width: 1400px;">
@@ -226,13 +100,32 @@
                                             {% endfor %}
                                         </div>
                                         {% endif %}
-                                        <button type="submit" id="more" class="btn btn-primary btn-sm">More</button>
+                                        <button type="submit" id="more" data-state="closed" data-movie-id="{{ result.meta_movie.id }}" class="btn btn-primary btn-sm">More</button>
                                     </div>
 
-                                    <div class="details">
-                                        <span class="rating_stars">
-                                            {{ macros.rating(79/10) }}
-                                        </span>
+                                    <div class="details" data-movie-id="{{ result.meta_movie.id }}">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Sources</h4>
+                                                <table class="browser table table-hover local_files">
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Meta</h4>
+                                                <div class="meta_badges"></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="consensus">
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -246,12 +139,80 @@
 
     <script>
     $(document).ready(function(){
+        $("button#more").click(function(){
+            let uid = $(this).attr("data-movie-id");
+            let state = $(this).attr("data-state");
+            let sel_details = $(`div.item .details[data-movie-id='${uid}']`);
+
+            if(state === "open"){
+                $(this).text("more");
+                $(this).attr("data-state", "closed");
+                sel_details.hide();
+                return;
+
+            } else {
+                $(this).text("close");
+                $(this).attr("data-state", "open");
+                sel_details.show();
+            }
+
+            FindexGui.api(`/meta/popcorn/details/${uid}`, "GET").then(function(data){
+                data = data.data;
+                if(data.local_files){
+                    let table_rows_html = "";
+
+                    data.local_files.forEach(function(obj, i){
+                        if(i <= 6) {
+                            let file_href = `${APPLICATION_ROOT}browse/${obj.path_file}`;
+                            table_rows_html += `
+<tr class="clickable text-nowrap" data-id="${obj.id}" data-isdir="f" data-type="${obj.file_format}" data-ext="${obj.file_ext}" data-href="${file_href}" rel="popover" title="">
+    <td><a target="_blank" href="${file_href}">${obj.file_name_human}</a></td>
+    <td>${obj.file_size_human}</td>
+    <td><a target="_blank" href="${obj.path_direct}">Download</a></td>
+</tr>`;
+                        }
+                    });
+
+                    sel_details.find(`table.local_files tbody`).html(table_rows_html);
+                }
+
+                if(data.meta_movie.meta){
+                    let _data = data.meta_movie.meta;
+                    let badges = "";
+                    function make_badge(text){
+                        return `<div class="label label-default">${text}</div>`;
+                    }
+                    if(_data.hasOwnProperty("metacritic") && _data.metacritic){
+                        badges += make_badge(`Metacritic: ${_data.metacritic}`);
+                    }
+                    if(_data.hasOwnProperty("production") && _data.production){
+                        badges += make_badge(`Production: ${_data.production}`);
+                    }
+                    if(_data.hasOwnProperty("boxoffice") && _data.boxoffice){
+                        badges += make_badge(`Box Office: ${_data.boxoffice}`);
+                    }
+                    if(_data.hasOwnProperty("awards") && _data.awards){
+                        badges += make_badge(_data.awards);
+                    }
+                    if(_data.hasOwnProperty("language") && _data.language){
+                        badges += make_badge(_data.language);
+                    }
+
+                    sel_details.find(`div.meta_badges`).html(badges);
+
+                    if(_data.hasOwnProperty("rtconsensus") && _data.rtconsensus){
+                        sel_details.find(`div.consensus`).html(`"${_data.rtconsensus}"`);
+                    }
+                }
+            });
+        });
+
         $('#director').selectivity({
             multiple: true,
             placeholder: "Director",
             ajax: {
                 url: function(term, offset){
-                    return `${APPLICATION_ROOT}api/v2/meta/imdb/director/search/${term.term}`;
+                    return `${APPLICATION_ROOT}api/v2/meta/popcorn/director/search/${term.term}`;
                 },
                 minimumInputLength: 3,
                 quietMillis: 250,
@@ -275,7 +236,7 @@
             placeholder: "Cast",
             ajax: {
                 url: function(term, offset){
-                    return `${APPLICATION_ROOT}api/v2/meta/imdb/actor/search/${term.term}`;
+                    return `${APPLICATION_ROOT}api/v2/meta/popcorn/actor/search/${term.term}`;
                 },
                 minimumInputLength: 3,
                 quietMillis: 250,

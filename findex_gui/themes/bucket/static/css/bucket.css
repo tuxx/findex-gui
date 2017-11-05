@@ -661,3 +661,151 @@ table.browser>thead>tr{
 .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
     background-color: transparent;
 }
+
+div.overview h1,
+div.overview h2,
+div.overview h3,
+div.overview h4{
+    padding-top:0;
+    margin-top:0;
+    margin-bottom:0;
+    padding-bottom:0;
+    font-weight:bold;
+}
+div.overview{
+    overflow: hidden;
+    margin-bottom:40px;
+}
+div.overview>div.item{
+    float:left;
+    width:50%;
+    margin-top: 20px;
+    min-height: 200px;
+}
+div.overview>div.item>div.options>a.details{
+    text-align: right;
+}
+div.overview>div.item>div.content>div{
+    float:left;
+}
+div.overview>div.item>div.content>div.poster{
+    width:20%;
+    height:160px;
+    background-size:cover;
+    background-repeat: no-repeat;
+
+}
+div.overview>div.item>div.content>div.info{
+    width:80%;
+    padding-left:10px;
+    padding-right:10px;
+}
+div.overview>div.item>div.content>div.info>div.title_container{
+    overflow:hidden;
+    border-bottom:1px solid #e0e0e0;
+}
+div.overview>div.item>div.content>div.info>div.title_container>.title{
+    float:left;
+    width:100%;
+    font-weight:bold;
+    font-size:16px;
+    padding-bottom:2px;
+    line-height: 20px;
+}
+div.overview span.year_release{
+    font-size:12px;
+    color: darkgrey;
+    float: right;
+}
+div.overview>div.item span.people{
+    display:block;
+    margin-top:6px;
+}
+div.overview>div.item span.synopsis{
+    margin-top:6px;
+    color: #505050;
+    display: block;
+}
+div.overview div.options>span.rating_stars{
+    padding-top: 5px;
+    padding-left: 4px;
+    float: left;
+}
+div.overview div.details{
+    display:none;
+    float:left;
+    width:100%;
+    padding-right:10px;
+    margin-top:6px;
+    min-height:200px;
+}
+div.overview div.details table{
+    margin-bottom:6px;
+}
+div.overview div.details tbody td{
+    padding-left: 0;
+    padding-right: 0;
+}
+div.overview div.details tbody tr td:last-child{
+    text-align: right;
+}
+div.overview div.details h4{
+    color:grey;
+    margin-bottom:8px;
+}
+div.overview div.details .meta_badges>div.label{
+    margin-right: 6px;
+    margin-bottom:6px;
+    float:left;
+}
+div.overview>div.item>div.content{
+    width:100%;
+    float:left;
+}
+div.overview>div.item>div.options{
+    width: 100%;
+    float: left;
+    padding-right: 10px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    margin-top: 8px;
+}
+div.overview>div.item>div.options>div.rating{
+    border-radius: 1px;
+    float: left;
+    font-size:14px;
+    font-weight: normal;
+}
+div.overview>div.item>div.options>button#more{
+    border-radius: 1px;
+    float: right;
+    font-size: 12px;
+    font-weight: normal;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+div.overview>div.item>div.options>div.genres{
+    padding-left: 6px;
+    padding-top: 1px;
+    float: left;
+}
+div.overview>div.item>div.options>div.genres>div.label{
+    background-color: #b1b1b1;
+    cursor: pointer;
+    border-radius: 0;
+}
+div.overview>div.item>div.options>div.genres>div.label:hover{
+    background-color: #8f8f8f;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 920px) and (min-width: 0px) {
+    div.overview>div.item>div.content>div.poster{
+        display: none;
+    }
+    div.overview>div.item>div.content>div.info{
+        width:100%;
+    }
+}

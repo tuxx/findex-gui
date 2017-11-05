@@ -54,7 +54,7 @@ def do_setup(**kwargs):
 
 do_setup(
     name="Findex-GUI",
-    version="0.3.0.1",
+    version="0.3.0.2",
     author="Sander Ferdinand",
     author_email="sa.ferdinand@gmail.com",
     packages=[

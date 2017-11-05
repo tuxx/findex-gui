@@ -60,7 +60,7 @@ class MetaController:
             _err("could not open %s: %s" % ("%sinfo.txt", str(ex)) % dirpath)
 
         if "version" in info:
-            OptionsController.set("meta_movies", info)
+            OptionsController.set("meta", info)
 
         if os.path.isfile("%smeta_movies.txt" % dirpath):
             db.session.query(MetaMovies).delete(synchronize_session=False)

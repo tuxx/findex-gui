@@ -52,9 +52,9 @@
                                 <div class="item">
                                     <div class="content">
                                         {% if result.meta_movie.meta.poster %}
-                                            {% set poster = '/static/meta/posters/'+result.meta_movie.meta.poster+'.jpg' %}
+                                            {% set poster = application_root+'/static/meta/posters/'+result.meta_movie.meta.poster+'.jpg' %}
                                         {% else %}
-                                            {% set poster = '/static/img/default_thumbnail2.png' %}
+                                            {% set poster = application_root+'/static/img/default_thumbnail2.png' %}
                                         {% endif %}
                                         <div class="poster" style="background-image: url('{{ poster }}')"></div>
                                         <div class="info">

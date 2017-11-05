@@ -1,5 +1,10 @@
 {% extends "bucket/templates/base.html" %}
 {% block content %}
+    <style>
+    .btn-group-active {
+        background-image: url({{ url_for("static", filename="themes/bucket/static/img/blue_line.png") }}) !important;
+    }
+    </style>
     <link href="{{ url_for("static", filename="themes/bucket/static/css/search.css") }}" rel="stylesheet">
     <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
     <script src="{{ url_for("static", filename="themes/bucket/static/js/search.js") }}"></script>

@@ -13,9 +13,9 @@
                     <i class="fa fa-dashboard"></i> <span>App</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu" style="display: block;">
-                    <li><a href="/admin"><i class="fa fa-circle-o"></i> Home</a></li>
+                    <li><a href="{{ url_for("admin_home") }}"><i class="fa fa-circle-o"></i> Home</a></li>
 {#                    <li><a href="/admin/appearance"><i class="fa fa-circle-o"></i> Appearance</a></li>#}
-                    <li><a href="/admin/news/overview"><i class="fa fa-circle-o"></i> News</a></li>
+                    <li><a href="{{ url_for("admin_news") }}"><i class="fa fa-circle-o"></i> News</a></li>
                     <li class="treeview menu-open">
                         <a href="#"><i class="fa fa-circle-o"></i> Status
                             <span class="pull-right-container">
@@ -23,16 +23,15 @@
                             </span>
                         </a>
                         <ul class="treeview-menu" style="display: block;">
-                            <li><a id="menu_status_overview" href="/admin/status/overview"><i class="fa fa-circle-o"></i> Overview
-
+                            <li><a id="menu_status_overview" href="{{ url_for("admin_status_overview") }}"><i class="fa fa-circle-o"></i> Overview
                             </a></li>
-                            <li><a href="/admin/status/findex"><i class="fa fa-circle-o"></i> Findex</a></li>
-                            <li><a href="/admin/status/system"><i class="fa fa-circle-o"></i> System</a></li>
-                            <li><a href="/admin/status/database"><i class="fa fa-circle-o"></i> Database</a></li>
-                            <li><a href="/admin/status/python"><i class="fa fa-circle-o"></i> Python</a></li>
+                            <li><a href="{{ url_for("admin_status_findex") }}"><i class="fa fa-circle-o"></i> Findex</a></li>
+                            <li><a href="{{ url_for("admin_status_system") }}"><i class="fa fa-circle-o"></i> System</a></li>
+                            <li><a href="{{ url_for("admin_status_database") }}"><i class="fa fa-circle-o"></i> Database</a></li>
+                            <li><a href="{{ url_for("admin_status_pip") }}"><i class="fa fa-circle-o"></i> Python</a></li>
                         </ul>
                     </li>
-                    <li><a href="/admin/metadata"><i class="fa fa-circle-o"></i> Metadata</a></li>
+                    <li><a href="{{ url_for("admin_metadata") }}"><i class="fa fa-circle-o"></i> Metadata</a></li>
 {#                    <li><a href="/admin/logs/overview"><i class="fa fa-circle-o"></i> Logs</a></li>#}
                 </ul>
             </li>
@@ -42,10 +41,10 @@
                     <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu" style="display: block;">
-                    <li><a href="/admin/server/overview"><i class="fa fa-circle-o"></i>Overview</a></li>
-                    <li><a href="/admin/server/add"><i class="fa fa-circle-o"></i>Add Server</a></li>
-                    <li><a href="/admin/server/group/add"><i class="fa fa-circle-o"></i>Add Group</a></li>
-                    <li><a href="/admin/server/nmap/add"><i class="fa fa-circle-o"></i>Add Nmap Rule</a></li>
+                    <li><a href="{{ url_for("admin_server_overview") }}"><i class="fa fa-circle-o"></i>Overview</a></li>
+                    <li><a href="{{ url_for("admin_server_add") }}"><i class="fa fa-circle-o"></i>Add Server</a></li>
+                    <li><a href="{{ url_for("admin_group_add") }}"><i class="fa fa-circle-o"></i>Add Group</a></li>
+                    <li><a href="{{ url_for("admin_server_add_nmap") }}"><i class="fa fa-circle-o"></i>Add Nmap Rule</a></li>
                 </ul>
             </li>
             <li class="treeview menu-open">
@@ -55,7 +54,7 @@
                     <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu" style="display: block;">
-                    <li><a href="/admin/scheduler/overview"><i class="fa fa-circle-o"></i> Overview</a></li>
+                    <li><a href="{{ url_for("admin_scheduler_overview") }}"><i class="fa fa-circle-o"></i> Overview</a></li>
                 </ul>
             </li>
             <li class="treeview menu-open">
@@ -65,8 +64,8 @@
                     <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu" style="display: block;">
-                    <li><a href="/admin/mq/overview"><i class="fa fa-circle-o"></i> Overview</a></li>
-                    <li><a href="/admin/mq/add"><i class="fa fa-circle-o"></i> Add queue</a></li>
+                    <li><a href="{{ url_for("admin_mq_overview") }}"><i class="fa fa-circle-o"></i> Overview</a></li>
+                    <li><a href="{{ url_for("admin_mq_add") }}"><i class="fa fa-circle-o"></i> Add queue</a></li>
                 </ul>
             </li>
             <li><a href="documentation/index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>

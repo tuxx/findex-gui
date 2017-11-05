@@ -1,7 +1,7 @@
 import os
 from findex_gui.bin.config import config
 
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect
 from flask_babel import Babel
 
 from findex_gui.orm.connect import Database
@@ -76,7 +76,12 @@ def create_app():
     from findex_gui.controllers.admin.server import routes
     from findex_gui.controllers.admin.status import routes
     from findex_gui.controllers.admin.scheduler import routes
-    app.add_url_rule('/', endpoint='root', view_func=lambda: redirect(url_for('news_home'), code=302))
+
+    @app.route("/")
+    def root():
+        """wait for url_for to get monkey patched before trying to import it"""
+        from flask import url_for
+        return redirect(url_for("news_home"))
 
     from findex_gui.controllers.search import api
     from findex_gui.controllers.session import api

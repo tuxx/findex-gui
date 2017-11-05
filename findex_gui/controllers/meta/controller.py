@@ -1,12 +1,20 @@
+import tempfile
 import os
 import json
 from typing import List
 
 from findex_gui.web import db
+from findex_gui.bin.misc import cwd
+from findex_gui.bin.utils import log_msg
 from findex_gui.orm.models import MetaMovies, MetaMovies, Files
+from findex_gui.controllers.options.options import OptionsController
 from findex_gui.controllers.user.decorators import admin_required
 
+from flask import request, redirect, url_for
+from werkzeug.utils import secure_filename
+from PTN import parse as ptn_parse
 from findex_common.exceptions import SearchException
+from sqlalchemy import text
 from sqlalchemy_utils import escape_like
 from sqlalchemy_zdb import ZdbQuery
 from sqlalchemy_zdb.types import ZdbLiteral
@@ -15,32 +23,66 @@ from sqlalchemy_zdb.types import ZdbLiteral
 class MetaController:
     @staticmethod
     @admin_required
-    def load_new_db(path_metadata_zip):
-        basename = os.path.basename(path_metadata_zip)
-        dirname = os.path.basename(path_metadata_zip)
-        os.popen("cd %s && unzip %s" % (dirname, basename)).read()
+    def load_new_db():
+        """bad code"""
+        # handle POST file upload
+        def _err(msg=None):
+            if msg:
+                log_msg(str(msg), category="meta_import", level=3)
+                raise Exception(msg)
+            raise Exception("error")
 
-        f = open("%s/info.txt")
-        info = json.loads(f.read())
-        f.close()
+        if 'file' not in request.files:
+            _err()
+        file = request.files["file"]
+        if file.filename == "" or not file.filename.startswith("findex_meta_"):
+            _err("bad filename")
+            
+        if not file:
+            _err("bad file")
 
-        if os.path.isfile("%s/meta_movies.txt" % basename):
+        if file.mimetype != "application/zip":
+            _err("bad mimetype")
+
+        filename = secure_filename(file.filename)
+        dirpath = "%s/meta/" % cwd()
+        destination = os.path.join(dirpath, filename)
+        file.save(destination)
+
+        os.popen("cd %s && unzip -o %s && rm %s" % (dirpath, filename, filename)).read()
+        info = {}
+
+        try:
+            f = open("%sinfo.txt" % dirpath, "r")
+            info = json.loads(f.read())
+            f.close()
+        except Exception as ex:
+            _err("could not open %s: %s" % ("%sinfo.txt", str(ex)) % dirpath)
+
+        if "version" in info:
+            OptionsController.set("meta_movies", info)
+
+        if os.path.isfile("%smeta_movies.txt" % dirpath):
             db.session.query(MetaMovies).delete(synchronize_session=False)
             db.session.commit()
             db.session.flush()
 
-            f = open("%s/meta_movies.txt" % basename, "r")
+            f = open("%smeta_movies.txt" % dirpath, "r")
             movies = f.readlines()
             f.close()
 
             movies = [json.loads(movie) for movie in movies]
 
+            # cleanup
+            os.popen("rm %smeta_movies.txt" % dirpath).read()
+
+            # fill table `MetaMovies`
             objects = []
             for movie in movies:
                 m = MetaMovies(
                     title=movie["title"],
                     year=movie["year"],
-                    rating=movie["year"],
+                    rating=movie["rating"],
                     plot=movie["plot"],
                     director=movie["director"],
                     genres=movie["genres"],
@@ -52,6 +94,33 @@ class MetaController:
             db.session.commit()
             db.session.flush()
 
+            meta_movies = {"%s:%d" % (k.title.lower(), k.year): k for k in ZdbQuery(MetaMovies, session=db.session).all()}
+
+            # 'relink' existing files to new metadata
+            q = ZdbQuery(Files, session=db.session)
+            q = q.filter(Files.file_format == 2)
+            q = q.filter(Files.meta_info != None)
+            q = q.filter(Files.file_size >= 134217728)
+
+            updates = []
+            for result in q.all():
+                if "ptn" not in result.meta_info:
+                    continue
+                ptn = result.meta_info["ptn"]
+
+                if "year" in ptn and "title" in ptn:
+                    uid = "%s:%d" % (ptn["title"].lower(), ptn["year"])
+                    if uid in meta_movies:
+                        updates.append("UPDATE files SET meta_movie_id=%d WHERE files.id=%d;" % (meta_movies[uid].id, result.id))
+
+            if updates:
+                try:
+                    db.session.execute(text("\n".join(updates))).fetchall()
+                except Exception as ex:
+                    pass
+                db.session.commit()
+                db.session.flush()
+        return True
 
 class MetaPopcornController:
     @staticmethod

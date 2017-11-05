@@ -103,7 +103,7 @@ do_setup(
         "findex_common",
         "sqlalchemy>=1.1.6",
         "sqlalchemy-utils>=0.32.13",
-        "sqlalchemy-zdb>=0.1.0",
+        "sqlalchemy-zdb>=0.1.3",
         "sqlalchemy-json",
         "dsnparse==0.1.10",
         "furl==0.5.7",

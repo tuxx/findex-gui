@@ -127,7 +127,7 @@
                 <div class="filters col-md-10 col-md-offset-1">
                     <div class="row no-padding">
                         <div class="col-md-4 beetje-padding">
-                            <input disabled id="movie_title" placeholder="Movie Title" name="movie_title" class="txtinput">
+                            <input id="movie_title" placeholder="Movie Title" name="movie_title" class="txtinput">
                         </div>
                         <div class="col-md-2 beetje-padding">
                             <input id="year" placeholder="Year" name="year" class="txtinput">
@@ -325,6 +325,10 @@
         let args = window.location.pathname.split("/").slice(-1)[0];
         args = Search.get_urlbar_items(args, false);
 
+        if(args.hasOwnProperty("title")){
+            $("#movie_title").val(args["title"]);
+        }
+
         if(args.hasOwnProperty("year")){
             $("#year").val(args["year"]);
         }
@@ -367,6 +371,7 @@
             else params["director"] = null;
 
             params["min_rating"] = $("#min_rating").val();
+            params["title"] = $("#movie_title").val();
             if(params["min_rating"]){
                 params["min_rating"] = parseFloat(params["min_rating"]);
             }
@@ -377,7 +382,7 @@
             }
 
             let url = "";
-            $.each(["actors", "genres", "director", "min_rating", "year"], function(index, key){
+            $.each(["actors", "title", "genres", "director", "min_rating", "year"], function(index, key){
                 if(params.hasOwnProperty(key) && params[key]){
                     if(params[key] instanceof Array){
                         if(params[key].length > 0) {

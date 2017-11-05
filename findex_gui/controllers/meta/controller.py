@@ -7,6 +7,7 @@ from findex_gui.orm.models import MetaMovies, MetaMovies, Files
 from findex_gui.controllers.user.decorators import admin_required
 
 from findex_common.exceptions import SearchException
+from sqlalchemy_utils import escape_like
 from sqlalchemy_zdb import ZdbQuery
 from sqlalchemy_zdb.types import ZdbLiteral
 
@@ -174,13 +175,11 @@ class MetaPopcornController:
     @staticmethod
     def search(actors: List = None, genres: List = None, min_rating: int = None,
                director: str = None, year: int = None,
-               offset: int = None, limit: int = 12):
-        if actors:
-            if not isinstance(actors, list):
-                raise SearchException("actors must be list")
-        if genres:
-            if not isinstance(genres, list):
-                raise SearchException("genres must be list")
+               offset: int = None, limit: int = 12, title=None):
+        if actors and not isinstance(actors, list):
+            raise SearchException("actors must be list")
+        if genres and not isinstance(genres, list):
+            raise SearchException("genres must be list")
         if min_rating:
             if not isinstance(min_rating, (int, float)):
                 raise SearchException("min_rating must be int")
@@ -190,17 +189,18 @@ class MetaPopcornController:
                 min_rating = int(min_rating * 10)
         if director and not isinstance(director, str):
             raise SearchException("director must be str")
-        if year:
-            if not isinstance(year, int):
-                raise Exception("year must be int")
-        if offset:
-            if not isinstance(offset, int):
-                raise Exception("offset must be int")
-        if limit:
-            if not isinstance(limit, int):
-                raise Exception("limit must be int")
+        if title and not isinstance(title, str):
+            raise SearchException("title must be str and not empty")
+        if title and len(title) < 3:
+            title = None
+        if year and not isinstance(year, int):
+            raise Exception("year must be int")
+        if offset and not isinstance(offset, int):
+            raise Exception("offset must be int")
+        if limit and not isinstance(limit, int):
+            raise Exception("limit must be int")
 
-        if actors or genres or min_rating or director or year:
+        if actors or genres or min_rating or director or year or title:
             q = ZdbQuery(MetaMovies, session=db.session)
         else:
             q = ZdbQuery(Files, session=db.session)
@@ -240,6 +240,10 @@ class MetaPopcornController:
 
         if director:
             q = q.filter(MetaMovies.director == director)
+
+        if title:
+            q = q.filter(MetaMovies.title == ZdbLiteral("\"%s*\"" % title))
+            # q = q.filter(MetaMovies.title.like(escape_like(title)))
 
         results = q.all()
         if not results:

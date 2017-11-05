@@ -1,9 +1,16 @@
-from flask import request, redirect, url_for
+import os
+import json
+import tempfile
+import shutil
 
-from findex_gui.web import app, themes
+from flask import request, redirect, url_for
+from werkzeug.utils import secure_filename
+
+from findex_gui.web import app, themes, db
 from findex_gui.bin.misc import version
 from findex_gui.controllers.admin.status.status import AdminStatusController
 from findex_gui.controllers.amqp.forms import FormAmqpAdd
+from findex_gui.controllers.options.options import OptionsController
 from findex_gui.controllers.user.decorators import admin_required
 from findex_gui.controllers.news.news import NewsController
 
@@ -20,6 +27,31 @@ def admin_home():
 @admin_required
 def admin_appearance():
     return themes.render("main/appearance", theme="_admin")
+
+@app.route("/admin/metadata", methods=["POST", "GET"])
+@admin_required
+def admin_metadata():
+    if request.method == 'POST':
+        from findex_gui.bin.utils import log_msg
+        from findex_gui.controllers.meta.controller import MetaController
+        try:
+            MetaController.load_new_db()
+        except Exception as ex:
+            log_msg(str(ex), category="meta_import", level=3)
+
+        return redirect(request.url)
+
+    meta_movies_count = db.session.execute("SELECT COUNT(*) FROM meta_movies;").fetchone()
+    if meta_movies_count:
+        meta_movies_count = meta_movies_count[0]
+
+    meta_version = OptionsController.get("meta")
+    if meta_version:
+        meta_version = meta_version.val
+
+    return themes.render("main/metadata", theme="_admin",
+                         meta_movies_count=meta_movies_count,
+                         meta_version=meta_version)
 
 #
 # News

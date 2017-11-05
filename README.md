@@ -8,10 +8,10 @@ Features
 - Scalable/fast
 - [Searching](http://i.imgur.com/WpTTkxx.png) (file name, category, size, extension)
 - [File browsing](http://i.imgur.com/6UkGBzB.png)
-- [IMDB powered 'popcorn' view](http://i.imgur.com/8nk8rbY.png) (release year, director, actors/actresses, genre)
+- [Metadata powered 'popcorn' view](https://i.imgur.com/9suQ5mY.png) (release year, director, actors/actresses, genre)
 - User login / registration
 - Languages: Dutch/English
-- Reverse proxying files from the (ftp/http) backend through the web interface
+- Reverse proxying/streaming from the (ftp/http) backends through the web interface
 
 Stack
 ----------

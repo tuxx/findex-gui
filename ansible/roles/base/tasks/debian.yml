@@ -27,6 +27,7 @@
     - git
     - screen
     - libssl-dev
+    - unzip
 
 - name: install setfacl support
   become: yes

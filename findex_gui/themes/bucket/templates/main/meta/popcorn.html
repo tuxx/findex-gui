@@ -1,3 +1,4 @@
+
 {% extends "bucket/templates/base.html" %}
 {% block content %}
     <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
@@ -10,7 +11,7 @@
                 <div class="filters col-md-10 col-md-offset-1">
                     <div class="row no-padding">
                         <div class="col-md-4 beetje-padding">
-                            <input disabled id="movie_title" placeholder="Movie Title" name="movie_title" class="txtinput">
+                            <input id="movie_title" placeholder="Movie Title" name="movie_title" class="txtinput">
                         </div>
                         <div class="col-md-2 beetje-padding">
                             <input id="year" placeholder="Year" name="year" class="txtinput">
@@ -45,47 +46,91 @@
                             <p>
                                 No results!
                             </p>
-                        {% endif %}
-                        {% for result in results %}
-                        <div class="col-md-4 no-padding">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">{{ result.meta_imdb.title }} ({{ result.meta_imdb.year }})
-                                    <a target="_blank" class="pull-right" href="{{ application_root }}search/{{ result.meta_imdb.title }}&cats=[movies]">
-                                        <button type="submit" class="btn btn-info btn-sm" >
-                                            <i class="fa fa-search fa-fw"></i> Link
-                                        </button>
-                                    </a>
-                                </div>
-                                <div class="panel-body">
-                                    <p>
-                                        {% set plot = result.meta_imdb.plot[:result.meta_imdb.plot.find("BY:")] %}
-                                        {{ plot[:500] }}
-                                        {% if plot|length > 500 %}
-                                             [...]
+                        {% else %}
+                            <div class="overview">
+                            {% for result in results %}
+                                <div class="item">
+                                    <div class="content">
+                                        {% if result.meta_movie.meta.poster %}
+                                            {% set poster = application_root+'/static/meta/posters/'+result.meta_movie.meta.poster+'.jpg' %}
+                                        {% else %}
+                                            {% set poster = application_root+'/static/img/default_thumbnail2.png' %}
                                         {% endif %}
-                                    </p>
-                                    <p>
-                                        Director:
-                                        <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a><br>
-                                        Actors:
-                                        {{ macros.actors_link(result.meta_imdb.actors) }}
-                                    </p>
-                                </div>
-                                <div class="panel-footer">
-                                    <div class="rating">
-                                        {{ macros.rating(result.meta_imdb.rating/10) }}
-                                        <div class="pull-right">
-                                            {{ result.meta_imdb.rating/10 }}
+                                        <div class="poster" style="background-image: url('{{ poster }}')"></div>
+                                        <div class="info">
+                                            <div class="title_container">
+                                                <div class="title">
+                                                    {{ result.meta_movie.title }} <span class="year_release">{{ result.meta_movie.year }}</span>
+                                                </div>
+                                            </div>
+
+                                            <span class="people">
+                                                <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_movie.director }}">
+                                                    {{ result.meta_movie.director }}
+                                                </a>
+                                                <br>
+                                                {{ macros.actors_link(result.meta_movie.actors) }}
+                                            </span>
+
+                                            <span class="synopsis">
+                                                "{{ result.meta_movie.plot }}"
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="options">
+                                        {% set badge_color = "default" %}
+                                        {% set rating = result.meta_movie.rating %}
+                                        {% if rating > 10 %}{% set rating = rating / 10 %}{% endif %}
+                                        {% if rating < 5 %}
+                                            {% set badge_color = "danger" %}
+                                        {% elif rating < 6.5 %}
+                                            {% set badge_color = "warning" %}
+                                        {% elif rating < 7.6 %}
+                                            {% set badge_color = "info" %}
+                                        {% else %}
+                                            {% set badge_color = "success" %}
+                                        {% endif %}
+                                        <div class="label rating label-{{ badge_color }}">{{ rating }}</div>
+                                        {% if result.meta_movie.genres %}
+                                            {% set genres = result.meta_movie.genres[:3] %}
+                                        <div class="genres">
+                                            {% for genre in genres %}
+                                            <div class="label label-default">{{ genre }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        <button type="submit" id="more" data-state="closed" data-movie-id="{{ result.meta_movie.id }}" class="btn btn-primary btn-sm">More</button>
+                                    </div>
+
+                                    <div class="details" data-movie-id="{{ result.meta_movie.id }}">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Sources</h4>
+                                                <table class="browser table table-hover local_files">
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Meta</h4>
+                                                <div class="meta_badges"></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="consensus">
+
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            {% endfor %}
                             </div>
-                        </div>
-                        {% if loop.index % 3 == 0 %}
-                            </div>
-                            <div class="row">
                         {% endif %}
-                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -94,19 +139,87 @@
 
     <script>
     $(document).ready(function(){
+        $("button#more").click(function(){
+            let uid = $(this).attr("data-movie-id");
+            let state = $(this).attr("data-state");
+            let sel_details = $(`div.item .details[data-movie-id='${uid}']`);
+
+            if(state === "open"){
+                $(this).text("more");
+                $(this).attr("data-state", "closed");
+                sel_details.hide();
+                return;
+
+            } else {
+                $(this).text("close");
+                $(this).attr("data-state", "open");
+                sel_details.show();
+            }
+
+            FindexGui.api(`/meta/popcorn/details/${uid}`, "GET").then(function(data){
+                data = data.data;
+                if(data.local_files){
+                    let table_rows_html = "";
+
+                    data.local_files.forEach(function(obj, i){
+                        if(i <= 6) {
+                            let file_href = `${APPLICATION_ROOT}browse/${obj.path_file}`;
+                            table_rows_html += `
+<tr class="clickable text-nowrap" data-id="${obj.id}" data-isdir="f" data-type="${obj.file_format}" data-ext="${obj.file_ext}" data-href="${file_href}" rel="popover" title="">
+    <td><a target="_blank" href="${file_href}">${obj.file_name_human}</a></td>
+    <td>${obj.file_size_human}</td>
+    <td><a target="_blank" href="${obj.path_direct}">Download</a></td>
+</tr>`;
+                        }
+                    });
+
+                    sel_details.find(`table.local_files tbody`).html(table_rows_html);
+                }
+
+                if(data.meta_movie.meta){
+                    let _data = data.meta_movie.meta;
+                    let badges = "";
+                    function make_badge(text){
+                        return `<div class="label label-default">${text}</div>`;
+                    }
+                    if(_data.hasOwnProperty("metacritic") && _data.metacritic){
+                        badges += make_badge(`Metacritic: ${_data.metacritic}`);
+                    }
+                    if(_data.hasOwnProperty("production") && _data.production){
+                        badges += make_badge(`Production: ${_data.production}`);
+                    }
+                    if(_data.hasOwnProperty("boxoffice") && _data.boxoffice){
+                        badges += make_badge(`Box Office: ${_data.boxoffice}`);
+                    }
+                    if(_data.hasOwnProperty("awards") && _data.awards){
+                        badges += make_badge(_data.awards);
+                    }
+                    if(_data.hasOwnProperty("language") && _data.language){
+                        badges += make_badge(_data.language);
+                    }
+
+                    sel_details.find(`div.meta_badges`).html(badges);
+
+                    if(_data.hasOwnProperty("rtconsensus") && _data.rtconsensus){
+                        sel_details.find(`div.consensus`).html(`"${_data.rtconsensus}"`);
+                    }
+                }
+            });
+        });
+
         $('#director').selectivity({
             multiple: true,
             placeholder: "Director",
             ajax: {
                 url: function(term, offset){
-                    return `${APPLICATION_ROOT}api/v2/meta/imdb/director/search/${term.term}`;
+                    return `${APPLICATION_ROOT}api/v2/meta/popcorn/director/search/${term.term}`;
                 },
                 minimumInputLength: 3,
                 quietMillis: 250,
                 fetch: function(url, init, queryOptions) {
                     return $.ajax(url).then(function(data) {
                         return {
-                            results: $.map(data.items, function(item) {
+                            results: $.map(data.data.items, function(item) {
                                 return {
                                     text: item.director,
                                     id: item.id
@@ -123,15 +236,14 @@
             placeholder: "Cast",
             ajax: {
                 url: function(term, offset){
-                    return `${APPLICATION_ROOT}api/v2/meta/imdb/actor/search/${term.term}`;
+                    return `${APPLICATION_ROOT}api/v2/meta/popcorn/actor/search/${term.term}`;
                 },
                 minimumInputLength: 3,
                 quietMillis: 250,
                 fetch: function(url, init, queryOptions) {
                     return $.ajax(url).then(function(data) {
-                        console.log(data);
                         return {
-                            results: $.map(data.items, function(item) {
+                            results: $.map(data.data.items, function(item) {
                                 return {
                                     text: item.actor,
                                     id: item.id
@@ -175,8 +287,8 @@
         });
 
         $('.selectivity-input').change(function(){
-            var a = $(this).find(".selectivity-multiple-selected-item");
-            if(a.length == 1){
+            let a = $(this).find(".selectivity-multiple-selected-item");
+            if(a.length === 1){
                 $(this).find(".selectivity-multiple-input-container").css("padding-top", 2)
             } else {
                 $(this).find(".selectivity-multiple-input-container").css("padding-top", 9)
@@ -185,6 +297,10 @@
 
         let args = window.location.pathname.split("/").slice(-1)[0];
         args = Search.get_urlbar_items(args, false);
+
+        if(args.hasOwnProperty("title")){
+            $("#movie_title").val(args["title"]);
+        }
 
         if(args.hasOwnProperty("year")){
             $("#year").val(args["year"]);
@@ -228,6 +344,7 @@
             else params["director"] = null;
 
             params["min_rating"] = $("#min_rating").val();
+            params["title"] = $("#movie_title").val();
             if(params["min_rating"]){
                 params["min_rating"] = parseFloat(params["min_rating"]);
             }
@@ -238,7 +355,7 @@
             }
 
             let url = "";
-            $.each(["actors", "genres", "director", "min_rating", "year"], function(index, key){
+            $.each(["actors", "title", "genres", "director", "min_rating", "year"], function(index, key){
                 if(params.hasOwnProperty(key) && params[key]){
                     if(params[key] instanceof Array){
                         if(params[key].length > 0) {

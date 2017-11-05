@@ -8,7 +8,7 @@ from flask_babel import gettext
 
 import findex_gui.controllers.browse.converters
 from findex_gui.web import app, themes, db
-from findex_gui.orm.models import MetaImdb
+from findex_gui.orm.models import MetaMovies
 from findex_gui.controllers.browse.browse import Browse
 from findex_gui.controllers.resources.resources import ResourceController
 from findex_gui.controllers.relay.relay import ReverseRelayController
@@ -40,8 +40,8 @@ def browse(args):
     browser = _browse.browse(resource, path, "")
 
     imdb = None
-    if f.meta_imdb:
-        imdb = db.session.query(MetaImdb).filter(MetaImdb.id == f.meta_imdb).first()
+    if f.meta_movie:
+        imdb = db.session.query(MetaMovies).filter(MetaMovies.id == f.meta_movie).first()
 
     return themes.render("main/file_viewer/viewer",
                          f=f, browser=browser,

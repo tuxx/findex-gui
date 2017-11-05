@@ -137,6 +137,11 @@ def main(ctx, debug, quiet, nolog, maxcount, user, cwd):
     * Current directory (if the ".cwd" file exists)
     * Default value ("~/.Findex")
     """
+    try:
+        os.popen("rm -rf /tmp/findex_*").read()
+    except:
+        pass
+
     decide_cwd(cwd)
 
     if quiet:

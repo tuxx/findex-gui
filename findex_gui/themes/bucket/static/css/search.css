@@ -13,7 +13,6 @@
 }
 
 .btn-group-active{
-    background-image: url('/static/themes/bucket/static/img/blue_line.png') !important;
     background-repeat: repeat-y !important;
     padding-left: 15px !important;
 }

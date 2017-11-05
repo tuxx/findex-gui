@@ -1,0 +1,124 @@
+{% extends "_admin/templates/base.html" %}
+{% block content %}
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Metadata
+                <small></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i> Metadata</a></li>
+            </ol>
+        </section>
+
+        <section class="content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Add database</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p>
+                                        By default, findex doesn't come with metadata. In general; the metadata includes:
+                                    </p>
+                                    <ul>
+                                        <li>Movie posters, ratings, actors/directors</li>
+                                        <li>Series posters, ratings, actors</li>
+                                        <li>Music/Band information</li>
+                                    </ul>
+                                    <p>
+                                        Findex can work without this metadata but for user-experience it's better that it is present.
+                                    </p>
+                                    <p>
+                                        The dump itself is provided as a zip file, with the following naming convention:
+                                        <code>findex_meta_*.zip</code>, where the <code>*</code> is a number. This signifies the metadata
+                                        database version number.
+                                    </p>
+                                    <p>
+                                        The dump is available at a webpage: <a target="_blank" href="https://blog.cedsys.nl/findex_meta.html">blog.cedsys.nl/findex_meta.html</a>.
+                                        Fetch the file and upload it here, to start the bootstrapping process.
+                                    </p>
+                                    <p>
+                                        Please note that:
+                                    </p>
+                                    <ul>
+                                        <li>I try to update the webpage as much as I can, so look regularly for new dumps.</li>
+                                        <li>The actual upload can take up to 2 minutes to import. Just let it load.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Status</h3>
+                        </div>
+                        <div class="box-body">
+                            {% if meta_movies_count >= 1 %}
+                                metadata present<br>
+                                version: {{ meta_version.version }}<br>
+                                date: {{ meta_version.date }}
+                            {% else %}
+                                <span style="color:red;">metadata not present</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="box box-solid">
+                        <div class="box-header with-border ">
+                            <h3 class="box-title">Upload Dump</h3>
+                        </div>
+                        <div class="box-body">
+                                <form action="" method=post enctype=multipart/form-data>
+                                    <p><input type=file name=file>
+                                    <input type=submit value=Upload>
+                                </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#movies" data-toggle="tab">Movies</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="movies">
+                                <section id="new">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            {{ meta_movies_count }} rows of metadata active
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 2.3.1
+        </div>
+        <strong>zzz</a>.</strong> zzz
+    </footer>
+
+{% endblock %}

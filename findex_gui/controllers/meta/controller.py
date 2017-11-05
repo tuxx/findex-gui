@@ -242,7 +242,7 @@ class MetaPopcornController:
             q = q.filter(MetaMovies.director == director)
 
         if title:
-            q = q.filter(MetaMovies.title == ZdbLiteral("\"%s*\"" % title))
+            q = q.filter(MetaMovies.title == ZdbLiteral("\"*%s*\"" % title))
             # q = q.filter(MetaMovies.title.like(escape_like(title)))
 
         results = q.all()

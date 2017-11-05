@@ -15,8 +15,8 @@ from findex_common.static_variables import FileCategories, FileProtocols
 class SearchController:
     @staticmethod
     def search(key: str, file_categories: list = None, file_extensions: list = None, file_size: list = None,
-               file_type: str = "both", page: int = 0, per_page: int = 30,
-               autocomplete: bool = False, lazy_search=False):
+               file_type: str = "both", page: int = 0, per_page: int = 30, autocomplete: bool = False,
+               lazy_search=False, meta_movie_id: int = None):
         """
         Search database.
         :param key: str
@@ -27,6 +27,7 @@ class SearchController:
         :param page: offset results
         :param per_page: limit results
         :param autocomplete: indicates autocomplete was used
+        :param meta_movie_id:
         :return:
         """
         now = datetime.now()
@@ -38,7 +39,8 @@ class SearchController:
             file_size=file_size,
             page=page,
             per_page=per_page,
-            autocomplete=autocomplete)
+            autocomplete=autocomplete,
+            meta_movie_id=meta_movie_id)
         db_time = (datetime.now() - now).total_seconds()
 
         result = SearchResult(results=results)
@@ -107,7 +109,6 @@ class SearchController:
 
             if cat_id is None:
                 continue
-
             cat_ids.append(FileCategories().id_by_name(cat))
 
         if cat_ids and "file_categories" not in ignore_filters:
@@ -127,6 +128,9 @@ class SearchController:
                 exts.append(ext)
 
             q = q.filter(Files.file_ext.in_(exts))
+
+        if isinstance(kwargs["meta_movie_id"], int):
+            q = q.filter(Files.meta_movie_id == kwargs["meta_movie_id"])
 
         # Search
         if config("findex:elasticsearch:enabled"):
@@ -157,17 +161,18 @@ class SearchController:
         try:
             results = q.all()
         except Exception as ex:
-            e = ""
             raise Exception(ex)
 
-        resource_ids = set([z.resource_id for z in results])
-        resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
-
-        for result in results:
-            setattr(result, "resource", resource_obs[result.resource_id])
-
+        results = SearchController.assign_resource_objects(results)
         return results
 
+    @staticmethod
+    def assign_resource_objects(results):
+        resource_ids = set([z.resource_id for z in results])
+        resource_obs = {z.id: z for z in Resource.query.filter(Resource.id.in_(resource_ids)).all()}
+        for result in results:
+            setattr(result, "resource", resource_obs[result.resource_id])
+        return results
 
 class SearchResult:
     def __init__(self, results):

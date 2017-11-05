@@ -59,17 +59,16 @@ class MetaPopcornController:
 
     @staticmethod
     def get_director(search=None):
-        """A faster SELECT DISTINCT unnest(director) FROM meta_movies
-            using meta_movie_directors
-        """
-        q = ZdbQuery(MetaMoviesDirectors, session=db.session)
+        q = ZdbQuery(MetaMovies, session=db.session)
         if search:
+            search = search.lower()
             search = search.replace("*", "")
             if not isinstance(search, str):
                 raise SearchException("search must be str")
-            q = q.filter(MetaMoviesDirectors.director.like(ZdbLiteral("%s*" % search)))
-        results = q.all()
-        return results
+            q = q.filter(MetaMovies.director == ZdbLiteral("\"%s*\"" % search))
+            # q = q.filter(MetaMovies.director.distinct()) distinct not implmeneted yet in ZdbQuery
+        results = [z.director for z in q.all()]
+        return list(set(results))
 
     @staticmethod
     def get_actors(search=None):
@@ -82,7 +81,7 @@ class MetaPopcornController:
             search = search.replace("*", "")
             if not isinstance(search, str):
                 raise SearchException("search must be str")
-            q = q.filter(MetaMovies.actors == ZdbLiteral("%s*" % search))
+            q = q.filter(MetaMovies.actors == ZdbLiteral("\"%s*\"" % search))
         results = q.all()
 
         actors = []
@@ -249,16 +248,12 @@ class MetaPopcornController:
         ids = list(set([z.id for z in results]))
 
         q = ZdbQuery(Files, session=db.session)
-        q = q.filter(Files.meta_movie_id.in_(ids))
+        q = q.filter(Files.file_format == 2)
         q = q.filter(Files.file_size >= 134217728)
-        q = q.limit(45)
+        q = q.filter(Files.meta_movie_id.in_(ids))
+        q = q.limit(100)
         results = q.all()
 
-        # @TODO: migrate `meta_info` to JSONB so we get the #> operator
-        # with that we can DISTINCT on nested json key 'title'
-        # e.g: SELECT DISTINCT ON (files.meta_info#>'{ptn, title}')
-        # to prevent from returning duplicates in popcorn view.
-        # for now, lets just do this:
         _names = []
         _rtn = []
         for result in results:
@@ -267,3 +262,9 @@ class MetaPopcornController:
                 _rtn.append(result)
                 _names.append(result.meta_movie.title)
         return _rtn
+
+# @TODO: migrate `meta_info` to JSONB so we get the #> operator
+# with that we can DISTINCT on nested json key 'title'
+# e.g: SELECT DISTINCT ON (files.meta_info#>'{ptn, title}')
+# to prevent from returning duplicates in popcorn view.
+# for now, lets just do this:

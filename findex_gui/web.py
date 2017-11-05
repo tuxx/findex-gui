@@ -22,6 +22,7 @@ def create_app():
                 template_folder='themes')
 
     # setup config
+    app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024
     app.config['SECRET_KEY'] = config("findex:findex:secret_token")
     app.config['dir_base'] = os.path.dirname(os.path.abspath(__file__))
     app.config['dir_root'] = '/'.join(app.config['dir_base'].split('/')[:-1])
@@ -68,7 +69,7 @@ def create_app():
     from findex_gui.controllers.browse import routes
     from findex_gui.controllers.relay import routes
     from findex_gui.controllers.user import routes
-    from findex_gui.controllers.meta_imdb import routes
+    from findex_gui.controllers.meta import routes
     from findex_gui.controllers.news import routes
     from findex_gui.controllers.admin import routes
     from findex_gui.controllers.admin.amqp import routes
@@ -82,7 +83,7 @@ def create_app():
     from findex_gui.controllers.user import api
     from findex_gui.controllers.browse import api
     from findex_gui.controllers.resources import api
-    from findex_gui.controllers.meta_imdb import api
+    from findex_gui.controllers.meta import api
     from findex_gui.controllers.news import api
     from findex_gui.controllers.admin import api
     from findex_gui.controllers.nmap import api

@@ -242,7 +242,6 @@
                 quietMillis: 250,
                 fetch: function(url, init, queryOptions) {
                     return $.ajax(url).then(function(data) {
-                        console.log(data.data);
                         return {
                             results: $.map(data.data.items, function(item) {
                                 return {

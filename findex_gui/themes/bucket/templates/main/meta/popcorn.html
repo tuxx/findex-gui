@@ -23,6 +23,7 @@
             float:left;
             width:50%;
             margin-top: 20px;
+            min-height: 200px;
         }
         div.overview>div.item>div.options>a.details{
             text-align: right;
@@ -118,6 +119,15 @@
             background-color: #8f8f8f;
             cursor: pointer;
         }
+
+        @media screen and (max-width: 920px) and (min-width: 0px) {
+            div.overview>div.item>div.content>div.poster{
+                display: none;
+            }
+            div.overview>div.item>div.content>div.info{
+                width:100%;
+            }
+        }
     </style>
 
     <!-- Page Content -->
@@ -208,11 +218,14 @@
                                             {% set badge_color = "success" %}
                                         {% endif %}
                                         <div class="label rating label-{{ badge_color }}">{{ rating }}</div>
+                                        {% if result.meta_movie.genres %}
+                                            {% set genres = result.meta_movie.genres[:3] %}
                                         <div class="genres">
-                                            <div class="label label-default">Sci-Fi</div>
-                                            <div class="label label-default">Romance</div>
-                                            <div class="label label-default">Comedy</div>
+                                            {% for genre in genres %}
+                                            <div class="label label-default">{{ genre }}</div>
+                                            {% endfor %}
                                         </div>
+                                        {% endif %}
                                         <button type="submit" id="more" class="btn btn-primary btn-sm">More</button>
                                     </div>
 

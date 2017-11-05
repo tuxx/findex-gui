@@ -407,7 +407,7 @@ class User(BASE, AuthUser, Extended):
 class MetaMovies(BASE, Extended):
     __tablename__ = "meta_movies"
 
-    id = Column(SMALLINT, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
     title = ZdbColumn(FULLTEXT(), nullable=False)
     year = ZdbColumn(SMALLINT(), nullable=False)
@@ -458,7 +458,7 @@ class Post(BASE, Extended):
 class Files(BASE, Extended):
     __tablename__ = "files"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
 
     resource_id = ZdbColumn(Integer())
 
@@ -476,7 +476,7 @@ class Files(BASE, Extended):
     searchable = ZdbColumn(FULLTEXT(41))
 
     meta_info = ZdbColumn(MutableJson())
-    meta_movie_id = ZdbColumn(SMALLINT())
+    meta_movie_id = ZdbColumn(Integer())
     meta_movie = None
 
     ix_resource_id = Index("ix_resource_id", resource_id)
@@ -560,7 +560,7 @@ class Files(BASE, Extended):
 class NmapRule(BASE, Extended):
     __tablename__ = "nmap_rules"
 
-    id = Column(SMALLINT, primary_key=True)
+    id = Column(Integer, primary_key=True)
     rule = Column(String(), nullable=False, unique=True)
     name = Column(String(), nullable=False, unique=True)
     output = Column(MutableJson(), nullable=True, default={"data": {}})

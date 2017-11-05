@@ -213,16 +213,7 @@ class MetaPopcornController:
                 q = q.offset(offset)
 
             results = q.all()
-
-            # for every result, fetch meta
-            q = db.session.query(MetaMovies)
-            metas = q.filter(MetaMovies.id.in_([z.meta_movie_id for z in results])).all()
-            metas = {z.id: z for z in metas}
-
-            # assign metas
-            for result in results:
-                if result.meta_movie_id in metas:
-                    result.meta_movie = metas[result.meta_movie_id]
+            results = MetaPopcornController._assign_meta(results)
             return results
 
         if actors:
@@ -267,8 +258,26 @@ class MetaPopcornController:
                 _names.append(result.meta_movie.title)
         return _rtn
 
-# @TODO: migrate `meta_info` to JSONB so we get the #> operator
-# with that we can DISTINCT on nested json key 'title'
-# e.g: SELECT DISTINCT ON (files.meta_info#>'{ptn, title}')
-# to prevent from returning duplicates in popcorn view.
-# for now, lets just do this:
+    @staticmethod
+    def get_details(meta_movie_id):
+        """returns movies given a movie_id"""
+        from findex_gui.controllers.search.search import SearchController
+        q = ZdbQuery(Files, session=db.session)
+        q = q.filter(Files.meta_movie_id == meta_movie_id)
+        results = q.all()
+        results = MetaPopcornController._assign_meta(results)
+        results = SearchController.assign_resource_objects(results)
+        return results
+
+    @staticmethod
+    def _assign_meta(results: List[Files]):
+        """assigns the meta_movie attribute to file objects"""
+        q = db.session.query(MetaMovies)
+        metas = q.filter(MetaMovies.id.in_([z.meta_movie_id for z in results])).all()
+        metas = {z.id: z for z in metas}
+
+        # assign metas
+        for result in results:
+            if result.meta_movie_id in metas:
+                result.meta_movie = metas[result.meta_movie_id]
+        return results

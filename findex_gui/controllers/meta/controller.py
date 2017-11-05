@@ -1,53 +1,105 @@
+import os
+import json
 from typing import List
 
 from findex_gui.web import db
-from findex_gui.orm.models import MetaImdb, MetaImdbActors, MetaImdbDirectors, Files
-from findex_common.exceptions import SearchException
+from findex_gui.orm.models import MetaMovies, MetaMovies, Files
+from findex_gui.controllers.user.decorators import admin_required
 
-from sqlalchemy import desc
+from findex_common.exceptions import SearchException
 from sqlalchemy_zdb import ZdbQuery
 from sqlalchemy_zdb.types import ZdbLiteral
 
 
-class MetaImdbController:
+class MetaController:
+    @staticmethod
+    @admin_required
+    def load_new_db(path_metadata_zip):
+        basename = os.path.basename(path_metadata_zip)
+        dirname = os.path.basename(path_metadata_zip)
+        os.popen("cd %s && unzip %s" % (dirname, basename)).read()
+
+        f = open("%s/info.txt")
+        info = json.loads(f.read())
+        f.close()
+
+        if os.path.isfile("%s/meta_movies.txt" % basename):
+            db.session.query(MetaMovies).delete(synchronize_session=False)
+            db.session.commit()
+            db.session.flush()
+
+            f = open("%s/meta_movies.txt" % basename, "r")
+            movies = f.readlines()
+            f.close()
+
+            movies = [json.loads(movie) for movie in movies]
+
+            objects = []
+            for movie in movies:
+                m = MetaMovies(
+                    title=movie["title"],
+                    year=movie["year"],
+                    rating=movie["year"],
+                    plot=movie["plot"],
+                    director=movie["director"],
+                    genres=movie["genres"],
+                    actors=movie["actors"],
+                    meta=movie.get("meta", {})
+                )
+                objects.append(m)
+            db.session.bulk_save_objects(objects)
+            db.session.commit()
+            db.session.flush()
+
+
+class MetaPopcornController:
     @staticmethod
     def get(imdb_id):
-        return db.session.query(MetaImdb).filter(MetaImdb.id == imdb_id).first()
+        return db.session.query(MetaMovies).filter(MetaMovies.id == imdb_id).first()
 
     @staticmethod
     def get_director(search=None):
-        """A faster SELECT DISTINCT unnest(director) FROM meta_imdb
-            using meta_imdb_directors
+        """A faster SELECT DISTINCT unnest(director) FROM meta_movies
+            using meta_movie_directors
         """
-        q = ZdbQuery(MetaImdbDirectors, session=db.session)
+        q = ZdbQuery(MetaMoviesDirectors, session=db.session)
         if search:
             search = search.replace("*", "")
             if not isinstance(search, str):
                 raise SearchException("search must be str")
-            q = q.filter(MetaImdbDirectors.director.like(ZdbLiteral("%s*" % search)))
+            q = q.filter(MetaMoviesDirectors.director.like(ZdbLiteral("%s*" % search)))
         results = q.all()
         return results
 
     @staticmethod
     def get_actors(search=None):
-        """A faster SELECT DISTINCT unnest(actors) FROM meta_imdb
-            using meta_imdb_actors
-        """
-        q = ZdbQuery(MetaImdbActors, session=db.session)
+        if len(search) < 3:
+            return []
+
+        q = ZdbQuery(MetaMovies, session=db.session)
         if search:
+            search = search.lower()
             search = search.replace("*", "")
             if not isinstance(search, str):
                 raise SearchException("search must be str")
-            q = q.filter(MetaImdbActors.actor.like(ZdbLiteral("%s*" % search)))
+            q = q.filter(MetaMovies.actors == ZdbLiteral("%s*" % search))
         results = q.all()
-        return results
+
+        actors = []
+        for result in results:
+            for actor in result.actors:
+                if search not in actor.lower():
+                    continue
+                if actor not in actors:
+                    actors.append(actor)
+        return actors
 
     @staticmethod
     def get_actor_played_in(actor):
         """Returns a list of movies given an actor/actress"""
 
-        q = ZdbQuery(MetaImdb, session=db.session)
-        q = q.filter(MetaImdb.actors.like(actor))
+        q = ZdbQuery(MetaMovies, session=db.session)
+        q = q.filter(MetaMovies.actors.like(actor))
         results_imdb = q.all()
         if not results_imdb:
             return {
@@ -59,7 +111,7 @@ class MetaImdbController:
         results_imdb = sorted(results_imdb, key=lambda x: x.rating, reverse=True)
 
         q = ZdbQuery(Files, session=db.session)
-        q = q.filter(Files.meta_imdb_id.in_(ids))
+        q = q.filter(Files.meta_movie_id.in_(ids))
         q = q.filter(Files.file_size >= 134217728)
         results_local = q.all()
         # @TODO: migrate `meta_info` to JSONB so we get the #> operator
@@ -70,11 +122,11 @@ class MetaImdbController:
         _names = []
         _rtn = []
         for result in results_local:
-            result.get_meta_imdb()
-            if result.meta_imdb.title not in _names:
+            result.get_meta_movie()
+            if result.meta_movie.title not in _names:
                 _rtn.append(result)
-                _names.append(result.meta_imdb.title)
-        _rtn = sorted(_rtn, key=lambda x: x.meta_imdb.title, reverse=True)
+                _names.append(result.meta_movie.title)
+        _rtn = sorted(_rtn, key=lambda x: x.meta_movie.title, reverse=True)
 
         return {
             "local": _rtn,
@@ -85,8 +137,8 @@ class MetaImdbController:
     def get_director_directed(director):
         """Returns a list of movies given a director"""
 
-        q = ZdbQuery(MetaImdb, session=db.session)
-        q = q.filter(MetaImdb.director.like(director))
+        q = ZdbQuery(MetaMovies, session=db.session)
+        q = q.filter(MetaMovies.director.like(director))
         results_imdb = q.all()
         if not results_imdb:
             return {
@@ -98,7 +150,7 @@ class MetaImdbController:
         results_imdb = sorted(results_imdb, key=lambda x: x.rating, reverse=True)
 
         q = ZdbQuery(Files, session=db.session)
-        q = q.filter(Files.meta_imdb_id.in_(ids))
+        q = q.filter(Files.meta_movie_id.in_(ids))
         q = q.filter(Files.file_size >= 134217728)
 
         results_local = q.all()
@@ -110,11 +162,11 @@ class MetaImdbController:
         _names = []
         _rtn = []
         for result in results_local:
-            result.get_meta_imdb()
-            if result.meta_imdb.title not in _names:
+            result.get_meta_movie()
+            if result.meta_movie.title not in _names:
                 _rtn.append(result)
-                _names.append(result.meta_imdb.title)
-        _rtn = sorted(_rtn, key=lambda x: x.meta_imdb.title, reverse=True)
+                _names.append(result.meta_movie.title)
+        _rtn = sorted(_rtn, key=lambda x: x.meta_movie.title, reverse=True)
         return {
             "local": _rtn,
             "imdb": results_imdb
@@ -150,33 +202,45 @@ class MetaImdbController:
                 raise Exception("limit must be int")
 
         if actors or genres or min_rating or director or year:
-            q = ZdbQuery(MetaImdb, session=db.session)
+            q = ZdbQuery(MetaMovies, session=db.session)
         else:
-            q = db.session.query(Files)
-            q = q.filter(Files.meta_imdb_id != None)
+            q = ZdbQuery(Files, session=db.session)
+            q = q.filter(Files.meta_movie_id != None)
             q = q.filter(Files.file_size >= 134217728)
-            q = q.limit(12)
+            q = q.distinct(Files.meta_movie_id)
+            q = q.limit(100)
+
             if offset:
                 q = q.offset(offset)
+
             results = q.all()
+
+            # for every result, fetch meta
+            q = db.session.query(MetaMovies)
+            metas = q.filter(MetaMovies.id.in_([z.meta_movie_id for z in results])).all()
+            metas = {z.id: z for z in metas}
+
+            # assign metas
             for result in results:
-                result.get_meta_imdb()
+                if result.meta_movie_id in metas:
+                    result.meta_movie = metas[result.meta_movie_id]
             return results
 
         if actors:
-            q = q.filter(MetaImdb.actors.in_(actors))
+            q = q.filter(MetaMovies.actors.in_(actors))
 
         if genres:
-            q = q.filter(MetaImdb.genres.in_(genres))
+            for i in genres:
+                q = q.filter(MetaMovies.genres == i)
 
         if min_rating:
-            q = q.filter(MetaImdb.rating >= min_rating)
+            q = q.filter(MetaMovies.rating >= min_rating)
 
         if year:
-            q = q.filter(MetaImdb.year == year)
+            q = q.filter(MetaMovies.year == year)
 
         if director:
-            q = q.filter(MetaImdb.director == director)
+            q = q.filter(MetaMovies.director == director)
 
         results = q.all()
         if not results:
@@ -185,7 +249,7 @@ class MetaImdbController:
         ids = list(set([z.id for z in results]))
 
         q = ZdbQuery(Files, session=db.session)
-        q = q.filter(Files.meta_imdb_id.in_(ids))
+        q = q.filter(Files.meta_movie_id.in_(ids))
         q = q.filter(Files.file_size >= 134217728)
         q = q.limit(45)
         results = q.all()
@@ -198,8 +262,8 @@ class MetaImdbController:
         _names = []
         _rtn = []
         for result in results:
-            result.get_meta_imdb()
-            if result.meta_imdb.title not in _names:
+            result.get_meta_movie()
+            if result.meta_movie.title not in _names:
                 _rtn.append(result)
-                _names.append(result.meta_imdb.title)
+                _names.append(result.meta_movie.title)
         return _rtn

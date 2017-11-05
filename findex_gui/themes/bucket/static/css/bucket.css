@@ -278,7 +278,7 @@ button:focus {
 .navbar-brand{
     padding: 0px;
     padding-top: 0px !important;
-    background: url('http://i.imgur.com/h83XZCE.png');
+    background: url('/static/img/findex2.png');
     height: 40px;
     width: 68px;
     background-repeat: no-repeat;

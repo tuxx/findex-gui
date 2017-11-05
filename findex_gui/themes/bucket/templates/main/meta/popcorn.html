@@ -1,7 +1,124 @@
+
 {% extends "bucket/templates/base.html" %}
 {% block content %}
     <script src="{{ url_for("static", filename="js/findex/search.js") }}"></script>
     {% import 'bucket/templates/main/meta/_macros.html' as macros %}
+
+    <style>
+        div.overview h1,
+        div.overview h2,
+        div.overview h3,
+        div.overview h4{
+            padding-top:0;
+            margin-top:0;
+            margin-bottom:0;
+            padding-bottom:0;
+            font-weight:bold;
+        }
+        div.overview{
+            overflow: hidden;
+            margin-bottom:40px;
+        }
+        div.overview>div.item{
+            float:left;
+            width:50%;
+            margin-top: 20px;
+        }
+        div.overview>div.item>div.options>a.details{
+            text-align: right;
+        }
+        div.overview>div.item>div.content>div{
+            float:left;
+        }
+        div.overview>div.item>div.content>div.poster{
+            width:20%;
+            height:160px;
+            background-size:cover;
+            background-repeat: no-repeat;
+
+        }
+        div.overview>div.item>div.content>div.info{
+            width:80%;
+            padding-left:10px;
+            padding-right:10px;
+        }
+        div.overview>div.item>div.content>div.info>div.title_container{
+            overflow:hidden;
+            border-bottom:1px solid #e0e0e0;
+        }
+        div.overview>div.item>div.content>div.info>div.title_container>.title{
+            float:left;
+            width:100%;
+            font-weight:bold;
+            font-size:16px;
+            padding-bottom:2px;
+            line-height: 20px;
+        }
+        div.overview span.year_release{
+            font-size:12px;
+            color: darkgrey;
+            float: right;
+        }
+        div.overview>div.item span.people{
+            display:block;
+            margin-top:6px;
+        }
+        div.overview>div.item span.synopsis{
+            margin-top:6px;
+            color: #505050;
+            display: block;
+        }
+        div.overview div.options>span.rating_stars{
+            padding-top: 5px;
+            padding-left: 4px;
+            float: left;
+        }
+        div.overview div.details{
+            display:none;
+        }
+        div.overview>div.item>div.content{
+            width:100%;
+            float:left;
+        }
+        div.overview>div.item>div.options{
+            width: 100%;
+            float: left;
+            padding-right: 10px;
+            padding-bottom: 4px;
+            padding-top: 4px;
+            margin-top: 8px;
+        }
+        div.overview>div.item>div.options>div.rating{
+            border-radius: 1px;
+            float: left;
+            font-size:14px;
+            font-weight: normal;
+        }
+        div.overview>div.item>div.options>button#more{
+            border-radius: 1px;
+            float: right;
+            font-size: 12px;
+            font-weight: normal;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        div.overview>div.item>div.options>div.genres{
+            padding-left: 6px;
+            padding-top: 1px;
+            float: left;
+        }
+        div.overview>div.item>div.options>div.genres>div.label{
+            background-color: #b1b1b1;
+            cursor: pointer;
+            border-radius: 0;
+        }
+        div.overview>div.item>div.options>div.genres>div.label:hover{
+            background-color: #8f8f8f;
+            cursor: pointer;
+        }
+    </style>
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
@@ -45,47 +162,69 @@
                             <p>
                                 No results!
                             </p>
-                        {% endif %}
-                        {% for result in results %}
-                        <div class="col-md-4 no-padding">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">{{ result.meta_imdb.title }} ({{ result.meta_imdb.year }})
-                                    <a target="_blank" class="pull-right" href="{{ application_root }}search/{{ result.meta_imdb.title }}&cats=[movies]">
-                                        <button type="submit" class="btn btn-info btn-sm" >
-                                            <i class="fa fa-search fa-fw"></i> Link
-                                        </button>
-                                    </a>
-                                </div>
-                                <div class="panel-body">
-                                    <p>
-                                        {% set plot = result.meta_imdb.plot[:result.meta_imdb.plot.find("BY:")] %}
-                                        {{ plot[:500] }}
-                                        {% if plot|length > 500 %}
-                                             [...]
+                        {% else %}
+                            <div class="overview">
+                            {% for result in results %}
+                                <div class="item">
+                                    <div class="content">
+                                        {% if result.meta_movie.meta.poster %}
+                                            {% set poster = '/static/meta/posters/'+result.meta_movie.meta.poster+'.jpg' %}
+                                        {% else %}
+                                            {% set poster = '/static/img/default_thumbnail2.png' %}
                                         {% endif %}
-                                    </p>
-                                    <p>
-                                        Director:
-                                        <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a><br>
-                                        Actors:
-                                        {{ macros.actors_link(result.meta_imdb.actors) }}
-                                    </p>
-                                </div>
-                                <div class="panel-footer">
-                                    <div class="rating">
-                                        {{ macros.rating(result.meta_imdb.rating/10) }}
-                                        <div class="pull-right">
-                                            {{ result.meta_imdb.rating/10 }}
+                                        <div class="poster" style="background-image: url('{{ poster }}')"></div>
+                                        <div class="info">
+                                            <div class="title_container">
+                                                <div class="title">
+                                                    {{ result.meta_movie.title }} <span class="year_release">{{ result.meta_movie.year }}</span>
+                                                </div>
+                                            </div>
+
+                                            <span class="people">
+                                                <a href="{{ application_root }}meta/popcorn/director/{{ result.meta_movie.director }}">
+                                                    {{ result.meta_movie.director }}
+                                                </a>
+                                                <br>
+                                                {{ macros.actors_link(result.meta_movie.actors) }}
+                                            </span>
+
+                                            <span class="synopsis">
+                                                "{{ result.meta_movie.plot }}"
+                                            </span>
                                         </div>
                                     </div>
+
+                                    <div class="options">
+                                        {% set badge_color = "default" %}
+                                        {% set rating = result.meta_movie.rating %}
+                                        {% if rating > 10 %}{% set rating = rating / 10 %}{% endif %}
+                                        {% if rating < 5 %}
+                                            {% set badge_color = "danger" %}
+                                        {% elif rating < 6.5 %}
+                                            {% set badge_color = "warning" %}
+                                        {% elif rating < 7.6 %}
+                                            {% set badge_color = "info" %}
+                                        {% else %}
+                                            {% set badge_color = "success" %}
+                                        {% endif %}
+                                        <div class="label rating label-{{ badge_color }}">{{ rating }}</div>
+                                        <div class="genres">
+                                            <div class="label label-default">Sci-Fi</div>
+                                            <div class="label label-default">Romance</div>
+                                            <div class="label label-default">Comedy</div>
+                                        </div>
+                                        <button type="submit" id="more" class="btn btn-primary btn-sm">More</button>
+                                    </div>
+
+                                    <div class="details">
+                                        <span class="rating_stars">
+                                            {{ macros.rating(79/10) }}
+                                        </span>
+                                    </div>
                                 </div>
+                            {% endfor %}
                             </div>
-                        </div>
-                        {% if loop.index % 3 == 0 %}
-                            </div>
-                            <div class="row">
                         {% endif %}
-                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -106,7 +245,7 @@
                 fetch: function(url, init, queryOptions) {
                     return $.ajax(url).then(function(data) {
                         return {
-                            results: $.map(data.items, function(item) {
+                            results: $.map(data.data.items, function(item) {
                                 return {
                                     text: item.director,
                                     id: item.id
@@ -129,9 +268,9 @@
                 quietMillis: 250,
                 fetch: function(url, init, queryOptions) {
                     return $.ajax(url).then(function(data) {
-                        console.log(data);
+                        console.log(data.data);
                         return {
-                            results: $.map(data.items, function(item) {
+                            results: $.map(data.data.items, function(item) {
                                 return {
                                     text: item.actor,
                                     id: item.id
@@ -175,8 +314,8 @@
         });
 
         $('.selectivity-input').change(function(){
-            var a = $(this).find(".selectivity-multiple-selected-item");
-            if(a.length == 1){
+            let a = $(this).find(".selectivity-multiple-selected-item");
+            if(a.length === 1){
                 $(this).find(".selectivity-multiple-input-container").css("padding-top", 2)
             } else {
                 $(this).find(".selectivity-multiple-input-container").css("padding-top", 9)

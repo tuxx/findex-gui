@@ -3,7 +3,7 @@
 Vagrant.require_version ">= 1.9.7"
 
 Vagrant.configure(2) do |config|
-    config.vm.box = "debian/stretch64"
+    config.vm.box = "ubuntu/xenial64"
     config.vm.synced_folder ".", "/vagrant", disabled: true
 
     config.vm.define :findex do |aio|
@@ -11,8 +11,8 @@ Vagrant.configure(2) do |config|
         aio.vm.network "private_network", ip:"192.168.1.13"
         aio.vm.network "forwarded_port", guest: 22, host: 2203, host_ip: "127.0.0.1", id: 'ssh'
         aio.vm.provider :virtualbox do |vb|
-            vb.customize ["modifyvm", :id, "--memory", "2048"]
-            vb.customize ["modifyvm", :id, "--cpus", "1"]
+            vb.customize ["modifyvm", :id, "--memory", "4096"]
+            vb.customize ["modifyvm", :id, "--cpus", "2"]
             vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
             vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
             vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
@@ -68,7 +68,7 @@ Vagrant.configure(2) do |config|
         elasticsearch_config.vm.network "private_network", ip:"192.168.1.12"
         elasticsearch_config.vm.network "forwarded_port", guest: 22, host: 2202, host_ip: "127.0.0.1", id: 'ssh'
         elasticsearch_config.vm.provider :virtualbox do |vb|
-            vb.customize ["modifyvm", :id, "--memory", "2048"]
+            vb.customize ["modifyvm", :id, "--memory", "4096"]
             vb.customize ["modifyvm", :id, "--cpus", "1"]
             vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
             vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]

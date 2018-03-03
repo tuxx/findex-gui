@@ -9,3 +9,6 @@
 
 [findex]
 192.168.1.13
+
+[findex:vars]
+ansible_python_interpreter=/usr/bin/python3

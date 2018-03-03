@@ -50,6 +50,9 @@
   notify:
     - restart elasticsearch
 
+- name: restart elasticsearch
+  systemd: state=restarted name=elasticsearch
+
 - name: Waiting for port 9200 to come up
   wait_for:
     host: "{{ findex.es.host }}"

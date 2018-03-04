@@ -5,11 +5,11 @@
 # Elasticsearch home directory
 #ES_HOME=/usr/share/elasticsearch
 
+# Elasticsearch Java path
+#JAVA_HOME=
+
 # Elasticsearch configuration directory
 #CONF_DIR=/etc/elasticsearch
-
-# Elasticsearch configuration file
-#CONF_FILE=$CONF_DIR/elasticsearch.yml
 
 # Elasticsearch data directory
 #DATA_DIR=/var/lib/elasticsearch
@@ -17,30 +17,14 @@
 # Elasticsearch logs directory
 #LOG_DIR=/var/log/elasticsearch
 
-# Elasticsearch work directory
-#WORK_DIR=/tmp/elasticsearch
-
 # Elasticsearch PID directory
 #PID_DIR=/var/run/elasticsearch
-
-# Heap size defaults to 256m min, 1g max
-# Set ES_HEAP_SIZE to 50% of available RAM, but no more than 31g
-ES_HEAP_SIZE=1g
-
-# Heap new generation
-#ES_HEAP_NEWSIZE=
-
-# Maximum direct memory
-#ES_DIRECT_SIZE=
 
 # Additional Java OPTS
 #ES_JAVA_OPTS=
 
 # Configure restart on package upgrade (true, every other setting will lead to not restarting)
-#ES_RESTART_ON_UPGRADE=true
-
-# Path to the GC log file
-#ES_GC_LOG_FILE=/var/log/elasticsearch/gc.log
+#RESTART_ON_UPGRADE=true
 
 ################################
 # Elasticsearch service
@@ -56,6 +40,9 @@ ES_HEAP_SIZE=1g
 #ES_USER=elasticsearch
 #ES_GROUP=elasticsearch
 
+# The number of seconds to wait before checking if Elasticsearch started successfully as a daemon process
+ES_STARTUP_SLEEP_TIME=5
+
 ################################
 # System properties
 ################################
@@ -63,13 +50,13 @@ ES_HEAP_SIZE=1g
 # Specifies the maximum file descriptor number that can be opened by this process
 # When using Systemd, this setting is ignored and the LimitNOFILE defined in
 # /usr/lib/systemd/system/elasticsearch.service takes precedence
-#MAX_OPEN_FILES=65535
+#MAX_OPEN_FILES=65536
 
 # The maximum number of bytes of memory that may be locked into RAM
-# Set to "unlimited" if you use the 'bootstrap.mlockall: true' option
-# in elasticsearch.yml (ES_HEAP_SIZE  must also be set).
-# When using Systemd, the LimitMEMLOCK property must be set
-# in /usr/lib/systemd/system/elasticsearch.service
+# Set to "unlimited" if you use the 'bootstrap.memory_lock: true' option
+# in elasticsearch.yml.
+# When using systemd, LimitMEMLOCK must be set in a unit file such as
+# /etc/systemd/system/elasticsearch.service.d/override.conf.
 #MAX_LOCKED_MEMORY=unlimited
 
 # Maximum number of VMA (Virtual Memory Areas) a process can own

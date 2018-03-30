@@ -11,7 +11,7 @@ class FindexGui {
             timeout: 15500
         };
 
-        if (method != "GET") {
+        if (method !== "GET") {
             if(typeof _data.data !== 'undefined') _data.data = JSON.stringify(data);
             _data.contentType = 'application/json'
         }

@@ -1,5 +1,11 @@
+- name: stop nginx
+  systemd: state=stopped name=nginx
+
 - name: start nginx
-  service: name=nginx state=started enabled=true
+  systemd: state=started name=nginx
+
+- name: restart nginx
+  systemd: state=restarted name=nginx
 
 - name: reload nginx
-  service: name=nginx state=reloaded
+  systemd: state=reloaded name=nginx

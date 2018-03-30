@@ -4,7 +4,7 @@
     - postgresql-client-9.5
     - postgresql-9.5
     - libpq-dev
-    - python-psycopg2
+    - python3-psycopg2
 
 - name: add pg_hba.conf
   template: src=pg_hba.conf dest=/etc/postgresql/9.5/main/pg_hba.conf
@@ -14,13 +14,13 @@
   template: src=postgresql.conf dest=/etc/postgresql/9.5/main/postgresql.conf
   tags: postgres
 
-- name: download zombodb_jessie_pg95-3.1.15_amd64.deb
+- name: download zombodb_xenial_pg95-5.6.4-1.0.0_amd64.deb
   get_url:
-    url="https://github.com/zombodb/zombodb/releases/download/v3.1.15/zombodb_jessie_pg95-3.1.15_amd64.deb"
-    dest="/tmp/zombodb_jessie_pg95-3.1.15_amd64.deb"
+    url="https://www.zombodb.com/releases/v5.6.4-1.0.0/zombodb_xenial_pg95-5.6.4-1.0.0_amd64.deb"
+    dest="/tmp/zombodb_xenial_pg95-5.6.4-1.0.0_amd64.deb"
 
-- name: install zombodb_jessie_pg95-3.1.15_amd64.deb
-  apt: deb="/tmp/zombodb_jessie_pg95-3.1.15_amd64.deb"
+- name: install zombodb_xenial_pg95-5.6.4-1.0.0_amd64.deb
+  apt: deb="/tmp/zombodb_xenial_pg95-5.6.4-1.0.0_amd64.deb"
   notify: restart postgresql
 
 - name: Create findex database

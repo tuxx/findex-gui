@@ -1,2 +1,55 @@
-- include: debian.yml
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+- name: switch to Google DNS
+  copy: src=resolv dest=/etc/resolv.conf
+
+- name: install base requirements
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - curl
+    - nmap
+    - aptitude
+    - nload
+    - build-essential
+    - wget
+    - gcc
+    - ngrep
+    - git
+    - screen
+    - libssl-dev
+    - unzip
+    - python3-pexpect
+    - python-pexpect
+    - python-psycopg2
+
+- name: install setfacl support
+  become: yes
+  apt: pkg=acl
+
+- name: Add PostgreSQL repository key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- name: Add PostgreSQL repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main' state=present
+
+- name: update apt
+  apt:
+    update_cache: yes
+
+- name: select default locale
+  debconf:
+    name: locales
+    question: locales/default_environment_locale
+    value: en_US.UTF-8
+    vtype: select
+  notify:
+    - rebuild locales database
+
+- name: /etc/locale.gen
+  lineinfile:
+    dest: /etc/locale.gen
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: "{{ item.state }}"
+  with_items:
+    - { regexp: '^#? ?en_US.UTF-8 UTF-8', line: 'en_US.UTF-8 UTF-8', state: present }
+  notify:
+    - rebuild locales database

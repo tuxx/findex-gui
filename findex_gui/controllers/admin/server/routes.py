@@ -9,7 +9,7 @@ from findex_gui.controllers.admin.server.forms import FormServerGroupAdd
 
 @app.route("/admin/server/overview")
 @admin_required
-def admin_servers():
+def admin_server_overview():
     return themes.render("main/server/overview", theme="_admin")
 
 @app.route("/admin/server/add")

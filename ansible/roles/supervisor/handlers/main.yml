@@ -1,5 +1,11 @@
-- name: reload supervisor
-  service: name=supervisor state=reloaded
+- name: stop supervisor
+  systemd: state=stopped name=supervisor
+
+- name: start supervisor
+  systemd: state=started name=supervisor
 
 - name: restart supervisor
-  service: name=supervisor state=restarted
+  systemd: state=restarted name=supervisor
+
+- name: reload supervisor
+  systemd: state=reloaded name=supervisor

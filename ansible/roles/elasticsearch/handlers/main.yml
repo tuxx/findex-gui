@@ -1,5 +1,8 @@
-- name: restart elasticsearch
-  service: name=elasticsearch state=restarted
+- name: stop elasticsearch
+  systemd: state=stopped name=elasticsearch
 
 - name: start elasticsearch
-  service: name=elasticsearch enabled=yes
+  systemd: state=started name=elasticsearch
+
+- name: restart elasticsearch
+  systemd: state=restarted name=elasticsearch

@@ -35,14 +35,14 @@
                         <tr class="clickable text-nowrap" data-id="1" data-href="hi/" rel="popover" title="">
                             <td>
                                 <i class="fa fa-film"></i>
-                                <a href="{{ application_root }}search/{{ result.meta_imdb.title }}&cats=[movies]">
-                                {{ result.meta_imdb.title }} ({{ result.meta_imdb.year }})
+                                <a href="{{ application_root }}search/{{ result.meta_movie.title }}&cats=[movies]">
+                                {{ result.meta_movie.title }} ({{ result.meta_movie.year }})
                                 </a>
                             </td>
 
-                            <td><b>{{ result.meta_imdb.rating/10 }}</b></td>
-                            <td>{{ macros.actors_link(result.meta_imdb.actors) }}</td>
-                            <td><a href="{{ application_root }}meta/popcorn/director/{{ result.meta_imdb.director }}">{{ result.meta_imdb.director }}</a></td>
+                            <td><b>{{ result.meta_movie.rating/10 }}</b></td>
+                            <td>{{ macros.actors_link(result.meta_movie.actors) }}</td>
+                            <td><a href="{{ application_root }}meta/popcorn/director/{{ result.meta_movie.director }}">{{ result.meta_movie.director }}</a></td>
                             <td>
                             </td>
                         </tr>

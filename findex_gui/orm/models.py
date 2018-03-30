@@ -404,32 +404,29 @@ class User(BASE, AuthUser, Extended):
         return cls.query.filter(cls.username == data["username"]).one()
 
 
-class MetaImdb(BASE, Extended):
-    __tablename__ = "meta_imdb"
+class MetaMovies(BASE, Extended):
+    __tablename__ = "meta_movies"
 
-    id = Column(SMALLINT, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
     title = ZdbColumn(FULLTEXT(), nullable=False)
     year = ZdbColumn(SMALLINT(), nullable=False)
     rating = ZdbColumn(SMALLINT(), nullable=False)
-    director = ZdbColumn(FULLTEXT())
+    plot = ZdbColumn(FULLTEXT())
+    director = ZdbColumn(String())
     genres = ZdbColumn(ARRAY(String(32)))
     actors = ZdbColumn(ARRAY(String(64)))
-    plot = ZdbColumn(String())
+    meta = ZdbColumn(MutableJson())
 
-
-class MetaImdbActors(BASE, Extended):
-    __tablename__ = "meta_imdb_actors"
-
-    id = Column(SMALLINT, primary_key=True)
-    actor = ZdbColumn(FULLTEXT())
-
-
-class MetaImdbDirectors(BASE, Extended):
-    __tablename__ = "meta_imdb_directors"
-
-    id = Column(SMALLINT, primary_key=True)
-    director = ZdbColumn(FULLTEXT())
+    def __init__(self, title, year, rating, plot, director, genres, actors, meta):
+        self.title = title
+        self.year = year
+        self.rating = rating
+        self.plot = plot
+        self.director = director
+        self.genres = genres
+        self.actors = actors
+        self.meta = meta
 
 
 class Post(BASE, Extended):
@@ -461,7 +458,7 @@ class Post(BASE, Extended):
 class Files(BASE, Extended):
     __tablename__ = "files"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
 
     resource_id = ZdbColumn(Integer())
 
@@ -479,13 +476,12 @@ class Files(BASE, Extended):
     searchable = ZdbColumn(FULLTEXT(41))
 
     meta_info = ZdbColumn(MutableJson())
-    meta_imdb_id = ZdbColumn(SMALLINT())
-    meta_imdb = None
-    # meta_imdb_id = ZdbColumn(ForeignKey(MetaImdb.id))
-    # meta_imdb = relationship(MetaImdb)
+    meta_movie_id = ZdbColumn(Integer())
+    meta_movie = None
 
     ix_resource_id = Index("ix_resource_id", resource_id)
     ix_host_id_file_path = Index("ix_resource_id_file_path", resource_id, file_path)
+    ix_meta_movie_id = Index("ix_meta_movie_id", meta_movie_id)
 
     # CREATE INDEX ix_file_searchable_gin ON files USING gin(searchable gin_trgm_ops);
     # ix_file_searchable_gin = Index("ix_file_searchable_gin", searchable, postgresql_using="gin", postgresql_ops={
@@ -499,12 +495,12 @@ class Files(BASE, Extended):
         }
         return json
 
-    def get_meta_imdb(self):
-        if self.meta_imdb_id is None:
+    def get_meta_movie(self):
+        if self.meta_movie_id is None:
             return
         from findex_gui.web import db
-        self.meta_imdb = db.session.query(MetaImdb).filter(MetaImdb.id == self.meta_imdb_id).first()
-        return self.meta_imdb
+        self.meta_movie = db.session.query(MetaMovies).filter(MetaMovies.id == self.meta_movie_id).first()
+        return self.meta_movie
 
     @property
     def file_name_human(self):
@@ -564,7 +560,7 @@ class Files(BASE, Extended):
 class NmapRule(BASE, Extended):
     __tablename__ = "nmap_rules"
 
-    id = Column(SMALLINT, primary_key=True)
+    id = Column(Integer, primary_key=True)
     rule = Column(String(), nullable=False, unique=True)
     name = Column(String(), nullable=False, unique=True)
     output = Column(MutableJson(), nullable=True, default={"data": {}})

@@ -1,7 +1,11 @@
+- name: stop postgresql
+  systemd: state=stopped name=postgresql
+
+- name: start postgresql
+  systemd: state=started name=postgresql
+
 - name: restart postgresql
-  become_user: root
-  service: name=postgresql state=restarted
+  systemd: state=restarted name=postgresql
 
 - name: reload postgresql
-  become_user: root
-  service: name=postgresql enabled=yes state=reloaded
+  systemd: state=reloaded name=postgresql

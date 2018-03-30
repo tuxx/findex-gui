@@ -1,5 +1,6 @@
 import os
 from findex_gui.web import app
+from findex_gui.bin.misc import cwd
 from flask import render_template, request, flash, session, redirect, url_for, send_from_directory, abort
 
 
@@ -12,6 +13,13 @@ def static(filename):
 
     filename = filename.replace("..", "")
     filename = filename.replace("./", "")
+
+    if filename.startswith("meta/posters/"):
+        _cwd = cwd()
+        filename = filename[13:]
+        directory = "%s/meta/posters/" % _cwd
+        if os.path.isfile("%s%s" % (directory, filename)):
+            return send_from_directory(directory, filename)
 
     search_dirs = ["static/"]
 

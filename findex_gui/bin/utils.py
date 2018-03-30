@@ -132,7 +132,7 @@ def log_msg(msg: str, category: str, level: int = 1):
     """
     Logs a message
     :param msg: msg
-    :param author: author
+    :param category: category
     :param level: 0: DEBUG, 1: INFO, 2: WARNING, 3: ERROR
     :return:
     """
@@ -142,7 +142,8 @@ def log_msg(msg: str, category: str, level: int = 1):
     if not config("findex:findex:debug") and level == 0:
         return
     categories = [
-        "scheduler"
+        "scheduler",
+        "meta_import"
     ]
 
     if category not in categories:
